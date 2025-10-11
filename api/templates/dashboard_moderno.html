@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Green Jobs Brasil - Dashboard Moderno</title>
+    
+    <!-- Fonts e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #059669;
+            --light-green: #10b981;
+            --dark-green: #047857;
+            --accent-green: #34d399;
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-dark: #f8fafc;
+            --text-light: #cbd5e1;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .stat-card,
+        [data-theme="dark"] .search-section,
+        [data-theme="dark"] .quick-links {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        [data-theme="dark"] .search-input {
+            background: #334155;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .search-input:focus {
+            background: #475569;
+            border-color: var(--primary-green);
+        }
+
+        [data-theme="dark"] .quick-link:hover {
+            background: #334155;
+        }
+
+        [data-theme="dark"] .info-item {
+            background: #334155;
+            border-color: #475569;
+        }
+
+        [data-theme="dark"] .result-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .result-card.success {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        }
+
+        [data-theme="dark"] .result-card.warning {
+            background: linear-gradient(135deg, #451a03 0%, #92400e 100%);
+        }
+
+        [data-theme="dark"] .result-card.error {
+            background: linear-gradient(135deg, #450a0a 0%, #991b1b 100%);
+        }
+
+        #theme-toggle {
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: var(--transition);
+        }
+
+        #theme-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px !important;
+            width: 100%;
+        }
+
+        .chart-container canvas {
+            max-height: 300px !important;
+            max-width: 100% !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Moderno */
+        .header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Cards Estatísticas */
+        .stats-container {
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 3rem;
+        }
+
+        .search-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.5rem 2rem;
+            font-size: 1.2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: var(--transition);
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            border: none;
+            padding: 1.5rem 3rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-top: 1rem;
+            width: 100%;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-top: 2rem;
+            min-height: 100px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border-left: 6px solid var(--primary-green);
+        }
+
+        .result-card.success {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .result-card.warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+
+        .result-card.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+        }
+
+        /* Score Badge */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+        }
+
+        .score-high { background: #10b981; color: white; }
+        .score-medium { background: #f59e0b; color: white; }
+        .score-low { background: #6b7280; color: white; }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Quick Links */
+        .quick-links {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-top: 3rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-link:hover {
+            background: #f3f4f6;
+            color: var(--primary-green);
+            transform: translateX(8px);
+        }
+
+        .quick-link i {
+            width: 24px;
+            margin-right: 1rem;
+            color: var(--primary-green);
+        }
+
+        /* Responsive */
+        /* Charts Section */
+        /* Charts Section */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container canvas {
+            max-height: 300px !important;
+            height: 300px !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .stat-card {
+                margin-bottom: 1.5rem;
+            }
+            
+            .search-section {
+                padding: 2rem;
+            }
+        }
+
+        /* Animações */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1>🌱 Green Jobs Brasil</h1>
+                    <p>Plataforma Inteligente para Identificação de Empresas Sustentáveis</p>
+                </div>
+                <div class="col-auto">
+                    <button id="theme-toggle" class="btn btn-outline-light" title="Alternar tema">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="row" id="stats-row">
+                <!-- Stats serão carregadas dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section fade-in">
+            <h2 class="search-title">🔍 Verificador de Empresas Verdes</h2>
+            <p class="search-subtitle">
+                Digite o CNPJ de qualquer empresa brasileira e descubra instantaneamente 
+                se ela é classificada como sustentável baseado nos CNAEs verdes oficiais.
+            </p>
+            
+            <form class="search-form" onsubmit="verificarEmpresa(event)">
+                <input 
+                    type="text" 
+                    id="cnpj-input" 
+                    class="search-input" 
+                    placeholder="00.000.000/0000-00"
+                    maxlength="18"
+                    required
+                >
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search me-2"></i>
+                    Verificar Empresa Verde
+                </button>
+            </form>
+
+            <div id="result-section" class="result-section"></div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="quick-links fade-in">
+            <h3 class="mb-4">
+                <i class="fas fa-link me-2"></i>
+                Acesso Rápido
+            </h3>
+            <a href="/empresas" class="quick-link">
+                <i class="fas fa-building"></i>
+                <span>Ver Todas as Empresas Verdes</span>
+            </a>
+            <a href="/cnaes" class="quick-link">
+                <i class="fas fa-list"></i>
+                <span>Consultar CNAEs Sustentáveis</span>
+            </a>
+            <a href="/api/stats" class="quick-link" target="_blank">
+                <i class="fas fa-chart-bar"></i>
+                <span>Estatísticas Detalhadas</span>
+            </a>
+            <a href="/docs" class="quick-link" target="_blank">
+                <i class="fas fa-code"></i>
+                <span>Documentação da API</span>
+            </a>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row fade-in mt-4">
+            <div class="col-lg-6 mb-4">
+                <div class="search-section">
+                    <h4 class="mb-3">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Distribuição de Scores
+                    </h4>
+                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="search-section">
+                    <h4 class="mb-3">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        CNAEs por Categoria
+                    </h4>
+                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="cnaeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Carrega estatísticas ao iniciar
+        async function carregarEstatisticas() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                const statsHtml = `
+                    <div class="col-lg-3 col-md-6 mb-4 fade-in">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #059669, #10b981);">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="stat-number">${data.total_empresas}</div>
+                            <div class="stat-label">Empresas Verdes</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 fade-in">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #0ea5e9, #06b6d4);">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="stat-number">${data.total_cnaes_verdes}</div>
+                            <div class="stat-label">CNAEs Sustentáveis</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 fade-in">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-number">${data.score_medio}%</div>
+                            <div class="stat-label">Score Médio</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 fade-in">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <div class="stat-number">${data.total_relacoes}</div>
+                            <div class="stat-label">Relações CNAE</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('stats-row').innerHTML = statsHtml;
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Formatar CNPJ
+        document.getElementById('cnpj-input').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+                e.target.value = value;
+                
+                // Validação visual em tempo real
+                const input = e.target;
+                const digits = value.replace(/\D/g, '');
+                
+                if (digits.length === 0) {
+                    input.style.borderColor = '#e5e7eb';
+                    input.style.backgroundColor = '#f9fafb';
+                } else if (digits.length === 14) {
+                    input.style.borderColor = '#10b981';
+                    input.style.backgroundColor = '#f0fdf4';
+                } else {
+                    input.style.borderColor = '#f59e0b';
+                    input.style.backgroundColor = '#fffbeb';
+                }
+            }
+        });
+
+        // Adicionar sugestões de CNPJ
+        document.getElementById('cnpj-input').addEventListener('focus', function() {
+            mostrarSugestoes();
+        });
+
+        function mostrarSugestoes() {
+            const suggestionsHtml = `
+                <div id="cnpj-suggestions" style="
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: white;
+                    border: 2px solid #e5e7eb;
+                    border-top: none;
+                    border-radius: 0 0 12px 12px;
+                    z-index: 1000;
+                    max-height: 200px;
+                    overflow-y: auto;
+                ">
+                    <div class="p-3 border-bottom" style="border-bottom: 1px solid #e5e7eb;">
+                        <small class="text-muted">💡 Exemplos de CNPJs para teste:</small>
+                    </div>
+                    <div class="cnpj-suggestion p-2" data-cnpj="27325719000159" style="cursor: pointer; border-bottom: 1px solid #f3f4f6;">
+                        <strong>27.325.719/0001-59</strong><br>
+                        <small class="text-muted">CIMO ENGENHARIA (Empresa Verde)</small>
+                    </div>
+                    <div class="cnpj-suggestion p-2" data-cnpj="11222333000181" style="cursor: pointer; border-bottom: 1px solid #f3f4f6;">
+                        <strong>11.222.333/0001-81</strong><br>
+                        <small class="text-muted">Empresa de Teste</small>
+                    </div>
+                    <div class="cnpj-suggestion p-2" data-cnpj="87766550000178" style="cursor: pointer;">
+                        <strong>87.766.550/0001-78</strong><br>
+                        <small class="text-muted">Biomassa Energia Verde SA</small>
+                    </div>
+                </div>
+            `;
+            
+            const form = document.querySelector('.search-form');
+            const existing = document.getElementById('cnpj-suggestions');
+            if (existing) existing.remove();
+            
+            form.style.position = 'relative';
+            form.insertAdjacentHTML('beforeend', suggestionsHtml);
+            
+            // Event listeners para sugestões
+            document.querySelectorAll('.cnpj-suggestion').forEach(suggestion => {
+                suggestion.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f3f4f6';
+                });
+                suggestion.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'white';
+                });
+                suggestion.addEventListener('click', function() {
+                    const cnpj = this.dataset.cnpj;
+                    const formatted = cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+                    document.getElementById('cnpj-input').value = formatted;
+                    document.getElementById('cnpj-suggestions').remove();
+                    verificarEmpresa(new Event('submit'));
+                });
+            });
+        }
+
+        // Fechar sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            const suggestions = document.getElementById('cnpj-suggestions');
+            const input = document.getElementById('cnpj-input');
+            if (suggestions && !suggestions.contains(e.target) && e.target !== input) {
+                suggestions.remove();
+            }
+        });
+
+        // Verificar empresa
+        async function verificarEmpresa(event) {
+            event.preventDefault();
+            
+            const cnpj = document.getElementById('cnpj-input').value.replace(/\D/g, '');
+            const resultSection = document.getElementById('result-section');
+            
+            // Fechar sugestões se abertas
+            const suggestions = document.getElementById('cnpj-suggestions');
+            if (suggestions) suggestions.remove();
+            
+            if (cnpj.length !== 14) {
+                mostrarResultado({
+                    type: 'error',
+                    title: '❌ CNPJ Inválido',
+                    message: 'Por favor, digite um CNPJ válido com 14 dígitos.',
+                    details: 'Formato esperado: 00.000.000/0000-00'
+                });
+                return;
+            }
+            
+            // Mostrar loading com animação
+            resultSection.innerHTML = `
+                <div class="loading" style="background: white; border-radius: 16px; padding: 3rem; box-shadow: var(--card-shadow);">
+                    <div class="loading-spinner"></div>
+                    <h4>🔍 Consultando Receita Federal...</h4>
+                    <p class="text-muted">Aguarde enquanto verificamos os dados da empresa</p>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`/search-company/${cnpj}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const scoreClass = data.green_score >= 50 ? 'high' : 
+                                     data.green_score >= 20 ? 'medium' : 'low';
+                    
+                    const resultType = data.is_green ? 'success' : 'warning';
+                    const icon = data.is_green ? 'fas fa-check-circle' : 'fas fa-info-circle';
+                    const statusColor = data.situacao === 'ATIVA' ? 'success' : 'warning';
+                    
+                    mostrarResultado({
+                        type: resultType,
+                        title: data.is_green ? '🌟 Empresa Verde Certificada!' : '📋 Empresa Encontrada',
+                        content: `
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="mb-3"><strong>${data.nome}</strong></h4>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6">
+                                            <p class="mb-1"><strong>CNPJ:</strong></p>
+                                            <code class="fs-6">${formatarCNPJ(data.cnpj)}</code>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="mb-1"><strong>Situação:</strong></p>
+                                            <span class="badge bg-${statusColor}">${data.situacao}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    ${data.municipio ? `
+                                        <p class="mb-2">
+                                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                            <strong>Localização:</strong> ${data.municipio}/${data.uf}
+                                        </p>
+                                    ` : ''}
+                                    
+                                    <p class="mb-2">
+                                        <i class="fas fa-industry text-info me-2"></i>
+                                        <strong>CNAEs:</strong> ${data.cnaes.length} código(s) de atividade
+                                    </p>
+                                    
+                                    ${data.is_green ? `
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <i class="fas fa-leaf text-success me-2"></i>
+                                            <strong>Empresa Sustentável:</strong> 
+                                            Esta empresa possui atividades classificadas como verdes!
+                                        </div>
+                                    ` : `
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <i class="fas fa-info-circle text-muted me-2"></i>
+                                            <strong>Empresa Convencional:</strong> 
+                                            As atividades desta empresa não são classificadas como sustentáveis.
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="score-badge score-${scoreClass} mb-3">
+                                        <i class="fas fa-leaf me-2"></i>
+                                        Score: ${data.green_score}/100
+                                    </div>
+                                    
+                                    ${data.is_green ? `
+                                        <div class="d-grid">
+                                            <button class="btn btn-success" onclick="adicionarEmpresa('${data.cnpj}')">
+                                                <i class="fas fa-plus me-2"></i>
+                                                Adicionar ao Banco
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `
+                    });
+                } else {
+                    mostrarResultado({
+                        type: 'error',
+                        title: '❌ Empresa Não Encontrada',
+                        message: data.detail || 'Não foi possível encontrar esta empresa.',
+                        details: 'Verifique se o CNPJ está correto e tente novamente.'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado({
+                    type: 'error',
+                    title: '⚠️ Erro de Conexão',
+                    message: 'Erro ao buscar empresa. Tente novamente em alguns segundos.',
+                    details: 'Verifique sua conexão com a internet.'
+                });
+            }
+        }
+
+        // Adicionar empresa ao banco
+        async function adicionarEmpresa(cnpj) {
+            try {
+                const formData = new FormData();
+                formData.append('cnpj', cnpj);
+                
+                const response = await fetch('/add-company', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarResultado({
+                        type: 'success',
+                        title: '✅ Empresa Adicionada com Sucesso!',
+                        message: `${data.company.nome} foi adicionada ao banco de empresas verdes.`,
+                        details: `Score: ${data.company.score}/100 | CNAEs verdes: ${data.company.cnaes_verdes.length}`
+                    });
+                } else {
+                    mostrarResultado({
+                        type: 'warning',
+                        title: 'ℹ️ Empresa Já Cadastrada',
+                        message: data.message || 'Esta empresa já existe no banco de dados.'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado({
+                    type: 'error',
+                    title: '❌ Erro ao Adicionar',
+                    message: 'Erro ao adicionar empresa ao banco de dados.'
+                });
+            }
+        }
+
+        function mostrarResultado(result) {
+            const resultSection = document.getElementById('result-section');
+            const content = result.content || `
+                <p class="mb-2">${result.message}</p>
+                ${result.details ? `<small class="text-muted">${result.details}</small>` : ''}
+            `;
+            
+            const iconClass = {
+                'success': 'fas fa-check-circle text-success',
+                'warning': 'fas fa-info-circle text-warning', 
+                'error': 'fas fa-exclamation-triangle text-danger'
+            }[result.type] || 'fas fa-info-circle';
+            
+            resultSection.innerHTML = `
+                <div class="result-card ${result.type}" style="opacity: 0; transform: translateY(20px);">
+                    <div class="d-flex align-items-start">
+                        <i class="${iconClass} me-3 mt-1" style="font-size: 1.5rem;"></i>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-3">${result.title}</h4>
+                            ${content}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Animação de entrada
+            setTimeout(() => {
+                const card = resultSection.querySelector('.result-card');
+                card.style.transition = 'all 0.5s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function formatarCNPJ(cnpj) {
+            return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        }
+
+        // Carregar dados ao iniciar
+        carregarEstatisticas();
+        carregarGraficos();
+        initDarkMode();
+
+        // Dark Mode
+        function initDarkMode() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            // Carregar tema salvo
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // Toggle theme
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+        }
+
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeIcon.parentElement.title = 'Modo claro';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeIcon.parentElement.title = 'Modo escuro';
+            }
+        }
+
+        // Carregar gráficos
+        async function carregarGraficos() {
+            try {
+                // Dados das empresas para gráfico de scores
+                const empresasResponse = await fetch('/api/empresas');
+                const empresasData = await empresasResponse.json();
+                
+                // Dados dos CNAEs para gráfico de categorias
+                const cnaesResponse = await fetch('/api/cnaes');
+                const cnaesData = await cnaesResponse.json();
+                
+                if (empresasData.empresas && cnaesData.cnaes) {
+                    criarGraficoScores(empresasData.empresas);
+                    criarGraficoCNAEs(cnaesData.cnaes);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados dos gráficos:', error);
+            }
+        }
+
+        // Gráfico de distribuição de scores
+        function criarGraficoScores(empresas) {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            
+            // Categorizar scores
+            const alto = empresas.filter(e => e.pontuacao_verde >= 50).length;
+            const medio = empresas.filter(e => e.pontuacao_verde >= 20 && e.pontuacao_verde < 50).length;
+            const baixo = empresas.filter(e => e.pontuacao_verde < 20).length;
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Alto (50-100)', 'Médio (20-49)', 'Baixo (0-19)'],
+                    datasets: [{
+                        data: [alto, medio, baixo],
+                        backgroundColor: [
+                            '#10b981',
+                            '#f59e0b', 
+                            '#6b7280'
+                        ],
+                        borderWidth: 0,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: 10
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11,
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return `${context.label}: ${context.parsed} empresas (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        duration: 800
+                    }
+                }
+            });
+        }
+
+        // Gráfico de CNAEs por categoria
+        function criarGraficoCNAEs(cnaes) {
+            const ctx = document.getElementById('cnaeChart').getContext('2d');
+            
+            // Contar por categoria
+            const core = cnaes.filter(c => c.tipo === 'Core').length;
+            const adjacent = cnaes.filter(c => c.tipo === 'Adjacent').length;
+            const secondary = cnaes.filter(c => c.tipo === 'Secondary').length;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Core', 'Adjacent', 'Secondary'],
+                    datasets: [{
+                        label: 'Quantidade de CNAEs',
+                        data: [core, adjacent, secondary],
+                        backgroundColor: [
+                            '#10b981',
+                            '#f59e0b',
+                            '#6b7280'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 5,
+                            right: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const points = {'Core': 100, 'Adjacent': 70, 'Secondary': 40};
+                                    return `Pontuação: ${points[context.label]} pontos`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11,
+                                    family: 'Inter'
+                                }
+                            },
+                            grid: {
+                                color: '#f3f4f6'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    family: 'Inter',
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
