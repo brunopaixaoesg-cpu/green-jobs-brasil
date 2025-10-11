@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empresa | Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2ECC71;
+            --dark-green: #27AE60;
+            --light-green: #A9DFBF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .vaga-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .vaga-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.2);
+        }
+        
+        .candidato-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #ddd;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .candidato-item:hover {
+            background: white;
+            border-left-color: var(--primary-green);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .match-score {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .match-excelente { background: linear-gradient(135deg, #2ECC71, #27AE60); color: white; }
+        .match-bom { background: linear-gradient(135deg, #3498DB, #2980B9); color: white; }
+        .match-regular { background: linear-gradient(135deg, #F39C12, #E67E22); color: white; }
+        .match-baixo { background: linear-gradient(135deg, #95A5A6, #7F8C8D); color: white; }
+        
+        .ods-mini {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.2rem;
+        }
+        
+        .btn-green {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-green:hover {
+            background: var(--dark-green);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-building"></i> Dashboard Empresa</h1>
+                    <p class="mb-0">Encontre os melhores talentos verdes para suas vagas</p>
+                </div>
+                <a href="/" class="btn btn-light">
+                    <i class="fas fa-home"></i> Voltar
+                </a>
+            </div>
+        </div>
+
+        <!-- Estatísticas Rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-briefcase fa-2x text-primary mb-2"></i>
+                        <h3 id="totalVagas" class="mb-0">0</h3>
+                        <small class="text-muted">Vagas Ativas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x text-success mb-2"></i>
+                        <h3 id="totalCandidatos" class="mb-0">0</h3>
+                        <small class="text-muted">Candidatos Compatíveis</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h3 id="matchMedio" class="mb-0">0%</h3>
+                        <small class="text-muted">Match Médio</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy fa-2x text-danger mb-2"></i>
+                        <h3 id="matchesExcelentes" class="mb-0">0</h3>
+                        <small class="text-muted">Matches Excelentes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Minhas Vagas e Candidatos -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-list"></i> Minhas Vagas com Candidatos</h3>
+                    <a href="/vagas/publicar" class="btn btn-green">
+                        <i class="fas fa-plus"></i> Nova Vaga
+                    </a>
+                </div>
+
+                <!-- Loading -->
+                <div id="loading" class="text-center my-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Buscando vagas e candidatos...</p>
+                </div>
+
+                <!-- Lista de Vagas -->
+                <div id="vagasContainer" style="display: none;">
+                    <!-- Vagas serão inseridas aqui -->
+                </div>
+
+                <!-- Nenhuma vaga -->
+                <div id="noVagas" class="text-center my-5" style="display: none;">
+                    <i class="fas fa-briefcase fa-4x text-muted mb-3"></i>
+                    <h4>Nenhuma vaga publicada</h4>
+                    <p class="text-muted">Publique sua primeira vaga para encontrar candidatos!</p>
+                    <a href="/vagas/publicar" class="btn btn-green btn-lg">
+                        <i class="fas fa-plus"></i> Publicar Vaga
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const odsColors = {
+            7: '#FCC30B', 8: '#A21942', 9: '#FD6925', 11: '#FD9D24',
+            12: '#BF8B2E', 13: '#3F7E44', 14: '#0A97D9', 15: '#56C02B'
+        };
+
+        async function carregarDashboard() {
+            const loading = document.getElementById('loading');
+            const vagasContainer = document.getElementById('vagasContainer');
+            const noVagas = document.getElementById('noVagas');
+            
+            try {
+                // Buscar todas as vagas ativas
+                const vagasResponse = await fetch('/api/vagas/');
+                const vagas = await vagasResponse.json();
+                
+                loading.style.display = 'none';
+                
+                if (vagas.length === 0) {
+                    noVagas.style.display = 'block';
+                    return;
+                }
+                
+                vagasContainer.style.display = 'block';
+                document.getElementById('totalVagas').textContent = vagas.length;
+                
+                let totalCandidatos = 0;
+                let somaScores = 0;
+                let excelentes = 0;
+                
+                // Para cada vaga, buscar candidatos compatíveis
+                for (const vaga of vagas) {
+                    const candidatosResponse = await fetch(`/api/matching/vaga/${vaga.id}/candidatos?min_score=40&limit=10`);
+                    const data = await candidatosResponse.json();
+                    
+                    totalCandidatos += data.total_candidatos;
+                    
+                    // Criar card da vaga
+                    const vagaCard = criarVagaCard(vaga, data.candidatos);
+                    vagasContainer.innerHTML += vagaCard;
+                    
+                    // Calcular estatísticas
+                    data.candidatos.forEach(c => {
+                        somaScores += c.match.score_total;
+                        if (c.match.classificacao === 'excelente') excelentes++;
+                    });
+                }
+                
+                // Atualizar estatísticas
+                document.getElementById('totalCandidatos').textContent = totalCandidatos;
+                document.getElementById('matchesExcelentes').textContent = excelentes;
+                
+                const matchMedio = totalCandidatos > 0 ? (somaScores / totalCandidatos).toFixed(0) : 0;
+                document.getElementById('matchMedio').textContent = matchMedio + '%';
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                console.error('Erro ao carregar dashboard:', error);
+                vagasContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Erro ao carregar vagas e candidatos. Tente novamente.
+                    </div>
+                `;
+            }
+        }
+
+        function criarVagaCard(vaga, candidatos) {
+            const odsHtml = (vaga.ods_tags || []).map(ods => 
+                `<span class="ods-mini" style="background: ${odsColors[ods]}">${ods}</span>`
+            ).join('');
+            
+            const candidatosHtml = candidatos.length > 0 
+                ? candidatos.map(c => criarCandidatoItem(c, vaga.id)).join('')
+                : '<p class="text-muted text-center py-3">Nenhum candidato compatível (score mín. 40)</p>';
+            
+            return `
+                <div class="vaga-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="mb-1">${vaga.titulo}</h4>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                ${vaga.localizacao_cidade || ''} ${vaga.localizacao_uf || ''}
+                                ${vaga.remoto ? '<span class="badge bg-info ms-2">Remoto</span>' : ''}
+                            </p>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">${vaga.nivel}</span>
+                                <span class="badge bg-primary ms-1">${vaga.tipo}</span>
+                            </div>
+                            ${odsHtml ? `<div class="mt-2">${odsHtml}</div>` : ''}
+                        </div>
+                        <div class="text-end">
+                            <div class="badge bg-success mb-2">${candidatos.length} candidatos</div>
+                            <div>
+                                <a href="/vagas/detalhes?id=${vaga.id}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Ver Vaga
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5 class="mb-3"><i class="fas fa-users"></i> Melhores Candidatos</h5>
+                    ${candidatosHtml}
+                </div>
+            `;
+        }
+
+        function criarCandidatoItem(candidato, vagaId) {
+            const prof = candidato.profissional;
+            const match = candidato.match;
+            
+            const matchClass = `match-${match.classificacao}`;
+            
+            const odsHtml = (prof.ods_interesse || []).slice(0, 5).map(ods => 
+                `<span class="ods-mini" style="background: ${odsColors[ods]}">${ods}</span>`
+            ).join('');
+            
+            const skillsHtml = (prof.habilidades_esg || []).slice(0, 3).map(skill => 
+                `<span class="badge bg-light text-dark me-1">${skill}</span>`
+            ).join('');
+            
+            return `
+                <div class="candidato-item" onclick="verPerfil(${prof.id})">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="match-score ${matchClass}">
+                                ${match.score_total}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1">${prof.nome_completo}</h6>
+                            <p class="mb-1 small text-muted">
+                                ${prof.cargo_atual || 'Profissional ESG'} • 
+                                ${prof.anos_experiencia_esg} anos ESG • 
+                                ${prof.localizacao_uf || ''}
+                                ${prof.aceita_remoto ? '<i class="fas fa-laptop-house text-info ms-1"></i>' : ''}
+                            </p>
+                            <div class="mb-1">${skillsHtml}</div>
+                            <div>${odsHtml}</div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <div class="mb-1">
+                                <small class="text-muted">Match:</small>
+                                <strong class="text-${match.classificacao === 'excelente' ? 'success' : 
+                                    match.classificacao === 'bom' ? 'primary' : 
+                                    match.classificacao === 'regular' ? 'warning' : 'secondary'}">
+                                    ${match.classificacao.toUpperCase()}
+                                </strong>
+                            </div>
+                            <button class="btn btn-sm btn-green" onclick="event.stopPropagation(); entrarEmContato('${prof.email}', '${prof.nome_completo}', ${vagaId})">
+                                <i class="fas fa-envelope"></i> Contatar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalhes do Match (colapsável) -->
+                    <div class="mt-2 small text-muted">
+                        <strong>Compatibilidade:</strong>
+                        ODS ${match.breakdown.ods.score}% • 
+                        Skills ${match.breakdown.habilidades.score}% • 
+                        Exp ${match.breakdown.experiencia.score}% • 
+                        Loc ${match.breakdown.localizacao.score}%
+                    </div>
+                </div>
+            `;
+        }
+
+        function verPerfil(profissionalId) {
+            window.location.href = `/profissionais/perfil?id=${profissionalId}`;
+        }
+
+        function entrarEmContato(email, nome, vagaId) {
+            const assunto = encodeURIComponent(`Interesse na vaga - Green Jobs Brasil`);
+            const corpo = encodeURIComponent(`Olá ${nome},\n\nIdentificamos que seu perfil tem alta compatibilidade com uma de nossas vagas ESG.\n\nGostaríamos de conversar sobre essa oportunidade.\n\nAtenciosamente,\nEquipe Green Jobs Brasil`);
+            
+            window.location.href = `mailto:${email}?subject=${assunto}&body=${corpo}`;
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', carregarDashboard);
+    </script>
+</body>
+</html>

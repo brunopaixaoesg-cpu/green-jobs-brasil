@@ -79,6 +79,16 @@ async def publicar_vaga_page(request: Request):
     """Página para publicar vaga"""
     return templates.TemplateResponse("vagas/publicar.html", {"request": request})
 
+@app.get("/matching/empresa", response_class=HTMLResponse)
+async def dashboard_empresa_page(request: Request):
+    """Dashboard de matching para empresas"""
+    return templates.TemplateResponse("matching/dashboard_empresa.html", {"request": request})
+
+@app.get("/matching/profissional", response_class=HTMLResponse)
+async def dashboard_profissional_page(request: Request):
+    """Dashboard de matching para profissionais"""
+    return templates.TemplateResponse("matching/dashboard_profissional.html", {"request": request})
+
 # === ROTAS API ===
 
 @app.get("/api/health")
