@@ -17,12 +17,20 @@ import os
 app = FastAPI(
     title="Green Jobs Brasil API",
     description="API para consulta de empresas verdes no Brasil",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Configurar templates e arquivos estáticos
 templates = Jinja2Templates(directory="api/templates")
 app.mount("/static", StaticFiles(directory="api/static"), name="static")
+
+# Importar routers (importação local para evitar problemas de caminho)
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+from routers import vagas
+
+# Registrar routers
+app.include_router(vagas.router)
 
 import os
 
@@ -58,6 +66,16 @@ async def empresas_page(request: Request):
 async def cnaes_page(request: Request):
     """Página de CNAEs verdes"""
     return templates.TemplateResponse("cnaes_modernos.html", {"request": request})
+
+@app.get("/vagas", response_class=HTMLResponse)
+async def vagas_page(request: Request):
+    """Página de vagas ESG"""
+    return templates.TemplateResponse("vagas/lista.html", {"request": request})
+
+@app.get("/vagas/publicar", response_class=HTMLResponse)
+async def publicar_vaga_page(request: Request):
+    """Página para publicar vaga"""
+    return templates.TemplateResponse("vagas/publicar.html", {"request": request})
 
 # === ROTAS API ===
 
