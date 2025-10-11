@@ -27,10 +27,11 @@ app.mount("/static", StaticFiles(directory="api/static"), name="static")
 # Importar routers (importação local para evitar problemas de caminho)
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
-from routers import vagas
+from routers import vagas, profissionais
 
 # Registrar routers
 app.include_router(vagas.router)
+app.include_router(profissionais.router)
 
 import os
 
@@ -76,6 +77,26 @@ async def vagas_page(request: Request):
 async def publicar_vaga_page(request: Request):
     """Página para publicar vaga"""
     return templates.TemplateResponse("vagas/publicar.html", {"request": request})
+
+@app.get("/vagas/detalhes", response_class=HTMLResponse)
+async def detalhes_vaga_page(request: Request):
+    """Página de detalhes da vaga"""
+    return templates.TemplateResponse("vagas/detalhes.html", {"request": request})
+
+@app.get("/profissionais", response_class=HTMLResponse)
+async def profissionais_page(request: Request):
+    """Página de lista de profissionais ESG"""
+    return templates.TemplateResponse("profissionais/lista.html", {"request": request})
+
+@app.get("/profissionais/cadastro", response_class=HTMLResponse)
+async def cadastro_profissional_page(request: Request):
+    """Página de cadastro de profissional"""
+    return templates.TemplateResponse("profissionais/cadastro.html", {"request": request})
+
+@app.get("/profissionais/perfil", response_class=HTMLResponse)
+async def perfil_profissional_page(request: Request):
+    """Página de perfil do profissional"""
+    return templates.TemplateResponse("profissionais/perfil.html", {"request": request})
 
 # === ROTAS API ===
 
