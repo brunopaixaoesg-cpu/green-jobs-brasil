@@ -1,0 +1,21 @@
+# Dependências para POC de Scraper de Vagas ESG
+
+# Web Scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# HTML parsing avançado (caso precise de JavaScript)
+# playwright>=1.40.0  # Descomente se precisar renderizar JS
+
+# HTTP com retry e headers customizados
+requests-html>=0.10.0
+
+# Data handling
+python-dateutil>=2.8.0
+
+# Utilitários
+python-dotenv>=1.0.0
+
+# Testing (opcional)
+pytest>=7.4.0

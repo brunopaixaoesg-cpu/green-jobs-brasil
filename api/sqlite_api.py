@@ -89,6 +89,26 @@ async def dashboard_profissional_page(request: Request):
     """Dashboard de matching para profissionais"""
     return templates.TemplateResponse("matching/dashboard_profissional.html", {"request": request})
 
+@app.get("/vagas/detalhes", response_class=HTMLResponse)
+async def detalhes_vaga_page(request: Request):
+    """Página de detalhes da vaga"""
+    return templates.TemplateResponse("vagas/detalhes.html", {"request": request})
+
+@app.get("/profissionais", response_class=HTMLResponse)
+async def profissionais_page(request: Request):
+    """Página de lista de profissionais"""
+    return templates.TemplateResponse("profissionais/lista.html", {"request": request})
+
+@app.get("/profissionais/cadastro", response_class=HTMLResponse)
+async def cadastro_profissional_page(request: Request):
+    """Página de cadastro de profissional"""
+    return templates.TemplateResponse("profissionais/cadastro.html", {"request": request})
+
+@app.get("/profissionais/perfil", response_class=HTMLResponse)
+async def perfil_profissional_page(request: Request):
+    """Página de perfil do profissional"""
+    return templates.TemplateResponse("profissionais/perfil.html", {"request": request})
+
 # === ROTAS API ===
 
 @app.get("/api/health")

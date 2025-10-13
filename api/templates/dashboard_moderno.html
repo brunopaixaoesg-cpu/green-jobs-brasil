@@ -736,7 +736,7 @@
             `;
             
             try {
-                const response = await fetch(`/search-company/${cnpj}`);
+                const response = await fetch(`/api/search-company/${cnpj}`);
                 const data = await response.json();
                 
                 if (response.ok) {

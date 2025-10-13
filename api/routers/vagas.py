@@ -68,28 +68,28 @@ class VagaResponse(BaseModel):
     """Schema de resposta"""
     id: int
     cnpj: str
-    empresa_nome: Optional[str]
+    empresa_nome: Optional[str] = None
     titulo: str
     descricao: str
-    requisitos: Optional[str]
-    beneficios: Optional[str]
+    requisitos_adicionais: Optional[str] = None
+    beneficios: Optional[str] = None
     ods_tags: List[int]
     habilidades_requeridas: List[str]
     nivel_experiencia: str
     tipo_contratacao: str
-    localizacao_uf: Optional[str]
-    localizacao_cidade: Optional[str]
+    localizacao_uf: Optional[str] = None
+    localizacao_cidade: Optional[str] = None
     remoto: bool
     hibrido: bool
-    salario_min: Optional[float]
-    salario_max: Optional[float]
+    salario_min: Optional[float] = None
+    salario_max: Optional[float] = None
     status: str
-    visualizacoes: int
-    candidaturas: int
-    publicada_por: str
-    data_publicacao: Optional[str]
+    vagas_disponiveis: Optional[int] = 1
+    candidaturas_recebidas: int = 0
+    diferenciais: Optional[str] = None
     criada_em: str
     atualizada_em: str
+    fecha_em: Optional[str] = None
 
 # ============= ENDPOINTS =============
 
@@ -135,7 +135,7 @@ async def listar_vagas(
             params.append(nivel)
         
         # Ordenar por mais recentes
-        query += " ORDER BY v.data_publicacao DESC, v.criada_em DESC"
+        query += " ORDER BY v.criada_em DESC"
         query += " LIMIT ? OFFSET ?"
         params.extend([limit, offset])
         
@@ -168,10 +168,6 @@ async def obter_vaga(vaga_id: int):
     try:
         conn = get_db()
         cursor = conn.cursor()
-        
-        # Incrementar visualizações
-        cursor.execute("UPDATE vagas_esg SET visualizacoes = visualizacoes + 1 WHERE id = ?", (vaga_id,))
-        conn.commit()
         
         # Buscar vaga
         cursor.execute("""
@@ -215,14 +211,13 @@ async def criar_vaga(vaga: VagaCreate):
         # Inserir vaga
         cursor.execute("""
             INSERT INTO vagas_esg (
-                cnpj, empresa_nome, titulo, descricao, requisitos, beneficios,
+                cnpj, titulo, descricao, requisitos_adicionais, beneficios,
                 ods_tags, habilidades_requeridas, nivel_experiencia, tipo_contratacao,
                 localizacao_uf, localizacao_cidade, remoto, hibrido,
-                salario_min, salario_max, publicada_por, data_publicacao, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE('now'), 'ativa')
+                salario_min, salario_max, status, vagas_disponiveis
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ativa', 1)
         """, (
             vaga.cnpj,
-            empresa['razao_social'],
             vaga.titulo,
             vaga.descricao,
             vaga.requisitos,
@@ -236,8 +231,7 @@ async def criar_vaga(vaga: VagaCreate):
             1 if vaga.remoto else 0,
             1 if vaga.hibrido else 0,
             vaga.salario_min,
-            vaga.salario_max,
-            vaga.publicada_por
+            vaga.salario_max
         ))
         
         vaga_id = cursor.lastrowid
@@ -336,8 +330,8 @@ async def estatisticas_vagas():
                 SUM(CASE WHEN status = 'pausada' THEN 1 ELSE 0 END) as pausadas,
                 SUM(CASE WHEN status = 'fechada' THEN 1 ELSE 0 END) as fechadas,
                 SUM(CASE WHEN remoto = 1 THEN 1 ELSE 0 END) as remotas,
-                AVG(visualizacoes) as media_visualizacoes,
-                SUM(candidaturas) as total_candidaturas
+                SUM(vagas_disponiveis) as total_vagas_disponiveis,
+                SUM(candidaturas_recebidas) as total_candidaturas
             FROM vagas_esg
         """)
         

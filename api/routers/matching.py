@@ -72,7 +72,13 @@ def get_todas_vagas_ativas():
     conn.row_factory = dict_factory
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM vagas_esg WHERE status = 'ativa' ORDER BY criada_em DESC")
+    cursor.execute("""
+        SELECT v.*, e.razao_social as empresa_nome
+        FROM vagas_esg v
+        LEFT JOIN empresas_verdes e ON v.cnpj = e.cnpj
+        WHERE v.status = 'ativa' 
+        ORDER BY v.criada_em DESC
+    """)
     vagas = cursor.fetchall()
     conn.close()
     
@@ -220,11 +226,11 @@ def ranquear_vagas_para_profissional(
             'vaga': {
                 'id': vaga['id'],
                 'titulo': vaga['titulo'],
-                'empresa_cnpj': vaga['empresa_cnpj'],
-                'empresa_nome': vaga['empresa_nome'],
+                'cnpj': vaga['cnpj'],
+                'empresa_nome': vaga.get('empresa_nome'),
                 'descricao': vaga['descricao'],
-                'nivel': vaga['nivel'],
-                'tipo': vaga['tipo'],
+                'nivel_experiencia': vaga['nivel_experiencia'],
+                'tipo_contratacao': vaga['tipo_contratacao'],
                 'localizacao_uf': vaga['localizacao_uf'],
                 'localizacao_cidade': vaga['localizacao_cidade'],
                 'remoto': vaga['remoto'],
@@ -382,8 +388,8 @@ def obter_melhor_vaga(profissional_id: int):
         'vaga': {
             'id': melhor_vaga['id'],
             'titulo': melhor_vaga['titulo'],
-            'empresa_nome': melhor_vaga['empresa_nome'],
-            'nivel': melhor_vaga['nivel'],
+            'empresa_nome': melhor_vaga.get('empresa_nome'),
+            'nivel_experiencia': melhor_vaga['nivel_experiencia'],
             'salario_min': melhor_vaga['salario_min'],
             'salario_max': melhor_vaga['salario_max']
         },
