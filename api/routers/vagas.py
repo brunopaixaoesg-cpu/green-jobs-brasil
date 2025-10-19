@@ -31,8 +31,8 @@ class VagaCreate(BaseModel):
     requisitos: Optional[str] = Field(None, description="Requisitos da vaga")
     beneficios: Optional[str] = Field(None, description="Benefícios oferecidos")
     
-    ods_tags: List[int] = Field([], description="Lista de ODS relacionados")
-    habilidades_requeridas: List[str] = Field([], description="Habilidades ESG necessárias")
+    ods_tags: Optional[str] = Field(None, description="ODS relacionados como string")
+    habilidades_requeridas: Optional[str] = Field(None, description="Habilidades ESG como string")
     nivel_experiencia: str = Field(..., description="junior, pleno, senior, especialista")
     tipo_contratacao: str = Field(..., description="CLT, PJ, temporario, estagio, freelance")
     
@@ -68,37 +68,35 @@ class VagaResponse(BaseModel):
     """Schema de resposta"""
     id: int
     cnpj: str
-    empresa_nome: Optional[str] = None
     titulo: str
-    descricao: str
+    descricao: Optional[str] = None
     requisitos_adicionais: Optional[str] = None
     beneficios: Optional[str] = None
-    ods_tags: List[int]
-    habilidades_requeridas: List[str]
-    nivel_experiencia: str
-    tipo_contratacao: str
+    ods_tags: Optional[str] = None  # String JSON em vez de List[int]
+    habilidades_requeridas: Optional[str] = None  # String JSON em vez de List[str]
+    nivel_experiencia: Optional[str] = None
+    tipo_contratacao: Optional[str] = None
     localizacao_uf: Optional[str] = None
     localizacao_cidade: Optional[str] = None
-    remoto: bool
-    hibrido: bool
+    remoto: Optional[bool] = False
+    hibrido: Optional[bool] = False
     salario_min: Optional[float] = None
     salario_max: Optional[float] = None
-    status: str
+    status: Optional[str] = 'ativa'
     vagas_disponiveis: Optional[int] = 1
-    candidaturas_recebidas: int = 0
+    candidaturas_recebidas: Optional[int] = 0
     diferenciais: Optional[str] = None
-    criada_em: str
-    atualizada_em: str
+    criada_em: Optional[str] = None
+    atualizada_em: Optional[str] = None
     fecha_em: Optional[str] = None
 
 # ============= ENDPOINTS =============
 
 @router.get("/", response_model=List[VagaResponse])
 async def listar_vagas(
-    status: Optional[str] = Query(None, description="Filtrar por status"),
+    status: Optional[str] = Query('ativa', description="Filtrar por status"),
     uf: Optional[str] = Query(None, description="Filtrar por UF"),
     remoto: Optional[bool] = Query(None, description="Apenas remotas"),
-    ods: Optional[int] = Query(None, description="Filtrar por ODS"),
     nivel: Optional[str] = Query(None, description="Nível de experiência"),
     limit: int = Query(50, le=100),
     offset: int = Query(0, ge=0)
@@ -108,27 +106,45 @@ async def listar_vagas(
         conn = get_db()
         cursor = conn.cursor()
         
-        # Query base
-        query = """
-            SELECT v.*, e.razao_social as empresa_nome
-            FROM vagas_esg v
-            LEFT JOIN empresas_verdes e ON v.cnpj = e.cnpj
-            WHERE 1=1
-        """
+        # Query simplificada - apenas da tabela vagas_esg
+        query = "SELECT * FROM vagas_esg WHERE 1=1"
         params = []
         
         # Aplicar filtros
         if status:
-            query += " AND v.status = ?"
+            query += " AND status = ?"
             params.append(status)
         
         if uf:
-            query += " AND v.localizacao_uf = ?"
+            query += " AND localizacao_uf = ?"
             params.append(uf)
         
         if remoto is not None:
-            query += " AND v.remoto = ?"
+            query += " AND remoto = ?"
             params.append(1 if remoto else 0)
+        
+        if nivel:
+            query += " AND nivel_experiencia = ?"
+            params.append(nivel)
+        
+        # Ordenação e paginação
+        query += " ORDER BY criada_em DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+        
+        cursor.execute(query, params)
+        vagas = cursor.fetchall()
+        conn.close()
+        
+        # Converter para dicts sem processamento complexo
+        result = []
+        for vaga in vagas:
+            vaga_dict = dict(vaga)
+            result.append(vaga_dict)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao listar vagas: {str(e)}")
         
         if nivel:
             query += " AND v.nivel_experiencia = ?"

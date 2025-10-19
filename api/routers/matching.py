@@ -12,7 +12,11 @@ import os
 
 # Adicionar path para services
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from services.match_calculator import match_calculator
+from services.unified_matching import unified_matching
+from services.match_calculator import MatchCalculator
+
+# Instanciar o match calculator
+match_calculator = MatchCalculator()
 
 router = APIRouter(
     prefix="/api/matching",
@@ -121,14 +125,15 @@ def calcular_match(request: MatchRequest):
     if not profissional:
         raise HTTPException(status_code=404, detail="Profissional não encontrado ou inativo")
     
-    # Calcular match
-    match_data = match_calculator.calcular_match(vaga, profissional)
+    # Calcular match usando ML
+    score = unified_matching.calculate_compatibility(vaga, profissional)
     
     return {
         "vaga_id": request.vaga_id,
         "profissional_id": request.profissional_id,
-        "score_total": match_data['score_total'],
-        "classificacao": match_data['classificacao'],
+        "score_total": score,
+        "score_compatibilidade": score,
+        "model_used": "ML_ensemble",
         "breakdown": match_data['breakdown']
     }
 
@@ -139,55 +144,107 @@ def ranquear_candidatos_para_vaga(
     limit: int = 50
 ):
     """
-    Retorna profissionais ranqueados por compatibilidade com uma vaga
-    
-    Parâmetros:
-    - min_score: Score mínimo para aparecer nos resultados (default: 40)
-    - limit: Número máximo de resultados (default: 50)
-    
-    Retorna profissionais ordenados do maior para o menor score
+    Retorna profissionais que se candidataram a uma vaga, ranqueados por compatibilidade
     """
-    
-    # Buscar vaga
-    vaga = get_vaga(vaga_id)
-    if not vaga:
-        raise HTTPException(status_code=404, detail="Vaga não encontrada ou inativa")
-    
-    # Buscar todos os profissionais ativos
-    profissionais = get_todos_profissionais_ativos()
-    
-    # Rankear
-    matches = match_calculator.rankear_candidatos(vaga, profissionais, min_score)
-    
-    # Limitar resultados
-    matches = matches[:limit]
-    
-    # Formatar resposta
-    resultados = []
-    for prof, match_data in matches:
-        resultados.append({
-            'profissional': {
-                'id': prof['id'],
-                'nome_completo': prof['nome_completo'],
-                'email': prof['email'],
-                'cargo_atual': prof['cargo_atual'],
-                'nivel_desejado': prof['nivel_desejado'],
-                'anos_experiencia_esg': prof['anos_experiencia_esg'],
-                'localizacao_uf': prof['localizacao_uf'],
-                'localizacao_cidade': prof['localizacao_cidade'],
-                'aceita_remoto': prof['aceita_remoto'],
-                'ods_interesse': match_calculator._parse_json_field(prof.get('ods_interesse')),
-                'habilidades_esg': match_calculator._parse_json_field(prof.get('habilidades_esg'))
-            },
-            'match': match_data
-        })
-    
-    return {
-        'vaga_id': vaga_id,
-        'vaga_titulo': vaga.get('titulo'),
-        'total_candidatos': len(resultados),
-        'candidatos': resultados
-    }
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = dict_factory
+        cursor = conn.cursor()
+        
+        # Buscar vaga
+        cursor.execute("SELECT * FROM vagas_esg WHERE id = ? AND status = 'ativa'", (vaga_id,))
+        vaga = cursor.fetchone()
+        
+        if not vaga:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Vaga não encontrada ou inativa")
+        
+        # Buscar candidatos que se candidataram a esta vaga
+        query = """
+            SELECT 
+                p.*,
+                c.data_candidatura,
+                c.status as candidatura_status
+            FROM candidaturas_esg c
+            JOIN profissionais_esg p ON c.profissional_id = p.id
+            WHERE c.vaga_id = ? 
+            AND p.status = 'ativo'
+            ORDER BY c.data_candidatura DESC
+            LIMIT ?
+        """
+        
+        cursor.execute(query, (vaga_id, limit * 2))  # Buscar mais para filtrar depois
+        candidatos_raw = cursor.fetchall()
+        conn.close()
+        
+        # Calcular compatibilidade usando ML para cada candidato
+        candidatos = []
+        for candidato in candidatos_raw:
+            try:
+                # Usar o sistema ML unificado para calcular compatibilidade
+                match_result = unified_matching.calculate_compatibility(candidato['id'], vaga_id)
+                score = match_result['score_total']
+                
+                # Filtrar por score mínimo
+                if score >= min_score:
+                    candidatos.append({
+                        'profissional': {
+                            'id': candidato['id'],
+                            'nome_completo': candidato['nome_completo'],
+                            'email': candidato['email'],
+                            'cargo_atual': candidato['cargo_atual'],
+                            'empresa_atual': candidato['empresa_atual'],
+                            'anos_experiencia_esg': candidato['anos_experiencia_esg'],
+                            'localizacao_uf': candidato['localizacao_uf'],
+                            'localizacao_cidade': candidato['localizacao_cidade'],
+                            'aceita_remoto': candidato['aceita_remoto']
+                        },
+                        'match': {
+                            'score_total': score,
+                            'classificacao': match_result['classificacao'],
+                            'data_candidatura': candidato['data_candidatura'],
+                            'status': candidato['candidatura_status'],
+                            'model_used': match_result.get('model_used', 'unknown'),
+                            'breakdown': match_result.get('breakdown', {})
+                        }
+                    })
+            except Exception as e:
+                # Em caso de erro no ML, usar score padrão
+                candidatos.append({
+                    'profissional': {
+                        'id': candidato['id'],
+                        'nome_completo': candidato['nome_completo'],
+                        'email': candidato['email'],
+                        'cargo_atual': candidato['cargo_atual'],
+                        'empresa_atual': candidato['empresa_atual'],
+                        'anos_experiencia_esg': candidato['anos_experiencia_esg'],
+                        'localizacao_uf': candidato['localizacao_uf'],
+                        'localizacao_cidade': candidato['localizacao_cidade'],
+                        'aceita_remoto': candidato['aceita_remoto']
+                    },
+                    'match': {
+                        'score_total': 45,
+                        'classificacao': 'regular',
+                        'data_candidatura': candidato['data_candidatura'],
+                        'status': candidato['candidatura_status'],
+                        'model_used': 'error_fallback',
+                        'error': str(e)
+                    }
+                })
+        
+        # Ordenar por score (maior primeiro) e limitar
+        candidatos.sort(key=lambda x: x['match']['score_total'], reverse=True)
+        candidatos = candidatos[:limit]
+        
+        return {
+            'vaga_id': vaga_id,
+            'vaga_titulo': vaga.get('titulo'),
+            'total_candidatos': len(candidatos),
+            'candidatos': candidatos
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro no matching: {str(e)}")
 
 @router.get("/profissional/{profissional_id}/vagas")
 def ranquear_vagas_para_profissional(
@@ -213,15 +270,33 @@ def ranquear_vagas_para_profissional(
     # Buscar todas as vagas ativas
     vagas = get_todas_vagas_ativas()
     
-    # Rankear
-    matches = match_calculator.rankear_vagas(profissional, vagas, min_score)
+    # Rankear usando ML
+    results = []
+    for vaga in vagas:
+        try:
+            # Usar sistema unificado de matching (ML + tradicional)
+            score = unified_matching.calculate_compatibility(vaga, profissional)
+            
+            if score >= min_score:
+                results.append({
+                    'vaga': vaga,
+                    'score_compatibilidade': score,
+                    'model_used': 'ML_ensemble'
+                })
+        except Exception as e:
+            print(f"Erro no cálculo para vaga {vaga.get('id')}: {e}")
+            continue
+    
+    # Ordenar por score (maior primeiro)
+    results.sort(key=lambda x: x['score_compatibilidade'], reverse=True)
     
     # Limitar resultados
-    matches = matches[:limit]
+    results = results[:limit]
     
     # Formatar resposta
     resultados = []
-    for vaga, match_data in matches:
+    for result in results:
+        vaga = result['vaga']
         resultados.append({
             'vaga': {
                 'id': vaga['id'],
@@ -236,10 +311,11 @@ def ranquear_vagas_para_profissional(
                 'remoto': vaga['remoto'],
                 'salario_min': vaga['salario_min'],
                 'salario_max': vaga['salario_max'],
-                'ods_tags': match_calculator._parse_json_field(vaga.get('ods_tags')),
-                'habilidades_requeridas': match_calculator._parse_json_field(vaga.get('habilidades_requeridas'))
+                'ods_tags': vaga.get('ods_tags'),
+                'habilidades_requeridas': vaga.get('habilidades_requeridas')
             },
-            'match': match_data
+            'score_compatibilidade': result['score_compatibilidade'],
+            'model_used': result['model_used']
         })
     
     return {
@@ -296,8 +372,7 @@ def estatisticas_matching():
     
     for vaga in sample_vagas:
         for prof in sample_profs:
-            match_data = match_calculator.calcular_match(vaga, prof)
-            score = match_data['score_total']
+            score = unified_matching.calculate_compatibility(vaga, prof)
             scores.append(score)
             
             if score >= 80:
@@ -340,24 +415,43 @@ def obter_melhor_candidato(vaga_id: int):
     if not profissionais:
         raise HTTPException(status_code=404, detail="Nenhum profissional ativo encontrado")
     
-    matches = match_calculator.rankear_candidatos(vaga, profissionais, min_score=0)
+    # Rankear usando ML
+    results = []
+    for prof in profissionais:
+        try:
+            # Usar sistema unificado de matching (ML + tradicional)
+            score = unified_matching.calculate_compatibility(vaga, prof)
+            
+            if score >= 0:  # min_score = 0 para candidatos
+                results.append({
+                    'profissional': prof,
+                    'score_compatibilidade': score,
+                    'model_used': 'ML_ensemble'
+                })
+        except Exception as e:
+            print(f"Erro no cálculo para profissional {prof.get('id')}: {e}")
+            continue
     
-    if not matches:
+    # Ordenar por score (maior primeiro)
+    results.sort(key=lambda x: x['score_compatibilidade'], reverse=True)
+    
+    if not results:
         raise HTTPException(status_code=404, detail="Nenhum match calculado")
     
-    melhor_prof, melhor_match = matches[0]
+    melhor_result = results[0]
     
     return {
         'vaga_id': vaga_id,
         'vaga_titulo': vaga.get('titulo'),
         'profissional': {
-            'id': melhor_prof['id'],
-            'nome_completo': melhor_prof['nome_completo'],
-            'email': melhor_prof['email'],
-            'cargo_atual': melhor_prof['cargo_atual'],
-            'anos_experiencia_esg': melhor_prof['anos_experiencia_esg']
+            'id': melhor_result['profissional']['id'],
+            'nome_completo': melhor_result['profissional']['nome_completo'],
+            'email': melhor_result['profissional']['email'],
+            'cargo_atual': melhor_result['profissional']['cargo_atual'],
+            'anos_experiencia_esg': melhor_result['profissional']['anos_experiencia_esg']
         },
-        'match': melhor_match
+        'score_compatibilidade': melhor_result['score_compatibilidade'],
+        'model_used': melhor_result['model_used']
     }
 
 @router.get("/profissional/{profissional_id}/melhor-vaga")
@@ -375,23 +469,58 @@ def obter_melhor_vaga(profissional_id: int):
     if not vagas:
         raise HTTPException(status_code=404, detail="Nenhuma vaga ativa encontrada")
     
-    matches = match_calculator.rankear_vagas(profissional, vagas, min_score=0)
+    # Rankear usando ML
+    results = []
+    for vaga in vagas:
+        try:
+            score = unified_matching.calculate_compatibility(vaga, profissional)
+            results.append({
+                'vaga': vaga,
+                'score_compatibilidade': score,
+                'model_used': 'ML_ensemble'
+            })
+        except Exception as e:
+            print(f"Erro no cálculo para vaga {vaga.get('id')}: {e}")
+            continue
     
-    if not matches:
+    # Ordenar por score (maior primeiro)
+    results.sort(key=lambda x: x['score_compatibilidade'], reverse=True)
+    
+    if not results:
         raise HTTPException(status_code=404, detail="Nenhum match calculado")
     
-    melhor_vaga, melhor_match = matches[0]
+    melhor_result = results[0]
     
     return {
         'profissional_id': profissional_id,
         'profissional_nome': profissional.get('nome_completo'),
         'vaga': {
-            'id': melhor_vaga['id'],
-            'titulo': melhor_vaga['titulo'],
-            'empresa_nome': melhor_vaga.get('empresa_nome'),
-            'nivel_experiencia': melhor_vaga['nivel_experiencia'],
-            'salario_min': melhor_vaga['salario_min'],
-            'salario_max': melhor_vaga['salario_max']
+            'id': melhor_result['vaga']['id'],
+            'titulo': melhor_result['vaga']['titulo'],
+            'empresa_nome': melhor_result['vaga'].get('empresa_nome'),
+            'nivel_experiencia': melhor_result['vaga']['nivel_experiencia'],
+            'salario_min': melhor_result['vaga']['salario_min'],
+            'salario_max': melhor_result['vaga']['salario_max']
         },
-        'match': melhor_match
+        'score_compatibilidade': melhor_result['score_compatibilidade'],
+        'model_used': melhor_result['model_used']
     }
+
+@router.get("/status")
+async def get_matching_status():
+    """Status do sistema de matching"""
+    return unified_matching.get_service_status()
+
+@router.get("/test-ml/{profissional_id}/{vaga_id}")
+async def test_ml_matching(profissional_id: int, vaga_id: int):
+    """Testar matching ML vs tradicional"""
+    try:
+        ml_result = unified_matching.calculate_compatibility(profissional_id, vaga_id)
+        return {
+            'profissional_id': profissional_id,
+            'vaga_id': vaga_id,
+            'ml_result': ml_result,
+            'system_status': unified_matching.get_service_status()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

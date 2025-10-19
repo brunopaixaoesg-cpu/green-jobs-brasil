@@ -383,7 +383,16 @@
                 const response = await fetch('/api/empresas');
                 const data = await response.json();
                 
-                if (data.empresas) {
+                // A API retorna uma lista direta, não um objeto com propriedade empresas
+                if (Array.isArray(data) && data.length > 0) {
+                    empresas = data;
+                    empresasFiltradas = [...empresas];
+                    
+                    atualizarEstatisticas();
+                    popularFiltros();
+                    renderizarEmpresas();
+                } else if (data.empresas) {
+                    // Fallback para formato com objeto
                     empresas = data.empresas;
                     empresasFiltradas = [...empresas];
                     
@@ -391,7 +400,7 @@
                     popularFiltros();
                     renderizarEmpresas();
                 } else {
-                    mostrarErro('Erro ao carregar empresas');
+                    mostrarErro('Nenhuma empresa encontrada');
                 }
             } catch (error) {
                 console.error('Erro:', error);
@@ -402,8 +411,8 @@
         // Atualizar estatísticas
         function atualizarEstatisticas() {
             const total = empresas.length;
-            const ativas = empresas.filter(e => e.situacao === 'ATIVA').length;
-            const scoreTotal = empresas.reduce((sum, e) => sum + (e.pontuacao_verde || 0), 0);
+            const ativas = empresas.filter(e => e.situacao_cadastral === 'ATIVA').length;
+            const scoreTotal = empresas.reduce((sum, e) => sum + (e.green_score || 0), 0);
             const scoreMedio = total > 0 ? (scoreTotal / total).toFixed(1) : 0;
 
             document.getElementById('total-empresas').textContent = total;
@@ -440,9 +449,9 @@
             }
 
             const html = empresasFiltradas.map((empresa, index) => {
-                const score = empresa.pontuacao_verde || 0;
-                const scoreClass = score >= 50 ? 'high' : score >= 20 ? 'medium' : 'low';
-                const scoreText = score >= 50 ? 'Alto' : score >= 20 ? 'Médio' : 'Baixo';
+                const score = empresa.green_score || 0;
+                const scoreClass = score >= 80 ? 'high' : score >= 60 ? 'medium' : 'low';
+                const scoreText = score >= 80 ? 'Alto' : score >= 60 ? 'Médio' : 'Baixo';
                 
                 return `
                     <div class="company-card fade-in" style="animation-delay: ${index * 0.1}s">
@@ -451,7 +460,7 @@
                             ${score}/100 (${scoreText})
                         </div>
                         
-                        <h3 class="company-name">${empresa.nome || 'Nome não informado'}</h3>
+                        <h3 class="company-name">${empresa.razao_social || empresa.nome || 'Nome não informado'}</h3>
                         <div class="company-cnpj">${formatarCNPJ(empresa.cnpj)}</div>
                         
                         ${empresa.nome_fantasia ? `
@@ -465,7 +474,7 @@
                             <div class="info-item">
                                 <i class="fas fa-check-circle"></i>
                                 <span class="info-label">Situação:</span>
-                                <span class="info-value">${empresa.situacao || 'Não informado'}</span>
+                                <span class="info-value">${empresa.situacao_cadastral || empresa.situacao || 'Não informado'}</span>
                             </div>
                             
                             ${empresa.municipio ? `
@@ -506,17 +515,18 @@
             empresasFiltradas = empresas.filter(empresa => {
                 // Filtro de busca
                 const matchBusca = !busca || 
+                    (empresa.razao_social && empresa.razao_social.toLowerCase().includes(busca)) ||
                     (empresa.nome && empresa.nome.toLowerCase().includes(busca)) ||
                     (empresa.cnpj && empresa.cnpj.includes(busca.replace(/\D/g, ''))) ||
                     (empresa.municipio && empresa.municipio.toLowerCase().includes(busca)) ||
                     (empresa.nome_fantasia && empresa.nome_fantasia.toLowerCase().includes(busca));
 
                 // Filtro de score
-                const score = empresa.pontuacao_verde || 0;
+                const score = empresa.green_score || 0;
                 const matchScore = !scoreFilter ||
-                    (scoreFilter === 'high' && score >= 50) ||
-                    (scoreFilter === 'medium' && score >= 20 && score < 50) ||
-                    (scoreFilter === 'low' && score < 20);
+                    (scoreFilter === 'high' && score >= 80) ||
+                    (scoreFilter === 'medium' && score >= 60 && score < 80) ||
+                    (scoreFilter === 'low' && score < 60);
 
                 // Filtro de UF
                 const matchUF = !ufFilter || empresa.uf === ufFilter;

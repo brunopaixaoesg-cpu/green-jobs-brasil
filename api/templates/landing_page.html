@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Green Jobs Brasil - IA para Talentos Ambientais</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 60px 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: #2d3748;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #4a5568;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: #718096;
+            margin-bottom: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .cta-section {
+            margin-top: 50px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .features-section {
+            background: rgba(255, 255, 255, 0.9);
+            margin: 40px -40px -60px -40px;
+            padding: 60px 40px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .features-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 50px;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px 25px;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .tech-stack {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .tech-title {
+            font-size: 1.5rem;
+            color: #4a5568;
+            margin-bottom: 25px;
+        }
+
+        .tech-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tech-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tech-icon i {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .tech-icon span {
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { top: 60%; right: 10%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { bottom: 20%; left: 15%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .contact-banner {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin: 40px -40px -60px -40px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .contact-banner h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-banner p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .platform-section {
+            background: rgba(248, 250, 252, 0.95);
+            margin: 40px -40px 0 -40px;
+            padding: 60px 40px;
+            border-top: 3px solid #667eea;
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .platform-card {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .platform-icon {
+            font-size: 3.5rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .platform-title {
+            font-size: 1.4rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .platform-description {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .platform-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .feature-tag {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            color: #234e52;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #81e6d9;
+        }
+
+        .platform-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .platform-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                padding: 40px 25px;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-banner p {
+                font-size: 1rem;
+            }
+
+            .platform-section {
+                margin: 30px -20px 0 -20px;
+                padding: 40px 20px;
+            }
+
+            .platform-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                margin-top: 30px;
+            }
+
+            .platform-card {
+                padding: 25px 20px;
+            }
+
+            .platform-icon {
+                font-size: 3rem;
+            }
+
+            .platform-title {
+                font-size: 1.2rem;
+            }
+
+            .platform-btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero-section">
+        <div class="floating-elements">
+            <div class="floating-element">
+                <i class="fas fa-leaf fa-3x"></i>
+            </div>
+            <div class="floating-element">
+                <i class="fas fa-brain fa-3x"></i>
+            </div>
+            <div class="floating-element">
+                <i class="fas fa-seedling fa-3x"></i>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+            </div>
+            
+            <h1 class="hero-title">Green Jobs Brasil</h1>
+            <p class="hero-subtitle">Inteligência Artificial para Talentos Ambientais</p>
+            
+            <p class="hero-description">
+                O primeiro sistema de matching inteligente especializado em conectar profissionais qualificados 
+                com oportunidades no setor ambiental brasileiro. Utilizamos Machine Learning avançado para 
+                identificar os melhores matches entre candidatos e vagas verdes.
+            </p>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number">768</div>
+                    <div class="stat-label">Candidatos Processados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98.5%</div>
+                    <div class="stat-label">Precisão ML</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">42-64%</div>
+                    <div class="stat-label">Taxa de Match</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Algoritmos IA</div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <div class="cta-buttons">
+                    <a href="/ml-avancado" class="btn btn-primary">
+                        <i class="fas fa-chart-line"></i>
+                        Ver Dashboard ML
+                    </a>
+                    <a href="/explicacao-matching" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Como Funciona
+                    </a>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2 class="features-title">Por que Green Jobs Brasil?</h2>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="feature-title">IA Especializada</h3>
+                        <p class="feature-description">
+                            Random Forest + XGBoost treinados especificamente para o setor ambiental brasileiro
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3 class="feature-title">Foco Verde</h3>
+                        <p class="feature-description">
+                            Único sistema dedicado exclusivamente a profissionais e vagas do setor sustentável
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="feature-title">Precisão Comprovada</h3>
+                        <p class="feature-description">
+                            98.5% de precisão na identificação de candidatos compatíveis com vagas ambientais
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="feature-title">Eficiência Total</h3>
+                        <p class="feature-description">
+                            Reduz o tempo de triagem de candidatos de horas para segundos
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="feature-title">Network Ambiental</h3>
+                        <p class="feature-description">
+                            Conecta talentos com empresa líderes em sustentabilidade no Brasil
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3 class="feature-title">Inovação Contínua</h3>
+                        <p class="feature-description">
+                            Sistema aprende e melhora com cada contratação realizada
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Nova Seção: Funcionalidades Completas -->
+                <div class="platform-section">
+                    <h2 class="features-title">🚀 Plataforma Completa para o Setor Verde</h2>
+                    <p style="text-align: center; color: #4a5568; font-size: 1.1rem; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                        Muito mais que matching de candidatos - uma plataforma completa para conectar todo o ecossistema ambiental brasileiro
+                    </p>
+
+                    <div class="platform-grid">
+                        <div class="platform-card">
+                            <div class="platform-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h3 class="platform-title">🏢 Empresas Verdes</h3>
+                            <p class="platform-description">
+                                Base completa de empresas sustentáveis brasileiras com busca avançada por CNPJ, setor e localização
+                            </p>
+                            <div class="platform-features">
+                                <span class="feature-tag">✓ Busca por CNPJ</span>
+                                <span class="feature-tag">✓ Análise de CNAEs verdes</span>
+                                <span class="feature-tag">✓ Score de sustentabilidade</span>
+                            </div>
+                            <a href="/empresas" class="platform-btn">
+                                <i class="fas fa-search"></i>
+                                Buscar Empresas
+                            </a>
+                        </div>
+
+                        <div class="platform-card">
+                            <div class="platform-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <h3 class="platform-title">💼 Vagas Ambientais</h3>
+                            <p class="platform-description">
+                                Marketplace de oportunidades exclusivas no setor ambiental e sustentabilidade
+                            </p>
+                            <div class="platform-features">
+                                <span class="feature-tag">✓ Vagas especializadas</span>
+                                <span class="feature-tag">✓ Filtros avançados</span>
+                                <span class="feature-tag">✓ Match automático</span>
+                            </div>
+                            <a href="/vagas" class="platform-btn">
+                                <i class="fas fa-list"></i>
+                                Ver Vagas
+                            </a>
+                        </div>
+
+                        <div class="platform-card">
+                            <div class="platform-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <h3 class="platform-title">👥 Profissionais ESG</h3>
+                            <p class="platform-description">
+                                Rede de talentos especializados em sustentabilidade, energia renovável e gestão ambiental
+                            </p>
+                            <div class="platform-features">
+                                <span class="feature-tag">✓ Perfis detalhados</span>
+                                <span class="feature-tag">✓ Certificações verdes</span>
+                                <span class="feature-tag">✓ Portfolio de projetos</span>
+                            </div>
+                            <a href="/profissionais" class="platform-btn">
+                                <i class="fas fa-users"></i>
+                                Ver Talentos
+                            </a>
+                        </div>
+
+                        <div class="platform-card">
+                            <div class="platform-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="platform-title">📊 Analytics & Insights</h3>
+                            <p class="platform-description">
+                                Relatórios avançados sobre mercado de trabalho verde, tendências e oportunidades
+                            </p>
+                            <div class="platform-features">
+                                <span class="feature-tag">✓ Dados em tempo real</span>
+                                <span class="feature-tag">✓ Tendências de mercado</span>
+                                <span class="feature-tag">✓ Benchmarking setorial</span>
+                            </div>
+                            <a href="/dashboard" class="platform-btn">
+                                <i class="fas fa-chart-bar"></i>
+                                Ver Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-stack">
+                    <h3 class="tech-title">Tecnologia de Ponta</h3>
+                    <div class="tech-icons">
+                        <div class="tech-icon">
+                            <i class="fab fa-python"></i>
+                            <span>Python</span>
+                        </div>
+                        <div class="tech-icon">
+                            <i class="fas fa-brain"></i>
+                            <span>Scikit-learn</span>
+                        </div>
+                        <div class="tech-icon">
+                            <i class="fas fa-server"></i>
+                            <span>FastAPI</span>
+                        </div>
+                        <div class="tech-icon">
+                            <i class="fas fa-database"></i>
+                            <span>SQLite</span>
+                        </div>
+                        <div class="tech-icon">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Chart.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-banner">
+                <h3><i class="fas fa-handshake"></i> Pronto para Revolucionar seu Recrutamento Verde?</h3>
+                <p>Entre em contato e descubra como nossa IA pode transformar sua estratégia de talentos ambientais</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

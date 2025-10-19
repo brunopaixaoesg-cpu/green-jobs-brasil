@@ -3,465 +3,511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profissionais ESG | Green Jobs Brasil</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Profissionais ESG - Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-green: #2ECC71;
-            --dark-green: #27AE60;
-            --light-green: #A9DFBF;
+            --primary-green: #059669;
+            --light-green: #10b981;
+            --dark-green: #047857;
+            --accent-green: #34d399;
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            line-height: 1.6;
         }
-        
-        .header {
-            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-green) !important;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
             color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 4rem 0 2rem;
+            margin-bottom: 3rem;
         }
-        
-        .filters-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
+
         .profissional-card {
             background: white;
-            border-radius: 15px;
+            border-radius: var(--border-radius);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .profissional-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
-        
-        .prof-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+
+        .profissional-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-green), var(--accent-green));
+        }
+
+        .profissional-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .profissional-cargo {
+            color: var(--primary-green);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .profissional-empresa {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--primary-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 0.25rem 0.25rem 0.25rem 0;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+
+        .experiencia-badge {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .localizacao {
+            color: var(--text-light);
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            font-weight: bold;
+            gap: 0.5rem;
         }
-        
-        .ods-badge {
-            display: inline-block;
-            padding: 0.35rem 0.65rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin: 0.2rem;
-            font-weight: 500;
-        }
-        
-        .skill-badge {
-            background: var(--light-green);
-            color: var(--dark-green);
-            padding: 0.3rem 0.6rem;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            margin: 0.2rem;
-            display: inline-block;
-        }
-        
-        .nivel-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
+
+        .salario {
+            color: var(--primary-green);
             font-weight: 600;
+            font-size: 1.1rem;
         }
-        
-        .nivel-junior { background: #E3F2FD; color: #1976D2; }
-        .nivel-pleno { background: #F3E5F5; color: #7B1FA2; }
-        .nivel-senior { background: #FFE0B2; color: #E65100; }
-        .nivel-especialista { background: #FCE4EC; color: #C2185B; }
-        .nivel-gerencial { background: #E0F2F1; color: #00695C; }
-        
-        .stats-badge {
-            background: var(--light-green);
-            color: var(--dark-green);
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            margin: 0 0.5rem;
+
+        .filter-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
         }
-        
-        .btn-green {
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+        }
+
+        .stats-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            border: none;
+            color: var(--primary-green);
+            border-radius: 8px;
+            margin: 0 2px;
+        }
+
+        .page-link:hover, .page-item.active .page-link {
             background: var(--primary-green);
             color: white;
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .btn-green:hover {
-            background: var(--dark-green);
-            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h1 class="mb-0"><i class="fas fa-users"></i> Profissionais ESG</h1>
-                    <p class="mb-0 mt-2">Encontre talentos verdes para sua empresa</p>
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-leaf me-2"></i>Green Jobs Brasil
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresas">Empresas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vagas">Vagas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/profissionais">Profissionais</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/matching/empresa">Matching</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-users me-3"></i>Profissionais ESG
+                    </h1>
+                    <p class="lead mb-4">
+                        Descubra talentos especializados em sustentabilidade e ESG prontos para impulsionar sua empresa.
+                    </p>
                 </div>
-                <div class="mt-3 mt-md-0">
-                    <a href="/profissionais/cadastro" class="btn btn-light btn-lg me-2">
-                        <i class="fas fa-user-plus"></i> Cadastrar Perfil
-                    </a>
-                    <a href="/" class="btn btn-outline-light">
-                        <i class="fas fa-home"></i> Voltar
-                    </a>
+                <div class="col-lg-4">
+                    <div class="stats-summary">
+                        <h3 id="total-profissionais" class="fw-bold text-primary">--</h3>
+                        <p class="mb-0">Profissionais Cadastrados</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!-- Main Content -->
     <div class="container">
-        <!-- Estatísticas -->
-        <div class="text-center mb-4">
-            <span class="stats-badge">
-                <i class="fas fa-users"></i> <strong id="totalProfissionais">0</strong> Profissionais
-            </span>
-            <span class="stats-badge">
-                <i class="fas fa-laptop-house"></i> <strong id="totalRemotos">0</strong> Trabalho Remoto
-            </span>
-            <span class="stats-badge">
-                <i class="fas fa-chart-line"></i> Média <strong id="mediaExperiencia">0</strong> anos ESG
-            </span>
-        </div>
-
         <!-- Filtros -->
-        <div class="filters-card">
-            <h5 class="mb-3"><i class="fas fa-filter"></i> Filtros</h5>
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <label class="form-label">ODS</label>
-                    <select class="form-select" id="filtroODS">
-                        <option value="">Todos os ODS</option>
-                        <option value="7">7. Energia Limpa e Acessível</option>
-                        <option value="8">8. Trabalho Decente</option>
-                        <option value="9">9. Indústria e Inovação</option>
-                        <option value="11">11. Cidades Sustentáveis</option>
-                        <option value="12">12. Consumo Responsável</option>
-                        <option value="13">13. Ação Climática</option>
-                        <option value="14">14. Vida na Água</option>
-                        <option value="15">15. Vida Terrestre</option>
-                    </select>
+        <div class="filter-card">
+            <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtros</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="filtro-nome" placeholder="Nome do profissional">
                 </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label">Nível</label>
-                    <select class="form-select" id="filtroNivel">
-                        <option value="">Todos</option>
-                        <option value="junior">Júnior</option>
-                        <option value="pleno">Pleno</option>
-                        <option value="senior">Sênior</option>
-                        <option value="especialista">Especialista</option>
-                        <option value="gerencial">Gerencial</option>
-                    </select>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label">Estado</label>
-                    <select class="form-select" id="filtroUF">
-                        <option value="">Todos</option>
+                <div class="col-md-3">
+                    <select class="form-select" id="filtro-uf">
+                        <option value="">Todos os Estados</option>
                         <option value="SP">São Paulo</option>
                         <option value="RJ">Rio de Janeiro</option>
                         <option value="MG">Minas Gerais</option>
-                        <option value="RS">Rio Grande do Sul</option>
-                        <option value="PR">Paraná</option>
-                        <option value="SC">Santa Catarina</option>
-                        <option value="BA">Bahia</option>
                         <option value="DF">Distrito Federal</option>
+                        <option value="BA">Bahia</option>
                     </select>
                 </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label">Experiência ESG</label>
-                    <select class="form-select" id="filtroExpESG">
-                        <option value="">Qualquer</option>
-                        <option value="1">Mín. 1 ano</option>
-                        <option value="2">Mín. 2 anos</option>
-                        <option value="3">Mín. 3 anos</option>
-                        <option value="5">Mín. 5 anos</option>
-                    </select>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label">Habilidade</label>
-                    <input type="text" class="form-select" id="filtroHabilidade" placeholder="Ex: ISO 14001">
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-md-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="filtroRemoto">
-                        <label class="form-check-label" for="filtroRemoto">
-                            Apenas trabalho remoto
-                        </label>
-                    </div>
+                    <select class="form-select" id="filtro-experiencia">
+                        <option value="">Qualquer experiência</option>
+                        <option value="1-3">1-3 anos</option>
+                        <option value="4-7">4-7 anos</option>
+                        <option value="8-12">8-12 anos</option>
+                        <option value="13+">13+ anos</option>
+                    </select>
                 </div>
-                <div class="col-md-9 text-end">
-                    <button class="btn btn-green" onclick="aplicarFiltros()">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                    <button class="btn btn-secondary" onclick="limparFiltros()">
-                        <i class="fas fa-redo"></i> Limpar
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                        <i class="fas fa-search me-2"></i>Buscar
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Lista de Profissionais -->
-        <div id="profissionaisContainer">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p class="mt-3">Carregando profissionais...</p>
+        </div>
+
+        <div id="profissionais-container" style="display: none;">
             <!-- Profissionais serão carregados aqui -->
         </div>
 
-        <!-- Loading -->
-        <div id="loading" class="text-center my-5" style="display: none;">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-            <p class="mt-2">Carregando profissionais...</p>
-        </div>
-
-        <!-- Nenhum resultado -->
-        <div id="noResults" class="text-center my-5" style="display: none;">
-            <i class="fas fa-search fa-4x text-muted mb-3"></i>
-            <h4>Nenhum profissional encontrado</h4>
-            <p class="text-muted">Tente ajustar os filtros de busca</p>
-        </div>
+        <!-- Paginação -->
+        <nav id="pagination-container" style="display: none;">
+            <ul class="pagination">
+                <!-- Paginação será inserida aqui -->
+            </ul>
+        </nav>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Mapeamento de ODS para cores e emojis
-        const odsInfo = {
-            7: { emoji: '⚡', nome: 'Energia Limpa', cor: '#FCC30B' },
-            8: { emoji: '💼', nome: 'Trabalho Decente', cor: '#A21942' },
-            9: { emoji: '🏭', nome: 'Indústria', cor: '#FD6925' },
-            11: { emoji: '🏙️', nome: 'Cidades', cor: '#FD9D24' },
-            12: { emoji: '♻️', nome: 'Consumo Responsável', cor: '#BF8B2E' },
-            13: { emoji: '🌍', nome: 'Ação Climática', cor: '#3F7E44' },
-            14: { emoji: '🌊', nome: 'Vida na Água', cor: '#0A97D9' },
-            15: { emoji: '🌳', nome: 'Vida Terrestre', cor: '#56C02B' }
-        };
+        let profissionais = [];
+        let filteredProfissionais = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
 
         // Carregar profissionais
-        async function carregarProfissionais(filtros = {}) {
-            const container = document.getElementById('profissionaisContainer');
-            const loading = document.getElementById('loading');
-            const noResults = document.getElementById('noResults');
-            
-            container.innerHTML = '';
-            loading.style.display = 'block';
-            noResults.style.display = 'none';
-            
-            // Construir query params
-            const params = new URLSearchParams();
-            if (filtros.ods) params.append('ods', filtros.ods);
-            if (filtros.uf) params.append('uf', filtros.uf);
-            if (filtros.nivel) params.append('nivel', filtros.nivel);
-            if (filtros.remoto !== undefined) params.append('remoto', filtros.remoto);
-            if (filtros.min_exp_esg) params.append('min_exp_esg', filtros.min_exp_esg);
-            if (filtros.habilidade) params.append('habilidade', filtros.habilidade);
-            
+        async function carregarProfissionais() {
             try {
-                const response = await fetch(`/api/profissionais/?${params}`);
-                const profissionais = await response.json();
+                const response = await fetch('/api/profissionais/?limit=100');
+                const data = await response.json();
                 
-                loading.style.display = 'none';
+                profissionais = data;
+                filteredProfissionais = data;
                 
-                if (profissionais.length === 0) {
-                    noResults.style.display = 'block';
-                    return;
-                }
+                document.getElementById('total-profissionais').textContent = data.length;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('profissionais-container').style.display = 'block';
                 
-                profissionais.forEach(prof => {
-                    container.innerHTML += criarCardProfissional(prof);
-                });
+                renderizarProfissionais();
+                renderizarPaginacao();
                 
             } catch (error) {
-                loading.style.display = 'none';
                 console.error('Erro ao carregar profissionais:', error);
-                container.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Erro ao carregar profissionais. Tente novamente.
-                    </div>
+                document.getElementById('loading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                    <p class="mt-3">Erro ao carregar profissionais</p>
                 `;
             }
         }
 
-        // Criar card de profissional
-        function criarCardProfissional(prof) {
-            const iniciais = prof.nome_completo.split(' ')
-                .map(n => n[0])
-                .slice(0, 2)
-                .join('')
-                .toUpperCase();
-            
-            const odsHtml = prof.ods_interesse.map(ods => {
-                const info = odsInfo[ods];
-                return `<span class="ods-badge" style="background: ${info.cor}; color: white;">
-                    ${info.emoji} ${ods}
-                </span>`;
-            }).join('');
-            
-            const skillsHtml = prof.habilidades_esg.slice(0, 5).map(skill => 
-                `<span class="skill-badge">${skill}</span>`
-            ).join('');
-            
-            const maisSkills = prof.habilidades_esg.length > 5 
-                ? `<span class="skill-badge">+${prof.habilidades_esg.length - 5}</span>` 
-                : '';
-            
-            const nivelClass = `nivel-${prof.nivel_desejado || 'pleno'}`;
-            const nivelTexto = (prof.nivel_desejado || 'Pleno').charAt(0).toUpperCase() + 
-                               (prof.nivel_desejado || 'pleno').slice(1);
-            
-            const salarioRange = prof.pretensao_salarial_min && prof.pretensao_salarial_max
-                ? `R$ ${prof.pretensao_salarial_min.toLocaleString('pt-BR')} - R$ ${prof.pretensao_salarial_max.toLocaleString('pt-BR')}`
-                : 'A combinar';
-            
-            const localizacao = prof.localizacao_cidade && prof.localizacao_uf
-                ? `${prof.localizacao_cidade}, ${prof.localizacao_uf}`
-                : prof.localizacao_uf || 'Não informado';
-            
-            return `
-                <div class="profissional-card" onclick="verPerfil(${prof.id})">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="prof-avatar">${iniciais}</div>
-                        </div>
-                        <div class="col">
-                            <div class="d-flex justify-content-between align-items-start flex-wrap">
-                                <div>
-                                    <h4 class="mb-1">${prof.nome_completo}</h4>
-                                    <p class="text-muted mb-2">${prof.cargo_atual || 'Profissional ESG'}</p>
-                                    <span class="nivel-badge ${nivelClass}">${nivelTexto}</span>
-                                    ${prof.aceita_remoto ? '<span class="badge bg-info ms-2"><i class="fas fa-laptop-house"></i> Remoto</span>' : ''}
-                                    ${prof.perfil_completo ? '<span class="badge bg-success ms-2"><i class="fas fa-check-circle"></i> Completo</span>' : ''}
+        // Renderizar profissionais
+        function renderizarProfissionais() {
+            const container = document.getElementById('profissionais-container');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const profissionaisPagina = filteredProfissionais.slice(startIndex, endIndex);
+
+            if (profissionaisPagina.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-user-times fa-3x"></i>
+                        <h4 class="mt-3">Nenhum profissional encontrado</h4>
+                        <p>Tente ajustar os filtros para encontrar mais resultados.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = profissionaisPagina.map(profissional => {
+                const skills = JSON.parse(profissional.habilidades_esg || '[]');
+                const certificacoes = JSON.parse(profissional.certificacoes || '[]');
+                
+                const skillsHtml = skills.slice(0, 5).map(skill => 
+                    `<span class="skill-tag">${skill}</span>`
+                ).join('');
+
+                const salarioMin = profissional.pretensao_salarial_min ? 
+                    `R$ ${profissional.pretensao_salarial_min.toLocaleString('pt-BR')}` : 'A combinar';
+
+                return `
+                    <div class="profissional-card">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="profissional-name">${profissional.nome_completo}</div>
+                                <div class="profissional-cargo">
+                                    <i class="fas fa-briefcase me-2"></i>${profissional.cargo_atual || 'Cargo não informado'}
                                 </div>
-                                <div class="text-end">
-                                    <div class="mb-2">
-                                        <i class="fas fa-briefcase text-muted"></i>
-                                        <strong>${prof.anos_experiencia_esg || 0}</strong> anos ESG
-                                    </div>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-map-marker-alt"></i> ${localizacao}
-                                    </div>
+                                <div class="profissional-empresa">
+                                    <i class="fas fa-building me-2"></i>${profissional.empresa_atual || 'Empresa não informada'}
+                                </div>
+                                <div class="localizacao mb-3">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${profissional.localizacao_cidade} - ${profissional.localizacao_uf}
+                                </div>
+                                <div class="skills-container">
+                                    ${skillsHtml}
+                                    ${skills.length > 5 ? `<span class="skill-tag">+${skills.length - 5} mais</span>` : ''}
                                 </div>
                             </div>
-                            
-                            <hr class="my-3">
-                            
-                            <div class="mb-2">
-                                <strong><i class="fas fa-globe text-success"></i> ODS de Interesse:</strong><br>
-                                ${odsHtml || '<span class="text-muted">Não informado</span>'}
-                            </div>
-                            
-                            <div class="mb-2">
-                                <strong><i class="fas fa-lightbulb text-warning"></i> Habilidades ESG:</strong><br>
-                                ${skillsHtml}${maisSkills}
-                            </div>
-                            
-                            ${prof.resumo_profissional ? `
-                                <div class="mb-2">
-                                    <p class="text-muted mb-0 small">${prof.resumo_profissional.substring(0, 200)}...</p>
+                            <div class="col-md-4 text-md-end">
+                                <div class="experiencia-badge mb-3">
+                                    <i class="fas fa-clock"></i>
+                                    ${profissional.anos_experiencia_total} anos exp.
                                 </div>
-                            ` : ''}
-                            
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <i class="fas fa-dollar-sign text-success"></i>
-                                    <strong>Pretensão:</strong> ${salarioRange}
+                                <div class="salario mb-3">${salarioMin}</div>
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-leaf me-1"></i>
+                                        ${profissional.anos_experiencia_esg} anos em ESG
+                                    </small>
                                 </div>
-                                <div class="text-muted small">
-                                    <i class="fas fa-eye"></i> ${prof.visualizacoes_perfil} visualizações
-                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="verPerfil(${profissional.id})">
+                                    <i class="fas fa-eye me-2"></i>Ver Perfil
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            }).join('');
+
+            container.innerHTML = html;
         }
 
-        // Ver perfil completo
-        function verPerfil(profissionalId) {
-            window.location.href = `/profissionais/perfil?id=${profissionalId}`;
+        // Renderizar paginação
+        function renderizarPaginacao() {
+            const totalPages = Math.ceil(filteredProfissionais.length / itemsPerPage);
+            const container = document.getElementById('pagination-container');
+
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            const pagination = container.querySelector('.pagination');
+
+            let html = '';
+
+            // Botão anterior
+            if (currentPage > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="mudarPagina(${currentPage - 1})">Anterior</a></li>`;
+            }
+
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    html += `<li class="page-item active"><a class="page-link" href="#">${i}</a></li>`;
+                } else {
+                    html += `<li class="page-item"><a class="page-link" href="#" onclick="mudarPagina(${i})">${i}</a></li>`;
+                }
+            }
+
+            // Botão próximo
+            if (currentPage < totalPages) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="mudarPagina(${currentPage + 1})">Próximo</a></li>`;
+            }
+
+            pagination.innerHTML = html;
+        }
+
+        // Mudar página
+        function mudarPagina(page) {
+            currentPage = page;
+            renderizarProfissionais();
+            renderizarPaginacao();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Aplicar filtros
         function aplicarFiltros() {
-            const filtros = {
-                ods: document.getElementById('filtroODS').value,
-                uf: document.getElementById('filtroUF').value,
-                nivel: document.getElementById('filtroNivel').value,
-                min_exp_esg: document.getElementById('filtroExpESG').value,
-                habilidade: document.getElementById('filtroHabilidade').value,
-                remoto: document.getElementById('filtroRemoto').checked
-            };
-            
-            // Remover valores vazios
-            Object.keys(filtros).forEach(key => {
-                if (!filtros[key] && filtros[key] !== true && filtros[key] !== false) {
-                    delete filtros[key];
+            const filtroNome = document.getElementById('filtro-nome').value.toLowerCase();
+            const filtroUf = document.getElementById('filtro-uf').value;
+            const filtroExperiencia = document.getElementById('filtro-experiencia').value;
+
+            filteredProfissionais = profissionais.filter(profissional => {
+                // Filtro por nome
+                if (filtroNome && !profissional.nome_completo.toLowerCase().includes(filtroNome)) {
+                    return false;
                 }
+
+                // Filtro por UF
+                if (filtroUf && profissional.localizacao_uf !== filtroUf) {
+                    return false;
+                }
+
+                // Filtro por experiência
+                if (filtroExperiencia) {
+                    const anos = profissional.anos_experiencia_total;
+                    switch (filtroExperiencia) {
+                        case '1-3':
+                            if (anos < 1 || anos > 3) return false;
+                            break;
+                        case '4-7':
+                            if (anos < 4 || anos > 7) return false;
+                            break;
+                        case '8-12':
+                            if (anos < 8 || anos > 12) return false;
+                            break;
+                        case '13+':
+                            if (anos < 13) return false;
+                            break;
+                    }
+                }
+
+                return true;
             });
-            
-            carregarProfissionais(filtros);
+
+            currentPage = 1;
+            renderizarProfissionais();
+            renderizarPaginacao();
         }
 
-        // Limpar filtros
-        function limparFiltros() {
-            document.getElementById('filtroODS').value = '';
-            document.getElementById('filtroUF').value = '';
-            document.getElementById('filtroNivel').value = '';
-            document.getElementById('filtroExpESG').value = '';
-            document.getElementById('filtroHabilidade').value = '';
-            document.getElementById('filtroRemoto').checked = false;
-            
-            carregarProfissionais();
+        // Ver perfil
+        function verPerfil(id) {
+            window.open(`/profissionais/perfil?id=${id}`, '_blank');
         }
 
-        // Carregar estatísticas
-        async function carregarEstatisticas() {
-            try {
-                const response = await fetch('/api/profissionais/stats/resumo');
-                const stats = await response.json();
-                
-                document.getElementById('totalProfissionais').textContent = stats.total_profissionais;
-                document.getElementById('totalRemotos').textContent = stats.aceitam_remoto;
-                document.getElementById('mediaExperiencia').textContent = stats.experiencia_media_esg;
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
+        // Carregar ao iniciar
+        document.addEventListener('DOMContentLoaded', carregarProfissionais);
+
+        // Enter nos filtros
+        document.getElementById('filtro-nome').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                aplicarFiltros();
             }
-        }
-
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarProfissionais();
-            carregarEstatisticas();
         });
     </script>
 </body>

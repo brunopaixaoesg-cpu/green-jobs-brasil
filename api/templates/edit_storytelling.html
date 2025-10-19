@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Edite seu perfil storytelling ESG - Conte sua história verde, projetos e conquistas.">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Editar Perfil Storytelling - Green Jobs Brasil</title>
+    
+    <!-- Design System -->
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-green: #10b981;
+            --dark-green: #059669;
+            --light-green: #d1fae5;
+            --text-gray: #6b7280;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .section-title {
+            color: var(--dark-green);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--light-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-green);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px var(--light-green);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .char-counter {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .projeto-card, .conquista-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-cancel {
+            background: white;
+            color: var(--text-gray);
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #f9fafb;
+            border-color: var(--text-gray);
+        }
+
+        .alert-success {
+            background: var(--light-green);
+            color: var(--dark-green);
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+        }
+
+        .ods-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ods-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .ods-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .ods-badge.selected {
+            border-color: #fff;
+            box-shadow: 0 0 0 3px var(--primary-green);
+        }
+
+        .valor-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .valor-pill {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--light-green);
+            color: var(--dark-green);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner-border-sm {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        /* ========================================
+           RESPONSIVE DESIGN - MOBILE FIRST
+           ======================================== */
+
+        /* Mobile (< 576px) */
+        @media (max-width: 575px) {
+            body {
+                padding: 20px 0;
+            }
+
+            .main-card {
+                border-radius: 15px;
+                margin: 0 5px;
+            }
+
+            /* Header smaller */
+            .header-section {
+                padding: 25px 20px;
+            }
+
+            .header-section h1 {
+                font-size: 1.75rem;
+            }
+
+            .header-section p {
+                font-size: 0.95rem;
+            }
+
+            /* Form section less padding */
+            .form-section {
+                padding: 20px 15px;
+            }
+
+            /* Section titles */
+            .section-title {
+                font-size: 1.25rem;
+                margin-bottom: 15px;
+            }
+
+            /* Form inputs larger for touch */
+            .form-control, .form-select {
+                min-height: 48px;
+                padding: 14px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            textarea.form-control {
+                min-height: 100px;
+            }
+
+            /* Labels clearer */
+            .form-label {
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+
+            /* Character counter */
+            .char-counter {
+                font-size: 0.8rem;
+                margin-top: 3px;
+            }
+
+            /* Cards for arrays */
+            .projeto-card, .conquista-card {
+                padding: 15px;
+                margin-bottom: 15px;
+                border-radius: 12px;
+            }
+
+            /* Buttons full width on mobile */
+            .btn {
+                min-height: 48px;
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+
+            .btn-success, .btn-outline-secondary {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .btn-sm {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 10px 15px;
+            }
+
+            /* Icon buttons for add/remove */
+            .btn-outline-primary,
+            .btn-outline-danger {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px;
+            }
+
+            /* ODS badges smaller */
+            .ods-badge {
+                width: 44px;
+                height: 44px;
+                font-size: 0.9rem;
+            }
+
+            .ods-selector {
+                gap: 8px;
+                justify-content: center;
+            }
+
+            /* Valor pills */
+            .valor-pill {
+                padding: 6px 14px;
+                font-size: 0.875rem;
+            }
+
+            /* Form rows stack */
+            .row > .col-md-6,
+            .row > .col-md-4 {
+                margin-bottom: 15px;
+            }
+
+            /* Alert messages */
+            .alert {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+
+            /* Remove button spacing */
+            .mt-4 {
+                margin-top: 1.5rem !important;
+            }
+
+            .mb-4 {
+                margin-bottom: 1.5rem !important;
+            }
+        }
+
+        /* Tablet (576px - 768px) */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .main-card {
+                margin: 0 15px;
+            }
+
+            .header-section {
+                padding: 35px 30px;
+            }
+
+            .header-section h1 {
+                font-size: 2rem;
+            }
+
+            .form-section {
+                padding: 30px 25px;
+            }
+
+            .form-control, .form-select {
+                min-height: 46px;
+            }
+
+            /* Buttons can be inline */
+            .btn-success {
+                width: auto;
+            }
+
+            .btn-outline-secondary {
+                width: auto;
+                margin-left: 10px;
+            }
+        }
+
+        /* Tablet Large (768px - 992px) */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .main-card {
+                margin: 0 20px;
+            }
+
+            .form-section {
+                padding: 35px 30px;
+            }
+
+            .projeto-card, .conquista-card {
+                padding: 20px;
+            }
+        }
+
+        /* Desktop (992px+) */
+        @media (min-width: 992px) {
+            .main-card {
+                max-width: 1200px;
+            }
+
+            .form-section {
+                padding: 40px;
+            }
+        }
+
+        /* Touch device improvements */
+        @media (hover: none) and (pointer: coarse) {
+            /* All inputs minimum 44px */
+            .form-control,
+            .form-select,
+            .btn {
+                min-height: 48px;
+            }
+
+            /* Remove hover effects */
+            .btn:hover,
+            .ods-badge:hover {
+                transform: none;
+            }
+
+            /* Active states */
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .ods-badge:active {
+                transform: scale(0.95);
+            }
+
+            /* Better focus for keyboard */
+            .form-control:focus,
+            .form-select:focus {
+                outline: 3px solid var(--primary-green);
+                outline-offset: 2px;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .header-section {
+                padding: 20px;
+            }
+
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <!-- Header -->
+            <div class="header-section">
+                <h1><i class="fas fa-leaf"></i> Editar Perfil Storytelling</h1>
+                <p>Conte sua história verde e mostre quem você é além do CV</p>
+            </div>
+
+            <!-- Formulário -->
+            <form id="storytellingForm" class="form-section">
+                <div id="alertContainer"></div>
+
+                <!-- Seção: Minha História -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-book-open"></i>
+                        <span>Minha História Verde</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sua Jornada na Sustentabilidade</label>
+                        <textarea 
+                            class="form-control" 
+                            id="historia_verde" 
+                            name="historia_verde"
+                            maxlength="1000"
+                            placeholder="Conte como você começou na área ESG, suas motivações e o que te move nessa jornada...">{{ dados.historia_verde or '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="historia_counter">0</span>/1000 caracteres
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">O Que Te Motiva?</label>
+                        <textarea 
+                            class="form-control" 
+                            id="motivacao" 
+                            name="motivacao"
+                            maxlength="500"
+                            placeholder="O que te inspira a trabalhar com sustentabilidade?">{{ dados.motivacao or '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="motivacao_counter">0</span>/500 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Valores Pessoais -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-heart"></i>
+                        <span>Meus Valores</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Valores (separados por vírgula)</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="valores_pessoais" 
+                            name="valores_pessoais"
+                            placeholder="Ex: Transparência, Impacto Real, Colaboração, Inovação"
+                            value="{{ dados.valores_pessoais or '' }}">
+                        <small class="text-muted">Digite seus valores separados por vírgula</small>
+                    </div>
+                </div>
+
+                <!-- Seção: Objetivos de Carreira -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Objetivos de Carreira</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Onde Você Quer Chegar?</label>
+                        <textarea 
+                            class="form-control" 
+                            id="objetivos_carreira" 
+                            name="objetivos_carreira"
+                            maxlength="500"
+                            placeholder="Seus planos e ambições profissionais na área ESG...">{{ dados.objetivos_carreira or '' }}</textarea>
+                        <div class="char-counter">
+                            <span id="objetivos_counter">0</span>/500 caracteres
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Conquistas -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-trophy"></i>
+                        <span>Minhas Conquistas</span>
+                    </div>
+
+                    <div id="conquistasContainer"></div>
+
+                    <button type="button" class="add-btn" onclick="addConquista()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Conquista
+                    </button>
+                </div>
+
+                <!-- Seção: Portfólio de Projetos -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Portfólio de Projetos ESG</span>
+                    </div>
+
+                    <div id="projetosContainer"></div>
+
+                    <button type="button" class="add-btn" onclick="addProjeto()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Projeto
+                    </button>
+                </div>
+
+                <!-- Seção: Idiomas -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-globe"></i>
+                        <span>Idiomas</span>
+                    </div>
+
+                    <div id="idiomasContainer"></div>
+
+                    <button type="button" class="add-btn" onclick="addIdioma()">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Idioma
+                    </button>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex gap-3 justify-content-end mt-5">
+                    <button type="button" class="btn-cancel" onclick="window.history.back()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-save" id="saveBtn">
+                        <i class="fas fa-save"></i> Salvar Perfil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const profissionalId = {{ profissional_id }};
+        let conquistas = [];
+        let projetos = [];
+        let idiomas = [];
+
+        // Carregar dados existentes
+        async function loadData() {
+            try {
+                const response = await fetch(`/api/profissionais/api/${profissionalId}/storytelling`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Preencher campos simples
+                    document.getElementById('historia_verde').value = data.historia_verde || '';
+                    document.getElementById('motivacao').value = data.motivacao || '';
+                    document.getElementById('valores_pessoais').value = data.valores_pessoais || '';
+                    document.getElementById('objetivos_carreira').value = data.objetivos_carreira || '';
+
+                    // Atualizar contadores
+                    updateCharCounter('historia_verde', 'historia_counter');
+                    updateCharCounter('motivacao', 'motivacao_counter');
+                    updateCharCounter('objetivos_carreira', 'objetivos_counter');
+
+                    // Carregar conquistas
+                    conquistas = data.conquistas || [];
+                    renderConquistas();
+
+                    // Carregar projetos
+                    projetos = data.portfolio_projetos || [];
+                    renderProjetos();
+
+                    // Carregar idiomas
+                    idiomas = data.idiomas || [];
+                    renderIdiomas();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        // Atualizar contadores de caracteres
+        function updateCharCounter(textareaId, counterId) {
+            const textarea = document.getElementById(textareaId);
+            const counter = document.getElementById(counterId);
+            counter.textContent = textarea.value.length;
+        }
+
+        // Adicionar listeners para contadores
+        document.getElementById('historia_verde').addEventListener('input', () => updateCharCounter('historia_verde', 'historia_counter'));
+        document.getElementById('motivacao').addEventListener('input', () => updateCharCounter('motivacao', 'motivacao_counter'));
+        document.getElementById('objetivos_carreira').addEventListener('input', () => updateCharCounter('objetivos_carreira', 'objetivos_counter'));
+
+        // Renderizar conquistas
+        function renderConquistas() {
+            const container = document.getElementById('conquistasContainer');
+            container.innerHTML = conquistas.map((c, index) => `
+                <div class="conquista-card">
+                    <button type="button" class="remove-btn" onclick="removeConquista(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" value="${c.titulo || ''}" 
+                                   onchange="conquistas[${index}].titulo = this.value">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Data</label>
+                            <input type="text" class="form-control" value="${c.data || ''}" 
+                                   placeholder="Ex: 2023"
+                                   onchange="conquistas[${index}].data = this.value">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" rows="2" 
+                                      onchange="conquistas[${index}].descricao = this.value">${c.descricao || ''}</textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ícone (emoji)</label>
+                            <input type="text" class="form-control" value="${c.icone || '🏆'}" 
+                                   placeholder="🏆"
+                                   onchange="conquistas[${index}].icone = this.value">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addConquista() {
+            conquistas.push({
+                titulo: '',
+                descricao: '',
+                data: new Date().getFullYear().toString(),
+                icone: '🏆'
+            });
+            renderConquistas();
+        }
+
+        function removeConquista(index) {
+            conquistas.splice(index, 1);
+            renderConquistas();
+        }
+
+        // Renderizar projetos
+        function renderProjetos() {
+            const container = document.getElementById('projetosContainer');
+            container.innerHTML = projetos.map((p, index) => `
+                <div class="projeto-card">
+                    <button type="button" class="remove-btn" onclick="removeProjeto(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Título do Projeto</label>
+                            <input type="text" class="form-control" value="${p.titulo || ''}" 
+                                   onchange="projetos[${index}].titulo = this.value">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Empresa</label>
+                            <input type="text" class="form-control" value="${p.empresa || ''}" 
+                                   onchange="projetos[${index}].empresa = this.value">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" rows="3" 
+                                      onchange="projetos[${index}].descricao = this.value">${p.descricao || ''}</textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Período</label>
+                            <input type="text" class="form-control" value="${p.periodo || ''}" 
+                                   placeholder="Ex: Jan 2023 - Dez 2023"
+                                   onchange="projetos[${index}].periodo = this.value">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Resultados (separados por vírgula)</label>
+                            <input type="text" class="form-control" value="${(p.resultados || []).join(', ')}" 
+                                   placeholder="Ex: 40% redução CO2, R$500k economia"
+                                   onchange="projetos[${index}].resultados = this.value.split(',').map(r => r.trim())">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">ODS (separados por vírgula)</label>
+                            <input type="text" class="form-control" value="${(p.ods || []).join(', ')}" 
+                                   placeholder="Ex: 7, 12, 13"
+                                   onchange="projetos[${index}].ods = this.value.split(',').map(o => parseInt(o.trim()))">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tecnologias (separadas por vírgula)</label>
+                            <input type="text" class="form-control" value="${(p.tecnologias || []).join(', ')}" 
+                                   placeholder="Ex: Python, Excel, Power BI"
+                                   onchange="projetos[${index}].tecnologias = this.value.split(',').map(t => t.trim())">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addProjeto() {
+            projetos.push({
+                titulo: '',
+                empresa: '',
+                descricao: '',
+                periodo: '',
+                resultados: [],
+                ods: [],
+                tecnologias: []
+            });
+            renderProjetos();
+        }
+
+        function removeProjeto(index) {
+            projetos.splice(index, 1);
+            renderProjetos();
+        }
+
+        // Renderizar idiomas
+        function renderIdiomas() {
+            const container = document.getElementById('idiomasContainer');
+            container.innerHTML = idiomas.map((i, index) => `
+                <div class="conquista-card">
+                    <button type="button" class="remove-btn" onclick="removeIdioma(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Idioma</label>
+                            <input type="text" class="form-control" value="${i.idioma || ''}" 
+                                   placeholder="Ex: Inglês"
+                                   onchange="idiomas[${index}].idioma = this.value">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nível</label>
+                            <select class="form-select" onchange="idiomas[${index}].nivel = this.value">
+                                <option value="Básico" ${i.nivel === 'Básico' ? 'selected' : ''}>Básico</option>
+                                <option value="Intermediário" ${i.nivel === 'Intermediário' ? 'selected' : ''}>Intermediário</option>
+                                <option value="Avançado" ${i.nivel === 'Avançado' ? 'selected' : ''}>Avançado</option>
+                                <option value="Fluente" ${i.nivel === 'Fluente' ? 'selected' : ''}>Fluente</option>
+                                <option value="Nativo" ${i.nivel === 'Nativo' ? 'selected' : ''}>Nativo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addIdioma() {
+            idiomas.push({
+                idioma: '',
+                nivel: 'Intermediário'
+            });
+            renderIdiomas();
+        }
+
+        function removeIdioma(index) {
+            idiomas.splice(index, 1);
+            renderIdiomas();
+        }
+
+        // Salvar formulário
+        document.getElementById('storytellingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Salvando...';
+
+            const formData = {
+                historia_verde: document.getElementById('historia_verde').value,
+                motivacao: document.getElementById('motivacao').value,
+                valores_pessoais: document.getElementById('valores_pessoais').value,
+                objetivos_carreira: document.getElementById('objetivos_carreira').value,
+                conquistas_json: JSON.stringify(conquistas),
+                portfolio_projetos_json: JSON.stringify(projetos),
+                idiomas_json: JSON.stringify(idiomas)
+            };
+
+            try {
+                const response = await fetch(`/api/profissionais/api/${profissionalId}/storytelling`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    showAlert('success', '✅ Perfil atualizado com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = `/api/profissionais/perfil/${profissionalId}`;
+                    }, 1500);
+                } else {
+                    const error = await response.json();
+                    showAlert('danger', `❌ Erro ao salvar: ${error.detail}`);
+                }
+            } catch (error) {
+                showAlert('danger', '❌ Erro ao salvar perfil. Tente novamente.');
+                console.error('Erro:', error);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Perfil';
+            }
+        });
+
+        function showAlert(type, message) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Inicializar
+        loadData();
+    </script>
+</body>
+</html>

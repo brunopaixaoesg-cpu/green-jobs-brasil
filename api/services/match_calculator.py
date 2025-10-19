@@ -166,9 +166,13 @@ class MatchCalculator:
         - Anos de experiência ESG
         """
         
-        vaga_nivel = vaga.get('nivel', '').lower()
-        prof_nivel = profissional.get('nivel_desejado', '').lower()
+        vaga_nivel = vaga.get('nivel_experiencia', '') or ''
+        prof_nivel = profissional.get('nivel_desejado', '') or ''
         prof_exp_esg = profissional.get('anos_experiencia_esg', 0) or 0
+        
+        # Garantir que são strings antes de chamar lower()
+        vaga_nivel = str(vaga_nivel).lower() if vaga_nivel else 'pleno'
+        prof_nivel = str(prof_nivel).lower() if prof_nivel else 'pleno'
         
         # Mapeamento de níveis para score
         niveis_hierarchy = {

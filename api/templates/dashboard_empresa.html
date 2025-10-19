@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empresa | Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2ECC71;
+            --dark-green: #27AE60;
+            --light-green: #A9DFBF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .candidato-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .candidato-card:hover {
+            border-left-color: var(--primary-green);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.2);
+        }
+        
+        .score-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .score-excelente { background: linear-gradient(135deg, #2ECC71, #27AE60); }
+        .score-bom { background: linear-gradient(135deg, #3498DB, #2980B9); }
+        .score-regular { background: linear-gradient(135deg, #F39C12, #E67E22); }
+        .score-baixo { background: linear-gradient(135deg, #95A5A6, #7F8C8D); }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-pendente { background: #FFF3CD; color: #856404; }
+        .status-em_analise { background: #CCE5FF; color: #004085; }
+        .status-entrevista { background: #D1ECF1; color: #0C5460; }
+        .status-aprovada { background: #D4EDDA; color: #155724; }
+        .status-rejeitada { background: #F8D7DA; color: #721C24; }
+        
+        .btn-green {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+        }
+        
+        .btn-green:hover {
+            background: var(--dark-green);
+            color: white;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .vaga-tab {
+            cursor: pointer;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin-right: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .vaga-tab:hover, .vaga-tab.active {
+            background: var(--primary-green);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-building"></i> Dashboard Empresa</h1>
+                    <h4 class="mb-0">{{ empresa.razao_social }}</h4>
+                    <small>CNPJ: {{ empresa.cnpj }}</small>
+                </div>
+                <div>
+                    <a href="/empresas/login" class="btn btn-outline-light">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <i class="fas fa-briefcase fa-3x text-primary mb-2"></i>
+                    <h3>{{ empresa.total_vagas }}</h3>
+                    <small class="text-muted">Vagas Totais</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                    <h3>{{ empresa.vagas_ativas }}</h3>
+                    <small class="text-muted">Vagas Ativas</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <i class="fas fa-users fa-3x text-warning mb-2"></i>
+                    <h3 id="totalCandidaturas">0</h3>
+                    <small class="text-muted">Candidaturas</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <i class="fas fa-star fa-3x text-danger mb-2"></i>
+                    <h3 id="candidatosPendentes">0</h3>
+                    <small class="text-muted">Pendentes</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs de Vagas -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3"><i class="fas fa-list"></i> Minhas Vagas</h4>
+                <div class="d-flex flex-wrap mb-3" id="vagasTabs">
+                    <div class="vaga-tab active" onclick="filtrarPorVaga('todas')">
+                        <i class="fas fa-th"></i> Todas
+                    </div>
+                    {% for vaga in vagas %}
+                    <div class="vaga-tab" onclick="filtrarPorVaga({{ vaga.id }})">
+                        {{ vaga.titulo }} 
+                        <span class="badge bg-primary">{{ vaga.total_candidaturas or 0 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="filtroStatus" onchange="filtrarCandidaturas()">
+                        <option value="">Todos</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="em_analise">Em Análise</option>
+                        <option value="entrevista">Entrevista</option>
+                        <option value="aprovada">Aprovada</option>
+                        <option value="rejeitada">Rejeitada</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Score Mínimo</label>
+                    <select class="form-select" id="filtroScore" onchange="filtrarCandidaturas()">
+                        <option value="0">Todos</option>
+                        <option value="80">Excelente (80%+)</option>
+                        <option value="60">Bom (60%+)</option>
+                        <option value="40">Regular (40%+)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ordenar por</label>
+                    <select class="form-select" id="ordenacao" onchange="filtrarCandidaturas()">
+                        <option value="score">Score (maior)</option>
+                        <option value="data">Data (recente)</option>
+                        <option value="status">Status</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-green w-100" onclick="filtrarCandidaturas()">
+                        <i class="fas fa-filter"></i> Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center my-5">
+            <div class="spinner-border text-success"></div>
+            <p class="mt-2">Carregando candidatos...</p>
+        </div>
+
+        <!-- Lista de Candidaturas -->
+        <div id="candidaturasContainer" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-4">
+                        <i class="fas fa-user-friends"></i> Candidatos 
+                        <span id="countCandidatos" class="badge bg-success">0</span>
+                    </h4>
+                    <div id="candidaturasList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sem candidaturas -->
+        <div id="noCandidaturas" class="card" style="display: none;">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h4>Nenhuma candidatura encontrada</h4>
+                <p class="text-muted">Aguarde profissionais se candidatarem às suas vagas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Candidato -->
+    <div class="modal fade" id="candidatoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user"></i> Detalhes do Candidato
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Conteúdo dinâmico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-danger" onclick="atualizarStatus('rejeitada')">
+                        <i class="fas fa-times"></i> Rejeitar
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="atualizarStatus('em_analise')">
+                        <i class="fas fa-eye"></i> Em Análise
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="atualizarStatus('entrevista')">
+                        <i class="fas fa-calendar"></i> Entrevista
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="atualizarStatus('aprovada')">
+                        <i class="fas fa-check"></i> Aprovar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const empresaId = {{ empresa.id }};
+        let candidaturasData = [];
+        let candidaturaAtual = null;
+        let vagaFiltroAtual = 'todas';
+
+        // Carregar candidaturas ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarCandidaturas();
+        });
+
+        async function carregarCandidaturas() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('candidaturasContainer').style.display = 'none';
+            document.getElementById('noCandidaturas').style.display = 'none';
+
+            try {
+                const response = await fetch(`/empresas/api/candidaturas/${empresaId}`);
+                candidaturasData = await response.json();
+                
+                document.getElementById('totalCandidaturas').textContent = candidaturasData.length;
+                document.getElementById('candidatosPendentes').textContent = 
+                    candidaturasData.filter(c => c.status === 'pendente').length;
+                
+                filtrarCandidaturas();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao carregar candidaturas');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function filtrarPorVaga(vagaId) {
+            vagaFiltroAtual = vagaId;
+            
+            // Atualizar UI dos tabs
+            document.querySelectorAll('.vaga-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.vaga-tab').classList.add('active');
+            
+            filtrarCandidaturas();
+        }
+
+        function filtrarCandidaturas() {
+            const status = document.getElementById('filtroStatus').value;
+            const scoreMin = parseFloat(document.getElementById('filtroScore').value);
+            const ordenacao = document.getElementById('ordenacao').value;
+
+            let filtradas = [...candidaturasData];
+
+            // Filtrar por vaga
+            if (vagaFiltroAtual !== 'todas') {
+                filtradas = filtradas.filter(c => c.vaga_id === vagaFiltroAtual);
+            }
+
+            // Filtrar por status
+            if (status) {
+                filtradas = filtradas.filter(c => c.status === status);
+            }
+
+            // Filtrar por score
+            if (scoreMin > 0) {
+                filtradas = filtradas.filter(c => c.compatibilidade_score >= scoreMin);
+            }
+
+            // Ordenar
+            if (ordenacao === 'score') {
+                filtradas.sort((a, b) => b.compatibilidade_score - a.compatibilidade_score);
+            } else if (ordenacao === 'data') {
+                filtradas.sort((a, b) => new Date(b.data_candidatura) - new Date(a.data_candidatura));
+            } else if (ordenacao === 'status') {
+                filtradas.sort((a, b) => a.status.localeCompare(b.status));
+            }
+
+            renderizarCandidaturas(filtradas);
+        }
+
+        function renderizarCandidaturas(candidaturas) {
+            const container = document.getElementById('candidaturasList');
+            const countElement = document.getElementById('countCandidatos');
+            
+            if (candidaturas.length === 0) {
+                document.getElementById('candidaturasContainer').style.display = 'none';
+                document.getElementById('noCandidaturas').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('candidaturasContainer').style.display = 'block';
+            document.getElementById('noCandidaturas').style.display = 'none';
+            countElement.textContent = candidaturas.length;
+
+            container.innerHTML = candidaturas.map(cand => {
+                const scoreClass = cand.compatibilidade_score >= 80 ? 'excelente' :
+                                  cand.compatibilidade_score >= 60 ? 'bom' :
+                                  cand.compatibilidade_score >= 40 ? 'regular' : 'baixo';
+                
+                const statusClass = `status-${cand.status}`;
+                const statusText = {
+                    'pendente': 'Pendente',
+                    'em_analise': 'Em Análise',
+                    'entrevista': 'Entrevista',
+                    'aprovada': 'Aprovada',
+                    'rejeitada': 'Rejeitada'
+                }[cand.status] || cand.status;
+
+                const dataFormatada = new Date(cand.data_candidatura).toLocaleDateString('pt-BR');
+
+                return `
+                    <div class="candidato-card" onclick="verDetalhes(${cand.id})">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <div class="score-badge score-${scoreClass} me-3">
+                                    ${Math.round(cand.compatibilidade_score)}%
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">
+                                        <i class="fas fa-user"></i> ${cand.profissional_nome}
+                                    </h5>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-briefcase"></i> ${cand.vaga_titulo}
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-envelope"></i> ${cand.profissional_email} | 
+                                        <i class="fas fa-calendar"></i> ${dataFormatada}
+                                    </small>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="status-badge ${statusClass}">
+                                    ${statusText}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function verDetalhes(candidaturaId) {
+            candidaturaAtual = candidaturasData.find(c => c.id === candidaturaId);
+            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user"></i> Profissional</h6>
+                        <p><strong>${candidaturaAtual.profissional_nome}</strong></p>
+                        <p class="text-muted">${candidaturaAtual.profissional_email}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-briefcase"></i> Vaga</h6>
+                        <p><strong>${candidaturaAtual.vaga_titulo}</strong></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-line"></i> Compatibilidade</h6>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-success" style="width: ${candidaturaAtual.compatibilidade_score}%">
+                                ${Math.round(candidaturaAtual.compatibilidade_score)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle"></i> Status Atual</h6>
+                        <p><span class="status-badge status-${candidaturaAtual.status}">
+                            ${candidaturaAtual.status}
+                        </span></p>
+                    </div>
+                </div>
+                ${candidaturaAtual.observacoes ? `
+                    <hr>
+                    <h6><i class="fas fa-comment"></i> Observações</h6>
+                    <p>${candidaturaAtual.observacoes}</p>
+                ` : ''}
+            `;
+
+            new bootstrap.Modal(document.getElementById('candidatoModal')).show();
+        }
+
+        async function atualizarStatus(novoStatus) {
+            if (!candidaturaAtual) return;
+
+            const observacao = prompt('Adicionar observação (opcional):');
+
+            try {
+                const response = await fetch(`/empresas/api/candidatura/${candidaturaAtual.id}/status?novo_status=${novoStatus}${observacao ? '&observacoes=' + encodeURIComponent(observacao) : ''}`, {
+                    method: 'PUT'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Status atualizado para: ${novoStatus}`);
+                    bootstrap.Modal.getInstance(document.getElementById('candidatoModal')).hide();
+                    carregarCandidaturas();
+                } else {
+                    alert('Erro ao atualizar status');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar status');
+            }
+        }
+    </script>
+</body>
+</html>

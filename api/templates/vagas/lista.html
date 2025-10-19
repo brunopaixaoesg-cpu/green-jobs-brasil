@@ -377,8 +377,17 @@
         // Carregar vagas
         async function carregarVagas() {
             try {
+                console.log('Iniciando carregamento de vagas...');
                 const response = await fetch('/api/vagas/');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const vagas = await response.json();
+                console.log('Vagas carregadas:', vagas.length);
+                console.log('Primeira vaga:', vagas[0]);
                 
                 todasVagas = vagas;
                 vagasFiltradas = vagas;
@@ -389,6 +398,7 @@
                     <div class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <h4>Erro ao carregar vagas</h4>
+                        <p>Erro: ${error.message}</p>
                         <p>Tente novamente mais tarde.</p>
                     </div>
                 `;
@@ -414,60 +424,44 @@
                 <div class="vaga-card">
                     <div class="vaga-header">
                         <div>
-                            <h3 class="vaga-titulo">${vaga.titulo}</h3>
+                            <h3 class="vaga-titulo">${vaga.titulo || 'Título não informado'}</h3>
                             <div class="vaga-empresa">
                                 <i class="fas fa-building"></i>
-                                ${vaga.empresa_nome || 'Empresa não informada'}
+                                CNPJ: ${vaga.cnpj || 'Não informado'}
                             </div>
                         </div>
                         <span class="badge-status badge-ativa">
-                            ${vaga.status === 'ativa' ? '✓ Ativa' : vaga.status}
+                            ${vaga.status === 'ativa' ? '✓ Ativa' : (vaga.status || 'N/A')}
                         </span>
                     </div>
 
                     <div class="vaga-info">
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            ${vaga.remoto ? '🏠 Remoto' : `${vaga.localizacao_cidade || ''}, ${vaga.localizacao_uf || ''}`}
+                            ${vaga.remoto ? '🏠 Remoto' : `${vaga.localizacao_cidade || 'N/A'}, ${vaga.localizacao_uf || 'N/A'}`}
                         </div>
                         <div class="info-item">
                             <i class="fas fa-user-tie"></i>
-                            ${vaga.nivel_experiencia}
+                            ${vaga.nivel_experiencia || 'N/A'}
                         </div>
                         <div class="info-item">
                             <i class="fas fa-handshake"></i>
-                            ${vaga.tipo_contratacao}
+                            ${vaga.tipo_contratacao || 'N/A'}
                         </div>
                         ${vaga.salario_min && vaga.salario_max ? `
                             <div class="info-item">
                                 <i class="fas fa-dollar-sign"></i>
-                                R$ ${vaga.salario_min.toLocaleString()} - ${vaga.salario_max.toLocaleString()}
+                                R$ ${Number(vaga.salario_min).toLocaleString()} - ${Number(vaga.salario_max).toLocaleString()}
                             </div>
                         ` : ''}
                     </div>
 
-                    ${vaga.ods_tags && vaga.ods_tags.length > 0 ? `
-                        <div class="ods-tags">
-                            ${vaga.ods_tags.map(ods => `
-                                <span class="ods-badge">ODS ${ods}</span>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-
-                    <p class="vaga-descricao">${vaga.descricao.substring(0, 200)}...</p>
-
-                    ${vaga.habilidades_requeridas && vaga.habilidades_requeridas.length > 0 ? `
-                        <div class="habilidades">
-                            ${vaga.habilidades_requeridas.slice(0, 5).map(hab => `
-                                <span class="habilidade-tag">${hab}</span>
-                            `).join('')}
-                        </div>
-                    ` : ''}
+                    <p class="vaga-descricao">${(vaga.descricao || 'Descrição não disponível').substring(0, 200)}...</p>
 
                     <div class="vaga-footer">
                         <div class="vaga-stats">
-                            <span><i class="fas fa-eye"></i> ${vaga.visualizacoes} visualizações</span>
-                            <span><i class="fas fa-users"></i> ${vaga.candidaturas} candidaturas</span>
+                            <span><i class="fas fa-eye"></i> ${vaga.visualizacoes || 0} visualizações</span>
+                            <span><i class="fas fa-users"></i> ${vaga.candidaturas_recebidas || 0} candidaturas</span>
                         </div>
                         <button class="btn-ver-detalhes" onclick="verDetalhes(${vaga.id})">
                             Ver Detalhes
@@ -510,7 +504,8 @@
 
         // Ver detalhes
         function verDetalhes(id) {
-            window.location.href = `/vagas/detalhes?id=${id}`;
+            alert(`Funcionalidade de detalhes da vaga ${id} será implementada em breve!`);
+            // TODO: Criar modal ou página de detalhes
         }
 
         // Carregar ao iniciar
