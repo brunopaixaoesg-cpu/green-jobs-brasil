@@ -32,12 +32,13 @@ try:
     # Mudar diretório temporariamente para resolver imports
     original_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    from routers import auth, profissionais, empresas
+    from routers import profissionais, empresas
+    # from routers import auth  # Desabilitado temporariamente para MVP
     os.chdir(original_dir)
-    app.include_router(auth.router)
+    # app.include_router(auth.router)  # Desabilitado temporariamente
     app.include_router(profissionais.router)
     app.include_router(empresas.router)
-    print("Auth router carregado com sucesso!")
+    # print("Auth router carregado com sucesso!")
     print("Profissionais router carregado com sucesso!")
     print("Empresas router carregado com sucesso!")
 except Exception as e:
