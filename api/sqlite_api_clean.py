@@ -20,9 +20,19 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# Configurar templates e arquivos estáticos
-templates = Jinja2Templates(directory="api/templates")
-app.mount("/static", StaticFiles(directory="api/static"), name="static")
+# Configurar caminhos absolutos para templates e arquivos estáticos
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+DB_PATH = os.path.join(os.path.dirname(BASE_DIR), "gjb_dev.db")
+
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# Função helper para conectar ao banco
+def get_db_connection():
+    """Retorna conexão com o banco de dados"""
+    return sqlite3.connect(DB_PATH)
 
 # Importar routers
 import sys
@@ -124,7 +134,7 @@ async def profissional_perfil_page(request: Request, profissional_id: int):
 async def get_empresas():
     """Listar empresas verdes"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -170,7 +180,7 @@ async def get_empresas():
 async def get_stats():
     """Estatísticas gerais"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -295,7 +305,7 @@ async def add_company(cnpj: str = Form(...)):
 async def get_candidatos_vaga(vaga_id: int):
     """Retorna candidatos para uma vaga específica"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -333,7 +343,7 @@ async def get_candidatos_vaga(vaga_id: int):
 async def get_matching_stats():
     """Estatísticas de matching"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -375,7 +385,7 @@ async def get_matching_stats():
 async def get_matching_dashboard():
     """Dados completos do dashboard ML"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -450,7 +460,7 @@ async def get_matching_dashboard():
 async def get_vagas(limit: int = 10):
     """Lista vagas ESG"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -486,7 +496,7 @@ async def get_vagas(limit: int = 10):
 async def get_profissionais(limit: int = 10):
     """Lista profissionais ESG"""
     try:
-        conn = sqlite3.connect("gjb_dev.db")
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
