@@ -88,11 +88,11 @@ def seed_database():
             emp
         )
     
-    # Inserir vagas
+    # Inserir vagas (usar TRUE/FALSE para PostgreSQL boolean)
     vagas = [
-        ("Analista Energia Solar Júnior", "Vaga para atuar com projetos de energia solar residencial", "12345678000190", "junior", "CLT", "São Paulo", "SP", 0, "ativa", 3000, 4500),
-        ("Especialista em Economia Circular", "Desenvolver estratégias de economia circular", "98765432000110", "senior", "PJ", "Rio de Janeiro", "RJ", 1, "ativa", 8000, 12000),
-        ("Coordenador de Sustentabilidade", "Coordenar projetos ESG e sustentabilidade", "11223344000155", "pleno", "CLT", "Curitiba", "PR", 0, "ativa", 5500, 7500),
+        ("Analista Energia Solar Júnior", "Vaga para atuar com projetos de energia solar residencial", "12345678000190", "junior", "CLT", "São Paulo", "SP", False, "ativa", 3000, 4500),
+        ("Especialista em Economia Circular", "Desenvolver estratégias de economia circular", "98765432000110", "senior", "PJ", "Rio de Janeiro", "RJ", True, "ativa", 8000, 12000),
+        ("Coordenador de Sustentabilidade", "Coordenar projetos ESG e sustentabilidade", "11223344000155", "pleno", "CLT", "Curitiba", "PR", False, "ativa", 5500, 7500),
     ]
     
     for vaga in vagas:
