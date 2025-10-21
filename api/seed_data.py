@@ -27,7 +27,7 @@ def seed_database():
     
     print("📊 Populando banco com dados de exemplo...")
     
-    # Inserir profissionais (usando %s para PostgreSQL)
+    # Inserir profissionais e capturar IDs reais
     profissionais = [
         ("Maria Silva", "maria.silva@email.com", "Energia Solar", 5, "São Paulo", "SP"),
         ("João Santos", "joao.santos@email.com", "Economia Circular", 3, "Rio de Janeiro", "RJ"),
@@ -35,34 +35,37 @@ def seed_database():
         ("Carlos Oliveira", "carlos.oliveira@email.com", "Mobilidade Sustentável", 4, "Porto Alegre", "RS")
     ]
     
+    profissional_ids = []
     for prof in profissionais:
         cursor.execute(
-            "INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
             prof
         )
+        prof_id = cursor.fetchone()[0]
+        profissional_ids.append(prof_id)
     
-    # Inserir storytelling
+    # Inserir storytelling usando IDs reais
     storytelling_data = [
         (
-            1,
+            profissional_ids[0],
             "Comecei minha jornada verde instalando painéis solares em comunidades carentes...",
             "Sempre sonhei em trabalhar com energia limpa e fazer a diferença",
             "Já impactei mais de 500 famílias com acesso a energia solar"
         ),
         (
-            2,
+            profissional_ids[1],
             "Trabalho transformando resíduos em novos produtos há 5 anos...",
             "Vi o potencial da economia circular durante meus estudos",
             "Reduzi 30 toneladas de resíduos em aterros"
         ),
         (
-            3,
+            profissional_ids[2],
             "Especialista em gestão de resíduos sólidos urbanos...",
             "Quero criar cidades mais limpas e sustentáveis",
             "Implementei sistemas de coleta seletiva em 10 municípios"
         ),
         (
-            4,
+            profissional_ids[3],
             "Desenvolvo projetos de mobilidade urbana sustentável...",
             "Acredito que transporte público de qualidade muda vidas",
             "Projetei ciclovias que reduziram 40% das emissões"
