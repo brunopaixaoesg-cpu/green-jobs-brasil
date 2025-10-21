@@ -1,19 +1,16 @@
 """
 Script para popular banco de dados com dados de exemplo
 Green Jobs Brasil - Dados iniciais para demonstração
+PostgreSQL compatible
 """
-import sqlite3
 import os
 from datetime import datetime
-
-# Caminho do banco
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(os.path.dirname(BASE_DIR), "gjb_dev.db")
+from db import get_db
 
 def seed_database():
     """Popula banco com dados de exemplo - SEMPRE roda no Render"""
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db()
     cursor = conn.cursor()
     
     # Limpar dados anteriores (para Render)
@@ -22,13 +19,15 @@ def seed_database():
         cursor.execute("DELETE FROM vagas")
         cursor.execute("DELETE FROM empresas_esg")
         cursor.execute("DELETE FROM profissionais_esg")
+        conn.commit()
         print("🧹 Limpando dados antigos...")
-    except:
-        pass  # Tabelas podem não existir ainda
+    except Exception as e:
+        print(f"⚠️ Aviso ao limpar dados: {e}")
+        conn.rollback()
     
     print("📊 Populando banco com dados de exemplo...")
     
-    # Inserir profissionais
+    # Inserir profissionais (usando %s para PostgreSQL)
     profissionais = [
         ("Maria Silva", "maria.silva@email.com", "Energia Solar", 5, "São Paulo", "SP"),
         ("João Santos", "joao.santos@email.com", "Economia Circular", 3, "Rio de Janeiro", "RJ"),
@@ -36,10 +35,11 @@ def seed_database():
         ("Carlos Oliveira", "carlos.oliveira@email.com", "Mobilidade Sustentável", 4, "Porto Alegre", "RS")
     ]
     
-    cursor.executemany(
-        "INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf) VALUES (?, ?, ?, ?, ?, ?)",
-        profissionais
-    )
+    for prof in profissionais:
+        cursor.execute(
+            "INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf) VALUES (%s, %s, %s, %s, %s, %s)",
+            prof
+        )
     
     # Inserir storytelling
     storytelling_data = [
@@ -69,10 +69,11 @@ def seed_database():
         )
     ]
     
-    cursor.executemany(
-        "INSERT INTO storytelling (profissional_id, jornada_verde, motivacao, impacto) VALUES (?, ?, ?, ?)",
-        storytelling_data
-    )
+    for story in storytelling_data:
+        cursor.execute(
+            "INSERT INTO storytelling (profissional_id, jornada_verde, motivacao, impacto) VALUES (%s, %s, %s, %s)",
+            story
+        )
     
     # Inserir empresas ESG
     empresas = [
@@ -81,10 +82,11 @@ def seed_database():
         ("11223344000155", "Mobilidade Verde", "Mob Verde", 82.7)
     ]
     
-    cursor.executemany(
-        "INSERT INTO empresas_esg (cnpj, razao_social, nome_fantasia, score_verde) VALUES (?, ?, ?, ?)",
-        empresas
-    )
+    for emp in empresas:
+        cursor.execute(
+            "INSERT INTO empresas_esg (cnpj, razao_social, nome_fantasia, score_verde) VALUES (%s, %s, %s, %s)",
+            emp
+        )
     
     # Inserir vagas
     vagas = [
@@ -93,10 +95,11 @@ def seed_database():
         ("Coordenador de Sustentabilidade", "Coordenar projetos ESG e sustentabilidade", "11223344000155", "pleno", "CLT", "Curitiba", "PR", 0, "ativa", 5500, 7500),
     ]
     
-    cursor.executemany(
-        "INSERT INTO vagas (titulo, descricao, cnpj, nivel_experiencia, tipo_contratacao, localizacao_cidade, localizacao_uf, remoto, status, salario_min, salario_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        vagas
-    )
+    for vaga in vagas:
+        cursor.execute(
+            "INSERT INTO vagas (titulo, descricao, cnpj, nivel_experiencia, tipo_contratacao, localizacao_cidade, localizacao_uf, remoto, status, salario_min, salario_max) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            vaga
+        )
     
     conn.commit()
     print("✅ Dados inseridos com sucesso!")

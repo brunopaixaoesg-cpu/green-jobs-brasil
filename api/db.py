@@ -1,56 +1,52 @@
+#!/usr/bin/env python3
 """
-Green Jobs Brasil - Database Connection and Session Management
+Módulo de banco de dados para API - PostgreSQL
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
-from dotenv import load_dotenv
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from typing import Optional
 
-load_dotenv()
-
-# Database URL from environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///gjb_dev.db")
-
-# SQLAlchemy engine configuration
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    echo=False  # Set to True for SQL debugging
-)
-
-# Session factory
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for models
-Base = declarative_base()
+def get_database_url() -> str:
+    """Obter URL do banco de dados (PostgreSQL no Render, SQLite local)"""
+    return os.getenv("DATABASE_URL", "sqlite:///gjb_dev.db")
 
 def get_db():
-    """
-    Dependency for FastAPI to get database session.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def get_db_connection():
-    """
-    Get database connection for direct use.
-    """
-    return engine.connect()
+    """Obter conexão com banco de dados PostgreSQL"""
+    database_url = get_database_url()
+    
+    # Se for PostgreSQL (Render)
+    if database_url.startswith("postgres://") or database_url.startswith("postgresql://"):
+        # Render usa postgres://, mas psycopg2 precisa de postgresql://
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        
+        conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+        return conn
+    
+    # Fallback para SQLite local (desenvolvimento)
+    else:
+        import sqlite3
+        conn = sqlite3.connect("gjb_dev.db")
+        conn.row_factory = sqlite3.Row
+        return conn
 
 def test_connection():
-    """
-    Test database connectivity.
-    """
+    """Testar conexão com banco de dados"""
     try:
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT 1"))
-            return result.fetchone()[0] == 1
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        database_url = get_database_url()
+        if database_url.startswith("postgres"):
+            cursor.execute("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'public'")
+        else:
+            cursor.execute("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table'")
+        
+        result = cursor.fetchone()
+        count = result['count'] if isinstance(result, dict) else result[0]
+        conn.close()
+        return True, f"Conexão OK - {count} tabelas encontradas"
     except Exception as e:
-        print(f"Database connection failed: {e}")
-        return False
+        return False, f"Erro de conexão: {str(e)}"

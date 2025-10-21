@@ -1,13 +1,12 @@
 """
-Green Jobs Brasil - API com SQLite
-Versão que funciona diretamente com SQLite sem SQLAlchemy ORM complexo
+Green Jobs Brasil - API com PostgreSQL
+Versão compatível com PostgreSQL no Render.com
 """
 from fastapi import FastAPI, HTTPException, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
 from starlette.requests import Request
-import sqlite3
 import uvicorn
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -24,7 +23,6 @@ app = FastAPI(
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-DB_PATH = os.path.join(os.path.dirname(BASE_DIR), "gjb_dev.db")
 
 # Debug: Print dos caminhos
 print(f"🔍 BASE_DIR: {BASE_DIR}")
@@ -37,24 +35,21 @@ print(f"🔍 Static exists: {os.path.exists(STATIC_DIR)}")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Função helper para conectar ao banco
-def get_db_connection():
-    """Retorna conexão com o banco de dados"""
-    return sqlite3.connect(DB_PATH)
+# Importar db helper
+from db import get_db
 
-# Função para inicializar banco de dados
+# Função para inicializar banco de dados PostgreSQL
 def init_database():
-    """Cria tabelas básicas se não existirem"""
-    if not os.path.exists(DB_PATH):
-        print(f"📦 Criando banco de dados em: {DB_PATH}")
+    """Cria tabelas básicas se não existirem - PostgreSQL compatible"""
+    print(f"📦 Inicializando banco de dados...")
     
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     
-    # Criar tabela profissionais_esg (completa)
+    # Criar tabela profissionais_esg (PostgreSQL usa SERIAL ao invés de AUTOINCREMENT)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS profissionais_esg (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             email TEXT UNIQUE,
             area_atuacao TEXT,
@@ -68,7 +63,7 @@ def init_database():
     # Criar tabela storytelling
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS storytelling (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             profissional_id INTEGER,
             jornada_verde TEXT,
             motivacao TEXT,
@@ -81,7 +76,7 @@ def init_database():
     # Criar tabela empresas_esg
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS empresas_esg (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             cnpj TEXT UNIQUE,
             razao_social TEXT,
             nome_fantasia TEXT,
@@ -93,7 +88,7 @@ def init_database():
     # Criar tabela vagas
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vagas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             titulo TEXT NOT NULL,
             descricao TEXT,
             cnpj TEXT,
@@ -101,7 +96,7 @@ def init_database():
             tipo_contratacao TEXT,
             localizacao_cidade TEXT,
             localizacao_uf TEXT,
-            remoto BOOLEAN DEFAULT 0,
+            remoto BOOLEAN DEFAULT FALSE,
             status TEXT DEFAULT 'ativa',
             salario_min REAL,
             salario_max REAL,
