@@ -51,13 +51,16 @@ def init_database():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Criar tabela profissionais_esg (simplificada)
+    # Criar tabela profissionais_esg (completa)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS profissionais_esg (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             email TEXT UNIQUE,
             area_atuacao TEXT,
+            experiencia_anos INTEGER DEFAULT 0,
+            localizacao_cidade TEXT,
+            localizacao_uf TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -72,6 +75,39 @@ def init_database():
             impacto TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (profissional_id) REFERENCES profissionais_esg(id)
+        )
+    """)
+    
+    # Criar tabela empresas_esg
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS empresas_esg (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cnpj TEXT UNIQUE,
+            razao_social TEXT,
+            nome_fantasia TEXT,
+            score_verde REAL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Criar tabela vagas
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS vagas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            descricao TEXT,
+            cnpj TEXT,
+            nivel_experiencia TEXT,
+            tipo_contratacao TEXT,
+            localizacao_cidade TEXT,
+            localizacao_uf TEXT,
+            remoto BOOLEAN DEFAULT 0,
+            status TEXT DEFAULT 'ativa',
+            salario_min REAL,
+            salario_max REAL,
+            visualizacoes INTEGER DEFAULT 0,
+            candidaturas_recebidas INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     
