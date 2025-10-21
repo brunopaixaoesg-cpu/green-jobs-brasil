@@ -42,6 +42,46 @@ def get_db_connection():
     """Retorna conexão com o banco de dados"""
     return sqlite3.connect(DB_PATH)
 
+# Função para inicializar banco de dados
+def init_database():
+    """Cria tabelas básicas se não existirem"""
+    if not os.path.exists(DB_PATH):
+        print(f"📦 Criando banco de dados em: {DB_PATH}")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Criar tabela profissionais_esg (simplificada)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS profissionais_esg (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            email TEXT UNIQUE,
+            area_atuacao TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Criar tabela storytelling
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS storytelling (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profissional_id INTEGER,
+            jornada_verde TEXT,
+            motivacao TEXT,
+            impacto TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (profissional_id) REFERENCES profissionais_esg(id)
+        )
+    """)
+    
+    conn.commit()
+    conn.close()
+    print("✅ Banco de dados inicializado!")
+
+# Inicializar banco na startup
+init_database()
+
 # Importar routers
 import sys
 import os
