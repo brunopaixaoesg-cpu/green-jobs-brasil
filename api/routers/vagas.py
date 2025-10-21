@@ -6,20 +6,15 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime, date
-import sqlite3
 import json
 import os
+import sys
+
+# Adicionar path do db.py
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db import get_db
 
 router = APIRouter(prefix="/api/vagas", tags=["Vagas ESG"])
-
-# Configuração do banco
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "gjb_dev.db")
-
-def get_db():
-    """Conexão com banco SQLite"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 # ============= SCHEMAS PYDANTIC =============
 
