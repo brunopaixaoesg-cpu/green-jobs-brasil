@@ -26,6 +26,14 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 DB_PATH = os.path.join(os.path.dirname(BASE_DIR), "gjb_dev.db")
 
+# Debug: Print dos caminhos
+print(f"🔍 BASE_DIR: {BASE_DIR}")
+print(f"🔍 TEMPLATES_DIR: {TEMPLATES_DIR}")
+print(f"🔍 STATIC_DIR: {STATIC_DIR}")
+print(f"🔍 DB_PATH: {DB_PATH}")
+print(f"🔍 Templates exists: {os.path.exists(TEMPLATES_DIR)}")
+print(f"🔍 Static exists: {os.path.exists(STATIC_DIR)}")
+
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -55,6 +63,24 @@ except Exception as e:
     print(f"Aviso: Nao foi possivel carregar routers: {e}")
     import traceback
     traceback.print_exc()
+
+# Endpoint de debug/status
+@app.get("/api/status")
+async def status():
+    """Endpoint de debug para verificar estrutura de arquivos"""
+    import glob
+    return {
+        "status": "online",
+        "base_dir": BASE_DIR,
+        "templates_dir": TEMPLATES_DIR,
+        "static_dir": STATIC_DIR,
+        "db_path": DB_PATH,
+        "templates_exists": os.path.exists(TEMPLATES_DIR),
+        "static_exists": os.path.exists(STATIC_DIR),
+        "db_exists": os.path.exists(DB_PATH),
+        "templates_files": glob.glob(os.path.join(TEMPLATES_DIR, "*.html")) if os.path.exists(TEMPLATES_DIR) else [],
+        "cwd": os.getcwd()
+    }
 
 # Rota principal - Landing Page
 @app.get("/", response_class=HTMLResponse)
