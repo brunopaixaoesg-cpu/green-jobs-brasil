@@ -8,23 +8,18 @@ from fastapi.templating import Jinja2Templates
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
-import sqlite3
 import hashlib
 import os
+import sys
+
+# Adicionar path do db.py
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db import get_db
 
 router = APIRouter(prefix="/empresas", tags=["Empresas ESG"])
 
-# Configuração do banco
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "gjb_dev.db")
-
 # Templates
 templates = Jinja2Templates(directory="api/templates")
-
-def get_db():
-    """Conexão com banco SQLite"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 # ==================== MODELS ====================
 
