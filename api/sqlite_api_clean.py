@@ -123,23 +123,22 @@ except Exception as e:
 import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
-try:
-    # Mudar diretório temporariamente para resolver imports
-    original_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
-    from routers import profissionais, empresas
-    # from routers import auth  # Desabilitado temporariamente para MVP
-    os.chdir(original_dir)
-    # app.include_router(auth.router)  # Desabilitado temporariamente
-    app.include_router(profissionais.router)
-    app.include_router(empresas.router)
-    # print("Auth router carregado com sucesso!")
-    print("Profissionais router carregado com sucesso!")
-    print("Empresas router carregado com sucesso!")
-except Exception as e:
-    print(f"Aviso: Nao foi possivel carregar routers: {e}")
-    import traceback
-    traceback.print_exc()
+# Temporariamente desabilitado - routers complexos com problemas
+# try:
+#     original_dir = os.getcwd()
+#     os.chdir(os.path.dirname(__file__))
+#     from routers import profissionais, empresas
+#     os.chdir(original_dir)
+#     app.include_router(profissionais.router)
+#     app.include_router(empresas.router)
+#     print("Profissionais router carregado com sucesso!")
+#     print("Empresas router carregado com sucesso!")
+# except Exception as e:
+#     print(f"Aviso: Nao foi possivel carregar routers: {e}")
+#     import traceback
+#     traceback.print_exc()
+
+print("⚠️ Usando endpoints simplificados para MVP")
 
 # Endpoint de debug/status
 @app.get("/api/status")
@@ -163,6 +162,49 @@ async def status():
         "templates_files": glob.glob(os.path.join(TEMPLATES_DIR, "*.html")) if os.path.exists(TEMPLATES_DIR) else [],
         "cwd": os.getcwd()
     }
+
+# ============= ENDPOINTS SIMPLES PARA MVP =============
+
+@app.get("/api/vagas/")
+async def listar_vagas():
+    """Lista todas as vagas"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM vagas ORDER BY created_at DESC LIMIT 100")
+        vagas = cursor.fetchall()
+        conn.close()
+        return [dict(vaga) for vaga in vagas]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/profissionais/")
+async def listar_profissionais():
+    """Lista todos os profissionais"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM profissionais_esg ORDER BY created_at DESC LIMIT 100")
+        profissionais = cursor.fetchall()
+        conn.close()
+        return [dict(prof) for prof in profissionais]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/empresas")
+async def listar_empresas():
+    """Lista todas as empresas"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM empresas_esg ORDER BY score_verde DESC LIMIT 100")
+        empresas = cursor.fetchall()
+        conn.close()
+        return [dict(emp) for emp in empresas]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =====================================================
 
 # Rota principal - Landing Page
 @app.get("/", response_class=HTMLResponse)
