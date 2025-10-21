@@ -28,7 +28,6 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 print(f"🔍 BASE_DIR: {BASE_DIR}")
 print(f"🔍 TEMPLATES_DIR: {TEMPLATES_DIR}")
 print(f"🔍 STATIC_DIR: {STATIC_DIR}")
-print(f"🔍 DB_PATH: {DB_PATH}")
 print(f"🔍 Templates exists: {os.path.exists(TEMPLATES_DIR)}")
 print(f"🔍 Static exists: {os.path.exists(STATIC_DIR)}")
 
@@ -147,15 +146,20 @@ except Exception as e:
 async def status():
     """Endpoint de debug para verificar estrutura de arquivos"""
     import glob
+    from db import get_database_url
+    
+    db_url = get_database_url()
+    is_postgres = db_url.startswith("postgres")
+    
     return {
         "status": "online",
         "base_dir": BASE_DIR,
         "templates_dir": TEMPLATES_DIR,
         "static_dir": STATIC_DIR,
-        "db_path": DB_PATH,
+        "database_type": "PostgreSQL" if is_postgres else "SQLite",
+        "database_url_set": bool(db_url),
         "templates_exists": os.path.exists(TEMPLATES_DIR),
         "static_exists": os.path.exists(STATIC_DIR),
-        "db_exists": os.path.exists(DB_PATH),
         "templates_files": glob.glob(os.path.join(TEMPLATES_DIR, "*.html")) if os.path.exists(TEMPLATES_DIR) else [],
         "cwd": os.getcwd()
     }
