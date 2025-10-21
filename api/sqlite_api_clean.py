@@ -82,6 +82,13 @@ def init_database():
 # Inicializar banco na startup
 init_database()
 
+# Popular com dados de exemplo (apenas na primeira vez)
+try:
+    from seed_data import seed_database
+    seed_database()
+except Exception as e:
+    print(f"⚠️ Aviso ao popular dados: {e}")
+
 # Importar routers
 import sys
 import os
