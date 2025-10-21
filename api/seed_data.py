@@ -11,19 +11,20 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(os.path.dirname(BASE_DIR), "gjb_dev.db")
 
 def seed_database():
-    """Popula banco com dados de exemplo"""
+    """Popula banco com dados de exemplo - SEMPRE roda no Render"""
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Verificar se já tem dados
-    cursor.execute("SELECT COUNT(*) FROM profissionais_esg")
-    count = cursor.fetchone()[0]
-    
-    if count > 0:
-        print(f"✅ Banco já tem {count} profissionais. Pulando seed.")
-        conn.close()
-        return
+    # Limpar dados anteriores (para Render)
+    try:
+        cursor.execute("DELETE FROM storytelling")
+        cursor.execute("DELETE FROM vagas")
+        cursor.execute("DELETE FROM empresas_esg")
+        cursor.execute("DELETE FROM profissionais_esg")
+        print("🧹 Limpando dados antigos...")
+    except:
+        pass  # Tabelas podem não existir ainda
     
     print("📊 Populando banco com dados de exemplo...")
     
