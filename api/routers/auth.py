@@ -2,53 +2,20 @@
 Router de Autenticação
 Endpoints para registro, login, logout e gerenciamento de usuários
 """
-import sqlite3
-import sys
-import os
-from datetime import datetime
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
-# Adicionar path para imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from services.auth import (
-    Token, TokenData, UserCreate, UserLogin, UserResponse, UserInDB,
-    verify_password, get_password_hash, create_tokens_for_user,
-    decode_token, validate_user_type, validate_password_strength
-)
+from api.db import get_db
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticação"])
 
 # OAuth2 scheme para extração de token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# Caminho do banco de dados (relativo ao diretório raiz do projeto)
-import os
-if os.path.exists("gjb_dev.db"):
-    DB_PATH = "gjb_dev.db"
-elif os.path.exists("../gjb_dev.db"):
-    DB_PATH = "../gjb_dev.db"
-else:
-    # Tentar caminho absoluto
-    DB_PATH = os.path.join(os.path.dirname(__file__), "../../gjb_dev.db")
-
-
 # ============================================
 # FUNÇÕES DE BANCO DE DADOS
 # ============================================
 
-def get_db_connection():
-    """Cria conexão com o banco SQLite"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
 def get_user_by_email(email: str) -> Optional[UserInDB]:
     """Busca usuário por email"""
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     
     cursor.execute("""
@@ -79,7 +46,7 @@ def get_user_by_email(email: str) -> Optional[UserInDB]:
 
 def get_user_by_id(user_id: int) -> Optional[UserInDB]:
     """Busca usuário por ID"""
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     
     cursor.execute("""
@@ -110,7 +77,7 @@ def get_user_by_id(user_id: int) -> Optional[UserInDB]:
 
 def create_user(user_data: UserCreate) -> UserInDB:
     """Cria novo usuário no banco"""
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     
     hashed_password = get_password_hash(user_data.password)
@@ -145,7 +112,7 @@ def create_user(user_data: UserCreate) -> UserInDB:
 
 def log_auth_action(user_id: int, action: str, ip_address: str = None, user_agent: str = None):
     """Registra ação de autenticação no log"""
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     
     cursor.execute("""
