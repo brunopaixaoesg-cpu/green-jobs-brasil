@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Publicar Vaga - Green Jobs Brasil</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-green: #059669;
+            --light-green: #10b981;
+            --dark-green: #047857;
+            --accent-green: #34d399;
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding-bottom: 3rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: var(--primary-green);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            color: var(--dark-green);
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--accent-green);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .ods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .ods-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ods-checkbox:hover {
+            background: #f0fdf4;
+            border-color: var(--accent-green);
+        }
+
+        .ods-checkbox input[type="checkbox"] {
+            margin-right: 0.75rem;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .ods-checkbox input[type="checkbox"]:checked + label {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            min-height: 60px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.875rem;
+            background: var(--primary-green);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1.1rem;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>📝 Publicar Vaga ESG</h1>
+            <p>Encontre talentos sustentáveis para sua empresa</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="/vagas" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Voltar para Vagas
+        </a>
+
+        <div id="alertContainer"></div>
+
+        <form id="formVaga">
+            <!-- Informações Básicas -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações Básicas
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CNPJ da Empresa *</label>
+                        <input type="text" class="form-control" id="cnpj" required 
+                               placeholder="00.000.000/0000-00">
+                        <small class="text-muted">A empresa deve estar cadastrada no sistema</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Título da Vaga *</label>
+                        <input type="text" class="form-control" id="titulo" required 
+                               placeholder="Ex: Analista de Sustentabilidade Pleno">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descrição da Vaga *</label>
+                    <textarea class="form-control" id="descricao" rows="4" required
+                              placeholder="Descreva as responsabilidades e o dia a dia da posição..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Requisitos</label>
+                    <textarea class="form-control" id="requisitos" rows="3"
+                              placeholder="Liste os requisitos necessários para a vaga..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Benefícios</label>
+                    <textarea class="form-control" id="beneficios" rows="3"
+                              placeholder="Vale refeição, plano de saúde, home office..."></textarea>
+                </div>
+            </div>
+
+            <!-- ODS e Habilidades ESG -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-leaf me-2"></i>
+                    ODS e Habilidades ESG
+                </h3>
+
+                <div class="mb-4">
+                    <label class="form-label">Objetivos de Desenvolvimento Sustentável (ODS)</label>
+                    <div class="ods-grid">
+                        <div class="ods-checkbox">
+                            <input type="checkbox" name="ods" value="7" id="ods7">
+                            <label for="ods7">ODS 7 - Energia Limpa</label>
+                        </div>
+                        <div class="ods-checkbox">
+                            <input type="checkbox" name="ods" value="12" id="ods12">
+                            <label for="ods12">ODS 12 - Consumo Responsável</label>
+                        </div>
+                        <div class="ods-checkbox">
+                            <input type="checkbox" name="ods" value="13" id="ods13">
+                            <label for="ods13">ODS 13 - Ação Climática</label>
+                        </div>
+                        <div class="ods-checkbox">
+                            <input type="checkbox" name="ods" value="15" id="ods15">
+                            <label for="ods15">ODS 15 - Vida Terrestre</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Habilidades ESG Requeridas</label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="habilidadeInput" 
+                               placeholder="Digite uma habilidade e pressione Enter">
+                        <button class="btn btn-outline-secondary" type="button" onclick="adicionarHabilidade()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div id="habilidadesTags" class="tags-input"></div>
+                    <small class="text-muted">Ex: ISO 14001, Relatório GRI, Carbon Footprint, etc.</small>
+                </div>
+            </div>
+
+            <!-- Detalhes da Vaga -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-cog me-2"></i>
+                    Detalhes da Vaga
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nível de Experiência *</label>
+                        <select class="form-select" id="nivel" required>
+                            <option value="">Selecione...</option>
+                            <option value="junior">Júnior</option>
+                            <option value="pleno">Pleno</option>
+                            <option value="senior">Sênior</option>
+                            <option value="especialista">Especialista</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tipo de Contratação *</label>
+                        <select class="form-select" id="tipoContratacao" required>
+                            <option value="">Selecione...</option>
+                            <option value="CLT">CLT</option>
+                            <option value="PJ">PJ</option>
+                            <option value="estagio">Estágio</option>
+                            <option value="temporario">Temporário</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Estado (UF)</label>
+                        <select class="form-select" id="uf">
+                            <option value="">Selecione...</option>
+                            <option value="SP">São Paulo</option>
+                            <option value="RJ">Rio de Janeiro</option>
+                            <option value="MG">Minas Gerais</option>
+                            <option value="RS">Rio Grande do Sul</option>
+                            <option value="PR">Paraná</option>
+                            <option value="SC">Santa Catarina</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" 
+                               placeholder="Ex: São Paulo">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Modalidade</label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="remoto">
+                                <label class="form-check-label" for="remoto">Remoto</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="hibrido">
+                                <label class="form-check-label" for="hibrido">Híbrido</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Salário Mínimo (R$)</label>
+                        <input type="number" class="form-control" id="salarioMin" 
+                               placeholder="3000" step="100">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Salário Máximo (R$)</label>
+                        <input type="number" class="form-control" id="salarioMax" 
+                               placeholder="6000" step="100">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email do Responsável *</label>
+                    <input type="email" class="form-control" id="email" required 
+                           placeholder="recrutamento@empresa.com.br">
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Publicar Vaga
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let habilidades = [];
+
+        // Adicionar habilidade
+        function adicionarHabilidade() {
+            const input = document.getElementById('habilidadeInput');
+            const valor = input.value.trim();
+            
+            if (valor && !habilidades.includes(valor)) {
+                habilidades.push(valor);
+                renderizarHabilidades();
+                input.value = '';
+            }
+        }
+
+        // Remover habilidade
+        function removerHabilidade(index) {
+            habilidades.splice(index, 1);
+            renderizarHabilidades();
+        }
+
+        // Renderizar tags de habilidades
+        function renderizarHabilidades() {
+            const container = document.getElementById('habilidadesTags');
+            container.innerHTML = habilidades.map((hab, index) => `
+                <span class="tag">
+                    ${hab}
+                    <button type="button" onclick="removerHabilidade(${index})">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        // Enter para adicionar habilidade
+        document.getElementById('habilidadeInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                adicionarHabilidade();
+            }
+        });
+
+        // Mostrar alerta
+        function mostrarAlerta(tipo, mensagem) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                    ${mensagem}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Submeter formulário
+        document.getElementById('formVaga').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Publicando...';
+
+            // Coletar ODS selecionados
+            const odsCheckboxes = document.querySelectorAll('input[name="ods"]:checked');
+            const odsTags = Array.from(odsCheckboxes).map(cb => parseInt(cb.value));
+
+            // Montar dados
+            const dadosVaga = {
+                cnpj: document.getElementById('cnpj').value,
+                titulo: document.getElementById('titulo').value,
+                descricao: document.getElementById('descricao').value,
+                requisitos: document.getElementById('requisitos').value || null,
+                beneficios: document.getElementById('beneficios').value || null,
+                ods_tags: odsTags,
+                habilidades_requeridas: habilidades,
+                nivel_experiencia: document.getElementById('nivel').value,
+                tipo_contratacao: document.getElementById('tipoContratacao').value,
+                localizacao_uf: document.getElementById('uf').value || null,
+                localizacao_cidade: document.getElementById('cidade').value || null,
+                remoto: document.getElementById('remoto').checked,
+                hibrido: document.getElementById('hibrido').checked,
+                salario_min: parseFloat(document.getElementById('salarioMin').value) || null,
+                salario_max: parseFloat(document.getElementById('salarioMax').value) || null,
+                publicada_por: document.getElementById('email').value
+            };
+
+            try {
+                const response = await fetch('/api/vagas/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosVaga)
+                });
+
+                if (response.ok) {
+                    const vaga = await response.json();
+                    mostrarAlerta('success', `✅ Vaga "${vaga.titulo}" publicada com sucesso!`);
+                    
+                    // Redirecionar após 2 segundos
+                    setTimeout(() => {
+                        window.location.href = '/vagas';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    mostrarAlerta('danger', `❌ Erro ao publicar vaga: ${error.detail}`);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Publicar Vaga';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarAlerta('danger', '❌ Erro ao conectar com servidor. Tente novamente.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Publicar Vaga';
+            }
+        });
+    </script>
+</body>
+</html>

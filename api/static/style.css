@@ -1,0 +1,22 @@
+/* Green Jobs Brasil - Estilos Globais */
+
+:root {
+    --primary-green: #2ecc71;
+    --dark-green: #27ae60;
+    --light-green: #a8e6cf;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn-primary-green {
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    border: none;
+    color: white;
+}
+
+.btn-primary-green:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}

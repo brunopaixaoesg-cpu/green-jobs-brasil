@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Jobs Brasil - Roadmap de Evolução Tecnológica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #059669;
+        }
+        
+        .header h1 {
+            color: #059669;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .header h2 {
+            color: #6b7280;
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        
+        .header .date {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .overview {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            border-left: 5px solid #059669;
+        }
+        
+        .overview h3 {
+            color: #059669;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+        }
+        
+        .status-card h4 {
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            color: #1f2937;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title .icon {
+            margin-right: 0.75rem;
+            font-size: 2rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .feature-icon.primary { background: #3b82f6; }
+        .feature-icon.success { background: #10b981; }
+        .feature-icon.warning { background: #f59e0b; }
+        .feature-icon.danger { background: #ef4444; }
+        .feature-icon.purple { background: #8b5cf6; }
+        .feature-icon.indigo { background: #6366f1; }
+        .feature-icon.pink { background: #ec4899; }
+        .feature-icon.cyan { background: #06b6d4; }
+        
+        .feature-title {
+            color: #1f2937;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-description {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .feature-benefits {
+            list-style: none;
+        }
+        
+        .feature-benefits li {
+            color: #374151;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .feature-benefits li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+        
+        .timeline {
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+        
+        .timeline-marker {
+            width: 12px;
+            height: 12px;
+            background: #059669;
+            border-radius: 50%;
+            margin-right: 1rem;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .timeline-content h4 {
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a7f3d0 0%, #a7f3d0 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 0.2em;
+            background-position: 0 88%;
+        }
+        
+        @media print {
+            body { 
+                background: white; 
+                font-size: 12px;
+            }
+            .container { 
+                box-shadow: none; 
+                padding: 1rem;
+            }
+            .feature-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 Green Jobs Brasil</h1>
+            <h2>Roadmap de Evolução Tecnológica</h2>
+            <div class="date">Documento Estratégico • Outubro 2025</div>
+        </div>
+
+        <!-- Overview -->
+        <div class="overview">
+            <h3>📊 Status Atual do Sistema</h3>
+            <p>Sistema base totalmente operacional com funcionalidades core implementadas e dados realísticos para demonstrações.</p>
+            
+            <div class="status-grid">
+                <div class="status-card">
+                    <h4>Profissionais ESG</h4>
+                    <div class="number">96</div>
+                    <p>Cadastrados e ativos</p>
+                </div>
+                <div class="status-card">
+                    <h4>Vagas Verdes</h4>
+                    <div class="number">31</div>
+                    <p>Publicadas e ativas</p>
+                </div>
+                <div class="status-card">
+                    <h4>Candidaturas</h4>
+                    <div class="number">514</div>
+                    <p>Simuladas no sistema</p>
+                </div>
+                <div class="status-card">
+                    <h4>Taxa de Conversão</h4>
+                    <div class="number">2.5%</div>
+                    <p>Candidaturas → Contratações</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 1: Notificações -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🔔</span>
+                Sistema de Notificações em Tempo Real
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-high">
+                    <div class="feature-header">
+                        <div class="feature-icon primary">📬</div>
+                        <div class="feature-title">Notificações de Match</div>
+                    </div>
+                    <div class="feature-description">
+                        Sistema inteligente que notifica instantaneamente quando há compatibilidade entre profissionais e vagas.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Alertas em tempo real via WebSocket</li>
+                        <li>Notificações por email personalizadas</li>
+                        <li>Score de compatibilidade detalhado</li>
+                        <li>Histórico de matches perdidos</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon success">💬</div>
+                        <div class="feature-title">Mensageria Integrada</div>
+                    </div>
+                    <div class="feature-description">
+                        Canal direto de comunicação entre empresas e profissionais dentro da plataforma.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Chat em tempo real</li>
+                        <li>Compartilhamento de documentos</li>
+                        <li>Agendamento de entrevistas</li>
+                        <li>Histórico de conversas</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon warning">📱</div>
+                        <div class="feature-title">Push Notifications</div>
+                    </div>
+                    <div class="feature-description">
+                        Notificações push para manter usuários engajados mesmo quando offline.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Notificações mobile nativas</li>
+                        <li>Personalização por preferências</li>
+                        <li>Controle de frequência</li>
+                        <li>Deep linking para ações rápidas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Analytics -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📈</span>
+                Analytics Avançado e Business Intelligence
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-high">
+                    <div class="feature-header">
+                        <div class="feature-icon purple">📊</div>
+                        <div class="feature-title">Dashboard Executivo</div>
+                    </div>
+                    <div class="feature-description">
+                        Painéis estratégicos com KPIs e métricas avançadas para tomada de decisão.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>ROI de contratações ESG</li>
+                        <li>Tempo médio de preenchimento</li>
+                        <li>Análise de retenção</li>
+                        <li>Benchmarking de mercado</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon indigo">🗺️</div>
+                        <div class="feature-title">Mapa de Oportunidades</div>
+                    </div>
+                    <div class="feature-description">
+                        Visualização geográfica de oportunidades ESG e concentração de talentos.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Heatmap de vagas por região</li>
+                        <li>Análise de migração de talentos</li>
+                        <li>Identificação de clusters ESG</li>
+                        <li>Previsão de crescimento regional</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon cyan">💰</div>
+                        <div class="feature-title">Análise Salarial</div>
+                    </div>
+                    <div class="feature-description">
+                        Inteligência de mercado sobre faixas salariais e tendências de remuneração ESG.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Benchmarking salarial por ODS</li>
+                        <li>Tendências de crescimento</li>
+                        <li>Comparação por senioridade</li>
+                        <li>Projeções de mercado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: IA e ML -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🤖</span>
+                Inteligência Artificial e Machine Learning
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-high">
+                    <div class="feature-header">
+                        <div class="feature-icon danger">🧠</div>
+                        <div class="feature-title">Análise de Compatibilidade Avançada</div>
+                    </div>
+                    <div class="feature-description">
+                        <span class="highlight">Sistema de IA que vai além do currículo</span> para avaliar compatibilidade real entre profissionais e posições.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Análise de padrões comportamentais</li>
+                        <li>Avaliação de soft skills por NLP</li>
+                        <li>Predição de sucesso na função</li>
+                        <li>Matching por valores e cultura ESG</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-high">
+                    <div class="feature-header">
+                        <div class="feature-icon pink">🎯</div>
+                        <div class="feature-title">Demonstração Prática de Habilidades</div>
+                    </div>
+                    <div class="feature-description">
+                        <span class="highlight">Sistema inovador para profissionais demonstrarem conhecimento</span> através de projetos práticos e casos reais.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Mini-projetos ESG práticos</li>
+                        <li>Simulações de cenários reais</li>
+                        <li>Portfolio de soluções sustentáveis</li>
+                        <li>Validação por pares da indústria</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon success">🔮</div>
+                        <div class="feature-title">Recomendações Inteligentes</div>
+                    </div>
+                    <div class="feature-description">
+                        Engine de recomendação baseado em ML para sugerir vagas e candidatos com alta precisão.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Algoritmos de collaborative filtering</li>
+                        <li>Aprendizado contínuo do sistema</li>
+                        <li>Personalização por histórico</li>
+                        <li>Feedback loop automático</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon primary">🤖</div>
+                        <div class="feature-title">Chatbot ESG Especializado</div>
+                    </div>
+                    <div class="feature-description">
+                        Assistente virtual especializado em sustentabilidade para suporte e orientação.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Conhecimento especializado em ESG</li>
+                        <li>Suporte a candidaturas</li>
+                        <li>Orientação de carreira verde</li>
+                        <li>FAQ automatizado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Funcionalidades Sociais -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🌐</span>
+                Networking e Funcionalidades Sociais
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon success">📰</div>
+                        <div class="feature-title">Feed ESG</div>
+                    </div>
+                    <div class="feature-description">
+                        Timeline social com notícias, insights e discussões sobre sustentabilidade corporativa.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Curadoria automática de conteúdo</li>
+                        <li>Interação entre profissionais</li>
+                        <li>Sharing de conhecimento</li>
+                        <li>Trending topics ESG</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon warning">🎓</div>
+                        <div class="feature-title">Sistema de Mentoria</div>
+                    </div>
+                    <div class="feature-description">
+                        Conexão entre profissionais experientes e novatos na área de sustentabilidade.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Matching mentor-mentorado</li>
+                        <li>Agendamento de sessões</li>
+                        <li>Tracking de progresso</li>
+                        <li>Gamificação do aprendizado</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon purple">🎪</div>
+                        <div class="feature-title">Eventos e Networking</div>
+                    </div>
+                    <div class="feature-description">
+                        Plataforma para eventos, webinars e encontros da comunidade ESG.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Calendário de eventos verdes</li>
+                        <li>Networking dirigido</li>
+                        <li>Workshops especializados</li>
+                        <li>Certificações participativas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 5: Integrações -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🔗</span>
+                Integrações e APIs Externas
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-high">
+                    <div class="feature-header">
+                        <div class="feature-icon indigo">🏢</div>
+                        <div class="feature-title">Dados Governamentais</div>
+                    </div>
+                    <div class="feature-description">
+                        Integração com APIs oficiais para validação e enriquecimento de dados empresariais.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>API Receita Federal (CNPJ)</li>
+                        <li>Dados de licenças ambientais</li>
+                        <li>Certificações oficiais ESG</li>
+                        <li>Validação automática de empresas</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon primary">💼</div>
+                        <div class="feature-title">LinkedIn Integration</div>
+                    </div>
+                    <div class="feature-description">
+                        Sincronização com perfis LinkedIn para importação automática de dados profissionais.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Import de perfis automatizado</li>
+                        <li>Sync de atualizações</li>
+                        <li>Expansão de rede</li>
+                        <li>Validação de experiências</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon success">🏆</div>
+                        <div class="feature-title">Certificações ESG</div>
+                    </div>
+                    <div class="feature-description">
+                        Conexão com plataformas de certificação para validação automática de credentials.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Verificação de certificados</li>
+                        <li>Badges digitais</li>
+                        <li>Renovação automática</li>
+                        <li>Ranking de qualificações</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 6: Mobile e Marketplace -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📱</span>
+                Expansão Mobile e Marketplace
+            </h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card priority-medium">
+                    <div class="feature-header">
+                        <div class="feature-icon danger">📲</div>
+                        <div class="feature-title">App Mobile Nativo</div>
+                    </div>
+                    <div class="feature-description">
+                        Aplicativo móvel completo para iOS e Android com todas as funcionalidades da plataforma.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Interface otimizada para mobile</li>
+                        <li>Notificações push nativas</li>
+                        <li>Offline capabilities</li>
+                        <li>Integração com calendário</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card priority-low">
+                    <div class="feature-header">
+                        <div class="feature-icon cyan">🛍️</div>
+                        <div class="feature-title">Marketplace ESG</div>
+                    </div>
+                    <div class="feature-description">
+                        Plataforma de serviços onde profissionais podem oferecer consultoria e soluções sustentáveis.
+                    </div>
+                    <ul class="feature-benefits">
+                        <li>Projetos freelance verdes</li>
+                        <li>Consultoria especializada</li>
+                        <li>Cursos e treinamentos</li>
+                        <li>Sistema de pagamentos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline de Implementação -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">⏱️</span>
+                Timeline de Implementação Sugerida
+            </h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Fase 1 (1-2 meses): IA e Compatibilidade Avançada</h4>
+                        <p>Implementação do sistema de IA para análise de compatibilidade e demonstração prática de habilidades - foco no diferencial competitivo.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Fase 2 (2-3 meses): Notificações e Mensageria</h4>
+                        <p>Sistema de notificações em tempo real e comunicação integrada para melhorar engagement e conversões.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Fase 3 (3-4 meses): Analytics e BI</h4>
+                        <p>Dashboards executivos e análises avançadas para demonstrar valor para empresas parceiras.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Fase 4 (4-6 meses): Integrações e Mobile</h4>
+                        <p>APIs externas, app móvel e funcionalidades sociais para escalar a base de usuários.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>Fase 5 (6+ meses): Marketplace e Expansão</h4>
+                        <p>Monetização através de marketplace ESG e expansão para novos mercados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Green Jobs Brasil</strong> - Conectando Talentos com o Futuro Sustentável</p>
+            <p>Documento gerado em <strong>14 de Outubro de 2025</strong></p>
+        </div>
+    </div>
+</body>
+</html>

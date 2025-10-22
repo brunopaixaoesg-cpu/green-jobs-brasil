@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-10-18T11:14:22.295070",
+  "resultados": {
+    "scores": {
+      "total": 811,
+      "score_medio": 47.422194821208386,
+      "excelente": 1,
+      "bom": 187,
+      "regular": 356,
+      "baixo": 267
+    },
+    "vagas": 20,
+    "candidaturas": 46,
+    "totais": {
+      "vagas": 101,
+      "candidaturas": 857,
+      "score_medio": 48.451925320886815
+    }
+  }
+}

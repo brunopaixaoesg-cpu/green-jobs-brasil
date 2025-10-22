@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Jobs Brasil - Dashboard ML</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .ml-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .vaga-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-bottom: 3px solid #2ecc71;
+        }
+
+        .vaga-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .candidates {
+            padding: 30px;
+        }
+
+        .candidate-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-left: 5px solid #2ecc71;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .candidate-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .score-regular {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .score-baixo {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .candidate-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2ecc71;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: white;
+        }
+
+        .ml-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .ml-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ml-details {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-entrevista {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pendente {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-aprovada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-contratada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejeitada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-em_analise {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .candidate-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Green Jobs Brasil</h1>
+            <div class="ml-badge">
+                🧠 Sistema de Matching com Inteligência Artificial
+            </div>
+        </div>
+
+        <div class="vaga-info" id="vagaInfo">
+            <div class="vaga-title">📄 Carregando vaga...</div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCandidatos">-</div>
+                    <div class="stat-label">Candidatos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="scoreMaximo">-</div>
+                    <div class="stat-label">Score Máximo</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="scoreMinimo">-</div>
+                    <div class="stat-label">Score Mínimo</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="scoreMedio">-</div>
+                    <div class="stat-label">Score Médio</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="candidates" id="candidatesList">
+            <div style="text-align: center; padding: 50px;">
+                <div style="font-size: 2em;">🔄</div>
+                <div>Carregando candidatos com IA...</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadData()" title="Atualizar dados">
+        🔄
+    </button>
+
+    <script>
+        function getScoreClass(score) {
+            if (score >= 60) return 'score-alto';
+            if (score >= 45) return 'score-regular';
+            return 'score-baixo';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'entrevista': 'Entrevista',
+                'pendente': 'Pendente',
+                'aprovada': 'Aprovada',
+                'contratada': 'Contratada',
+                'rejeitada': 'Rejeitada',
+                'em_analise': 'Em Análise'
+            };
+            return statusMap[status] || status;
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/matching/vaga/1/candidatos');
+                const data = await response.json();
+                
+                // Atualizar informações da vaga
+                document.querySelector('.vaga-title').innerHTML = `📄 ${data.vaga_titulo}`;
+                document.getElementById('totalCandidatos').textContent = data.total_candidatos;
+                
+                // Calcular estatísticas
+                const scores = data.candidatos.map(c => c.match.score_total);
+                const scoreMax = Math.max(...scores);
+                const scoreMin = Math.min(...scores);
+                const scoreMedio = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                
+                document.getElementById('scoreMaximo').textContent = scoreMax + '%';
+                document.getElementById('scoreMinimo').textContent = scoreMin + '%';
+                document.getElementById('scoreMedio').textContent = scoreMedio + '%';
+                
+                // Renderizar candidatos
+                const candidatesList = document.getElementById('candidatesList');
+                candidatesList.innerHTML = data.candidatos.map((candidato, index) => {
+                    const prof = candidato.profissional;
+                    const match = candidato.match;
+                    
+                    return `
+                        <div class="candidate-card">
+                            <div class="candidate-header">
+                                <div>
+                                    <div class="candidate-name">${index + 1}. ${prof.nome_completo}</div>
+                                    <div style="font-size: 0.9em; color: #7f8c8d; margin-top: 5px;">
+                                        ${prof.cargo_atual} • ${prof.empresa_atual}
+                                    </div>
+                                </div>
+                                <div class="score-badge ${getScoreClass(match.score_total)}">
+                                    ${match.score_total}%
+                                </div>
+                            </div>
+                            
+                            <div class="candidate-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon">📧</div>
+                                    <div>${prof.email}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">📍</div>
+                                    <div>${prof.localizacao_cidade}/${prof.localizacao_uf}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">⏱️</div>
+                                    <div>${prof.anos_experiencia_esg} anos ESG</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">🏠</div>
+                                    <div>${prof.aceita_remoto ? 'Aceita remoto' : 'Presencial'}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">📊</div>
+                                    <div class="status-badge ${getStatusClass(match.status)}">
+                                        ${formatStatus(match.status)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ml-info">
+                                <div class="ml-title">
+                                    🤖 Análise de Machine Learning
+                                </div>
+                                <div class="ml-details">
+                                    <strong>Modelo:</strong> ${match.breakdown.modelo.detalhes}<br>
+                                    <strong>Previsão:</strong> ${match.breakdown.probabilidade.detalhes}<br>
+                                    <strong>Classificação:</strong> ${match.classificacao.toUpperCase()}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('candidatesList').innerHTML = `
+                    <div style="text-align: center; padding: 50px; color: #e74c3c;">
+                        <div style="font-size: 2em;">❌</div>
+                        <div>Erro ao carregar dados</div>
+                        <button onclick="loadData()" style="margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Tentar novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar dados ao inicializar
+        loadData();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>

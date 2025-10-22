@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Dashboard - Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2ecc71;
+            --dark-green: #27ae60;
+            --light-green: #a8e6cf;
+            --gray-bg: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            padding: 30px 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            border: none;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+            font-weight: 600;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 24px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            color: var(--primary-green);
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .candidatura-item {
+            border-left: 4px solid var(--primary-green);
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .candidatura-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pendente { background: #fff3cd; color: #856404; }
+        .status-em_analise { background: #cfe2ff; color: #084298; }
+        .status-aprovado { background: #d1e7dd; color: #0a3622; }
+        .status-rejeitado { background: #f8d7da; color: #58151c; }
+
+        .vaga-recomendada {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .vaga-recomendada:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+        }
+
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .score-high { background: #d1e7dd; color: #0a3622; }
+        .score-medium { background: #fff3cd; color: #856404; }
+        .score-low { background: #f8d7da; color: #58151c; }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .habilidade-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--light-green);
+            color: var(--dark-green);
+            border-radius: 15px;
+            font-size: 12px;
+            margin: 3px;
+            font-weight: 500;
+        }
+
+        .ods-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 2px;
+            font-weight: 600;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner-border-custom {
+            width: 4rem;
+            height: 4rem;
+            border-width: 0.4rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div id="loading">
+        <div class="text-center">
+            <div class="spinner-border spinner-border-custom text-success" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-3 text-muted">Carregando seu dashboard...</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar-custom">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <h4 class="mb-0">
+                    <i class="fas fa-leaf text-success"></i>
+                    <strong>Green Jobs Brasil</strong>
+                </h4>
+                <div>
+                    <a href="/vagas" class="btn btn-sm btn-outline-success me-2">
+                        <i class="fas fa-briefcase"></i> Vagas
+                    </a>
+                    <a href="/dashboard" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="dashboard-container" id="content" style="display: none;">
+        <div class="container-fluid">
+            
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h2 class="mb-1" id="profileName">Carregando...</h2>
+                        <p class="mb-0 opacity-75" id="profileCargo">-</p>
+                        <small class="opacity-50" id="profileEmail">-</small>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-light btn-lg" onclick="editarPerfil()">
+                            <i class="fas fa-edit"></i> Editar Perfil
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #d1e7dd;">
+                            <i class="fas fa-paper-plane text-success"></i>
+                        </div>
+                        <div class="stat-value" id="statCandidaturas">0</div>
+                        <div class="stat-label">Candidaturas</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #cfe2ff;">
+                            <i class="fas fa-chart-line text-primary"></i>
+                        </div>
+                        <div class="stat-value" id="statScore">0%</div>
+                        <div class="stat-label">Score Médio</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fff3cd;">
+                            <i class="fas fa-briefcase text-warning"></i>
+                        </div>
+                        <div class="stat-value" id="statVagas">0</div>
+                        <div class="stat-label">Vagas Disponíveis</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #e7d4f8;">
+                            <i class="fas fa-eye text-purple"></i>
+                        </div>
+                        <div class="stat-value" id="statVisualizacoes">0</div>
+                        <div class="stat-label">Visualizações</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Minhas Candidaturas -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-clipboard-list"></i> Minhas Candidaturas
+                        </div>
+                        <div class="card-body" id="candidaturasContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-success" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vagas Recomendadas -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-magic"></i> Vagas Recomendadas para Você
+                            <small class="ms-2">(Machine Learning)</small>
+                        </div>
+                        <div class="card-body" id="vagasRecomendadasContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-success" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perfil Detalhado -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-id-card"></i> Meu Perfil Completo
+                        </div>
+                        <div class="card-body" id="perfilDetalhadoContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-success" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar autenticação
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+        }
+
+        // Editar perfil
+        function editarPerfil() {
+            window.location.href = '/profissionais/editar-perfil';
+        }
+
+        // Função auxiliar para requisições autenticadas
+        async function fetchAuth(url) {
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
+
+            return response.json();
+        }
+
+        // Função para obter classe de score
+        function getScoreClass(score) {
+            if (score >= 75) return 'score-high';
+            if (score >= 50) return 'score-medium';
+            return 'score-low';
+        }
+
+        // Função para formatar status
+        function formatStatus(status) {
+            const statusMap = {
+                'pendente': 'Pendente',
+                'em_analise': 'Em Análise',
+                'aprovado': 'Aprovado',
+                'rejeitado': 'Rejeitado'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Função para formatar data
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Carregar dados do dashboard
+        async function loadDashboard() {
+            try {
+                // Carregar estatísticas
+                const stats = await fetchAuth('/api/profissionais/me/estatisticas');
+                if (stats) {
+                    document.getElementById('statCandidaturas').textContent = stats.candidaturas_enviadas;
+                    document.getElementById('statScore').textContent = stats.score_medio_compatibilidade + '%';
+                    document.getElementById('statVagas').textContent = stats.vagas_disponiveis;
+                    document.getElementById('statVisualizacoes').textContent = stats.visualizacoes_perfil;
+                }
+
+                // Carregar perfil
+                const perfil = await fetchAuth('/api/profissionais/me/perfil');
+                if (perfil && perfil.perfil) {
+                    const prof = perfil.perfil;
+                    document.getElementById('profileName').textContent = prof.nome_completo || 'Nome não informado';
+                    document.getElementById('profileCargo').textContent = prof.cargo_atual || 'Cargo não informado';
+                    document.getElementById('profileEmail').textContent = prof.email || '';
+
+                    // Renderizar perfil detalhado
+                    renderPerfilDetalhado(perfil);
+                }
+
+                // Carregar candidaturas
+                const candidaturas = await fetchAuth('/api/profissionais/me/candidaturas');
+                if (candidaturas) {
+                    renderCandidaturas(candidaturas);
+                }
+
+                // Carregar recomendações
+                const recomendacoes = await fetchAuth('/api/profissionais/me/recomendacoes');
+                if (recomendacoes) {
+                    renderRecomendacoes(recomendacoes);
+                }
+
+                // Mostrar conteúdo e esconder loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+                alert('Erro ao carregar dashboard. Por favor, tente novamente.');
+            }
+        }
+
+        // Renderizar candidaturas
+        function renderCandidaturas(data) {
+            const container = document.getElementById('candidaturasContainer');
+            
+            if (!data.candidaturas || data.candidaturas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h5>Nenhuma candidatura ainda</h5>
+                        <p>Explore vagas recomendadas e comece a se candidatar!</p>
+                        <a href="/vagas" class="btn btn-primary-custom mt-3">
+                            <i class="fas fa-search"></i> Buscar Vagas
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.candidaturas.forEach(cand => {
+                html += `
+                    <div class="candidatura-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1"><strong>${cand.vaga_titulo}</strong></h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-building"></i> ${cand.empresa_nome || 'Empresa não informada'}
+                                </small>
+                            </div>
+                            <span class="status-badge status-${cand.status}">
+                                ${formatStatus(cand.status)}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-percentage"></i> ${cand.compatibilidade_score}% match
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> ${formatDate(cand.data_candidatura)}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="verDetalhes(${cand.vaga_id})">
+                                <i class="fas fa-eye"></i> Ver Vaga
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Renderizar recomendações
+        function renderRecomendacoes(data) {
+            const container = document.getElementById('vagasRecomendadasContainer');
+            
+            if (!data.vagas_recomendadas || data.vagas_recomendadas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-robot"></i>
+                        <h5>Nenhuma recomendação no momento</h5>
+                        <p>Complete seu perfil para receber recomendações personalizadas!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.vagas_recomendadas.slice(0, 5).forEach(vaga => {
+                const scoreClass = getScoreClass(vaga.compatibilidade_score);
+                html += `
+                    <div class="vaga-recomendada">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2"><strong>${vaga.titulo}</strong></h6>
+                                <p class="text-muted small mb-2">${vaga.descricao ? vaga.descricao.substring(0, 120) + '...' : ''}</p>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-building"></i> ${vaga.empresa_nome || 'Empresa Confidencial'}
+                                        ${vaga.localizacao_cidade ? ` | <i class="fas fa-map-marker-alt"></i> ${vaga.localizacao_cidade}, ${vaga.localizacao_uf}` : ''}
+                                        ${vaga.remoto ? ' | <i class="fas fa-home"></i> Remoto' : ''}
+                                    </small>
+                                </div>
+                                ${vaga.salario_min ? `<div class="mb-2"><small><i class="fas fa-dollar-sign"></i> R$ ${vaga.salario_min.toLocaleString('pt-BR')} - R$ ${vaga.salario_max ? vaga.salario_max.toLocaleString('pt-BR') : '...'}</small></div>` : ''}
+                            </div>
+                            <div class="text-center ms-3">
+                                <div class="score-circle ${scoreClass}">
+                                    ${Math.round(vaga.compatibilidade_score)}%
+                                </div>
+                                <small class="text-muted d-block mt-1">Match</small>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary-custom btn-sm" onclick="candidatar(${vaga.id})">
+                                <i class="fas fa-paper-plane"></i> Candidatar
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="verDetalhes(${vaga.id})">
+                                <i class="fas fa-eye"></i> Ver Mais
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Renderizar perfil detalhado
+        function renderPerfilDetalhado(data) {
+            const container = document.getElementById('perfilDetalhadoContainer');
+            const prof = data.perfil;
+
+            let habilidadesHTML = '';
+            if (prof.habilidades_esg && Array.isArray(prof.habilidades_esg)) {
+                prof.habilidades_esg.forEach(hab => {
+                    habilidadesHTML += `<span class="habilidade-badge">${hab}</span>`;
+                });
+            }
+
+            let odsHTML = '';
+            if (prof.ods_interesse && Array.isArray(prof.ods_interesse)) {
+                prof.ods_interesse.forEach(ods => {
+                    odsHTML += `<span class="ods-badge">ODS ${ods}</span>`;
+                });
+            }
+
+            let html = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user"></i> Informações Pessoais</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Nome:</strong> ${prof.nome_completo || 'Não informado'}</li>
+                            <li><strong>Email:</strong> ${prof.email || 'Não informado'}</li>
+                            <li><strong>Telefone:</strong> ${prof.telefone || 'Não informado'}</li>
+                            <li><strong>Localização:</strong> ${prof.localizacao_cidade || ''} ${prof.localizacao_uf || ''}</li>
+                            <li><strong>Aceita Remoto:</strong> ${prof.aceita_remoto ? 'Sim' : 'Não'}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-briefcase"></i> Experiência Profissional</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Cargo Atual:</strong> ${prof.cargo_atual || 'Não informado'}</li>
+                            <li><strong>Empresa Atual:</strong> ${prof.empresa_atual || 'Não informado'}</li>
+                            <li><strong>Anos em ESG:</strong> ${prof.anos_experiencia_esg || 0} anos</li>
+                            <li><strong>Formação:</strong> ${prof.formacao_nivel || 'Não informado'} - ${prof.formacao_area || ''}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                ${habilidadesHTML ? `
+                    <div class="mt-3">
+                        <h6><i class="fas fa-star"></i> Habilidades ESG</h6>
+                        <div>${habilidadesHTML}</div>
+                    </div>
+                ` : ''}
+
+                ${odsHTML ? `
+                    <div class="mt-3">
+                        <h6><i class="fas fa-leaf"></i> ODS de Interesse</h6>
+                        <div>${odsHTML}</div>
+                    </div>
+                ` : ''}
+
+                ${prof.resumo_profissional ? `
+                    <div class="mt-3">
+                        <h6><i class="fas fa-file-alt"></i> Resumo Profissional</h6>
+                        <p class="text-muted">${prof.resumo_profissional}</p>
+                    </div>
+                ` : ''}
+
+                ${prof.motivacao_esg ? `
+                    <div class="mt-3">
+                        <h6><i class="fas fa-heart"></i> Motivação ESG</h6>
+                        <p class="text-muted">${prof.motivacao_esg}</p>
+                    </div>
+                ` : ''}
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Funções auxiliares
+        function verDetalhes(vagaId) {
+            window.location.href = `/vagas/${vagaId}`;
+        }
+
+        function candidatar(vagaId) {
+            if (confirm('Deseja se candidatar a esta vaga?')) {
+                // TODO: Implementar API de candidatura
+                alert('Funcionalidade de candidatura em desenvolvimento!');
+            }
+        }
+
+        // Inicializar
+        loadDashboard();
+    </script>
+</body>
+</html>

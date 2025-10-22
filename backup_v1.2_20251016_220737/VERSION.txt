@@ -1,0 +1,23 @@
+﻿GREEN JOBS BRASIL - SYSTEM v1.2
+================================
+
+Data do Backup: 16/10/2025 22:07:37
+DiretÃ³rio Original: C:\Users\Bruno\Empresas Verdes
+
+CONTEÃšDO DO BACKUP:
+- Sistema completo funcional
+- 7 pÃ¡ginas web operacionais
+- 8 APIs REST testadas
+- Banco de dados com 981 registros
+- DocumentaÃ§Ã£o completa
+
+COMO RESTAURAR:
+1. Copiar conteÃºdo desta pasta para pasta destino
+2. Instalar dependÃªncias: pip install -r api/requirements.txt
+3. Iniciar API: py start_api.py
+4. Acessar: http://127.0.0.1:8002/
+
+ARQUIVOS COPIADOS: 19
+ERROS: 0
+
+Para mais informaÃ§Ãµes, consulte VERSION_1.2.md

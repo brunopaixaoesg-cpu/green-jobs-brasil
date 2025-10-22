@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Vagas Recomendadas | Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2ECC71;
+            --dark-green: #27AE60;
+            --light-green: #A9DFBF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .vaga-match-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #ddd;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .vaga-match-card:hover {
+            border-left-color: var(--primary-green);
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.2);
+        }
+        
+        .match-excelente { border-left-color: #2ECC71 !important; }
+        .match-bom { border-left-color: #3498DB !important; }
+        .match-regular { border-left-color: #F39C12 !important; }
+        .match-baixo { border-left-color: #95A5A6 !important; }
+        
+        .match-badge {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .match-badge-excelente { background: linear-gradient(135deg, #2ECC71, #27AE60); }
+        .match-badge-bom { background: linear-gradient(135deg, #3498DB, #2980B9); }
+        .match-badge-regular { background: linear-gradient(135deg, #F39C12, #E67E22); }
+        .match-badge-baixo { background: linear-gradient(135deg, #95A5A6, #7F8C8D); }
+        
+        .ods-badge {
+            display: inline-block;
+            padding: 0.4rem 0.7rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            margin: 0.2rem;
+        }
+        
+        .btn-green {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+        }
+        
+        .btn-green:hover {
+            background: var(--dark-green);
+            color: white;
+        }
+        
+        .skill-match {
+            background: var(--light-green);
+            color: var(--dark-green);
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-tie"></i> Vagas Recomendadas</h1>
+                    <p class="mb-0" id="profileName">Suas melhores oportunidades ESG</p>
+                </div>
+                <div>
+                    <a href="/profissionais/cadastro" class="btn btn-light me-2">
+                        <i class="fas fa-user-edit"></i> Editar Perfil
+                    </a>
+                    <a href="/" class="btn btn-outline-light">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seleção de Profissional (simplificado - em produção seria login) -->
+        <div class="card">
+            <div class="card-body">
+                <h5><i class="fas fa-user-circle"></i> Selecione seu Perfil</h5>
+                <select id="profissionalSelect" class="form-select" onchange="carregarRecomendacoes()">
+                    <option value="">Carregando perfis...</option>
+                </select>
+                <small class="text-muted">Em produção, isso seria substituído por autenticação</small>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mb-4" id="statsRow" style="display: none;">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-briefcase fa-2x text-primary mb-2"></i>
+                        <h3 id="totalVagas" class="mb-0">0</h3>
+                        <small class="text-muted">Vagas Compatíveis</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h3 id="melhorMatch" class="mb-0">0%</h3>
+                        <small class="text-muted">Melhor Match</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy fa-2x text-success mb-2"></i>
+                        <h3 id="matchesAltos" class="mb-0">0</h3>
+                        <small class="text-muted">Matches 80%+</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-dollar-sign fa-2x text-danger mb-2"></i>
+                        <h3 id="salarioMedio" class="mb-0">R$ 0</h3>
+                        <small class="text-muted">Salário Médio</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center my-5" style="display: none;">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Buscando vagas compatíveis com seu perfil...</p>
+        </div>
+
+        <!-- Vagas Recomendadas -->
+        <div id="vagasContainer" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-4"><i class="fas fa-magic"></i> Vagas Perfeitas para Você</h3>
+                    <div id="vagasList">
+                        <!-- Vagas serão inseridas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nenhuma vaga -->
+        <div id="noVagas" class="card" style="display: none;">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                <h4>Nenhuma vaga compatível encontrada</h4>
+                <p class="text-muted">Tente ajustar seu perfil ou aguarde novas oportunidades!</p>
+                <a href="/vagas" class="btn btn-green">
+                    <i class="fas fa-list"></i> Ver Todas as Vagas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const odsInfo = {
+            7: { emoji: '⚡', nome: 'Energia Limpa', cor: '#FCC30B' },
+            8: { emoji: '💼', nome: 'Trabalho Decente', cor: '#A21942' },
+            9: { emoji: '🏭', nome: 'Indústria', cor: '#FD6925' },
+            11: { emoji: '🏙️', nome: 'Cidades', cor: '#FD9D24' },
+            12: { emoji: '♻️', nome: 'Consumo Resp.', cor: '#BF8B2E' },
+            13: { emoji: '🌍', nome: 'Ação Climática', cor: '#3F7E44' },
+            14: { emoji: '🌊', nome: 'Vida na Água', cor: '#0A97D9' },
+            15: { emoji: '🌳', nome: 'Vida Terrestre', cor: '#56C02B' }
+        };
+
+        let profissionaisList = [];
+
+        // Carregar lista de profissionais
+        async function carregarProfissionais() {
+            try {
+                const response = await fetch('/api/profissionais/?limit=100');
+                profissionaisList = await response.json();
+                
+                const select = document.getElementById('profissionalSelect');
+                select.innerHTML = '<option value="">Selecione seu perfil...</option>';
+                
+                profissionaisList.forEach(prof => {
+                    const option = document.createElement('option');
+                    option.value = prof.id;
+                    option.textContent = `${prof.nome_completo} - ${prof.cargo_atual || 'Profissional ESG'}`;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar profissionais:', error);
+            }
+        }
+
+        // Carregar recomendações
+        async function carregarRecomendacoes() {
+            const profissionalId = document.getElementById('profissionalSelect').value;
+            
+            if (!profissionalId) {
+                document.getElementById('vagasContainer').style.display = 'none';
+                document.getElementById('noVagas').style.display = 'none';
+                document.getElementById('statsRow').style.display = 'none';
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const vagasContainer = document.getElementById('vagasContainer');
+            const noVagas = document.getElementById('noVagas');
+            const statsRow = document.getElementById('statsRow');
+            
+            loading.style.display = 'block';
+            vagasContainer.style.display = 'none';
+            noVagas.style.display = 'none';
+            
+            try {
+                // Buscar vagas recomendadas
+                const response = await fetch(`/api/matching/profissional/${profissionalId}/vagas?min_score=40&limit=50`);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                // Atualizar header
+                document.getElementById('profileName').textContent = `Olá, ${data.profissional_nome}! Encontramos ${data.total_vagas} vagas para você`;
+                
+                if (data.total_vagas === 0) {
+                    noVagas.style.display = 'block';
+                    return;
+                }
+                
+                statsRow.style.display = 'flex';
+                vagasContainer.style.display = 'block';
+                
+                // Calcular estatísticas
+                const scores = data.vagas.map(v => v.match.score_total);
+                const melhorScore = Math.max(...scores);
+                const matchesAltos = scores.filter(s => s >= 80).length;
+                
+                const salarios = data.vagas
+                    .filter(v => v.vaga.salario_min && v.vaga.salario_max)
+                    .map(v => (v.vaga.salario_min + v.vaga.salario_max) / 2);
+                
+                const salarioMedio = salarios.length > 0 
+                    ? salarios.reduce((a, b) => a + b, 0) / salarios.length 
+                    : 0;
+                
+                // Atualizar stats
+                document.getElementById('totalVagas').textContent = data.total_vagas;
+                document.getElementById('melhorMatch').textContent = melhorScore.toFixed(0) + '%';
+                document.getElementById('matchesAltos').textContent = matchesAltos;
+                document.getElementById('salarioMedio').textContent = salarioMedio > 0 
+                    ? 'R$ ' + salarioMedio.toFixed(0).toLocaleString('pt-BR')
+                    : 'N/A';
+                
+                // Renderizar vagas
+                const vagasList = document.getElementById('vagasList');
+                vagasList.innerHTML = data.vagas.map(item => criarVagaCard(item)).join('');
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                console.error('Erro ao carregar recomendações:', error);
+                alert('Erro ao carregar vagas. Tente novamente.');
+            }
+        }
+
+        function criarVagaCard(item) {
+            const vaga = item.vaga;
+            const match = item.match;
+            
+            const matchClass = `match-${match.classificacao}`;
+            const matchBadgeClass = `match-badge-${match.classificacao}`;
+            
+            const odsHtml = (vaga.ods_tags || []).map(ods => {
+                const info = odsInfo[ods];
+                return `<span class="ods-badge" style="background: ${info.cor}">${info.emoji} ${ods}</span>`;
+            }).join('');
+            
+            const skillsHtml = (vaga.habilidades_requeridas || []).slice(0, 5).map(skill => 
+                `<span class="skill-match">${skill}</span>`
+            ).join('');
+            
+            const salario = vaga.salario_min && vaga.salario_max
+                ? `R$ ${vaga.salario_min.toLocaleString('pt-BR')} - R$ ${vaga.salario_max.toLocaleString('pt-BR')}`
+                : 'A combinar';
+            
+            return `
+                <div class="vaga-match-card ${matchClass}" onclick="verVaga(${vaga.id})">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="match-badge ${matchBadgeClass}">
+                                <div style="font-size: 1.5rem;">${match.score_total}</div>
+                                <div style="font-size: 0.7rem;">${match.classificacao}</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h4 class="mb-2">${vaga.titulo}</h4>
+                            <h6 class="text-muted mb-2">${vaga.empresa_nome}</h6>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">${vaga.nivel}</span>
+                                <span class="badge bg-primary ms-1">${vaga.tipo}</span>
+                                ${vaga.remoto ? '<span class="badge bg-info ms-1"><i class="fas fa-laptop-house"></i> Remoto</span>' : ''}
+                            </div>
+                            
+                            <p class="mb-2 small">
+                                <i class="fas fa-map-marker-alt"></i> ${vaga.localizacao_cidade || ''} ${vaga.localizacao_uf || ''}
+                                <span class="ms-3"><i class="fas fa-dollar-sign"></i> ${salario}</span>
+                            </p>
+                            
+                            ${odsHtml ? `<div class="mb-2">${odsHtml}</div>` : ''}
+                            ${skillsHtml ? `<div class="mb-2">${skillsHtml}</div>` : ''}
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Por que você combina:</strong>
+                                    ${match.breakdown.ods.score >= 80 ? '✓ ODS alinhados ' : ''}
+                                    ${match.breakdown.habilidades.score >= 70 ? '✓ Skills compatíveis ' : ''}
+                                    ${match.breakdown.experiencia.score >= 70 ? '✓ Experiência adequada ' : ''}
+                                    ${match.breakdown.localizacao.score >= 80 ? '✓ Localização ok ' : ''}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <button class="btn btn-green btn-lg" onclick="event.stopPropagation(); candidatar(${vaga.id})">
+                                <i class="fas fa-paper-plane"></i> Candidatar-se
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-muted">Match: ${match.score_total}%</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="row text-center">
+                        <div class="col">
+                            <small class="text-muted">ODS</small><br>
+                            <strong>${match.breakdown.ods.score}%</strong>
+                        </div>
+                        <div class="col">
+                            <small class="text-muted">Habilidades</small><br>
+                            <strong>${match.breakdown.habilidades.score}%</strong>
+                        </div>
+                        <div class="col">
+                            <small class="text-muted">Experiência</small><br>
+                            <strong>${match.breakdown.experiencia.score}%</strong>
+                        </div>
+                        <div class="col">
+                            <small class="text-muted">Localização</small><br>
+                            <strong>${match.breakdown.localizacao.score}%</strong>
+                        </div>
+                        <div class="col">
+                            <small class="text-muted">Salário</small><br>
+                            <strong>${match.breakdown.salario.score}%</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function verVaga(vagaId) {
+            window.location.href = `/vagas/detalhes?id=${vagaId}`;
+        }
+
+        function candidatar(vagaId) {
+            alert('Candidatura registrada! Em breve a empresa entrará em contato.');
+            // Aqui implementaria POST para registrar candidatura
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', carregarProfissionais);
+    </script>
+</body>
+</html>

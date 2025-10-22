@@ -1,0 +1,24 @@
+{
+  "feature_names": [
+    "experiencia_normalizada",
+    "score_atual",
+    "mesmo_estado",
+    "compatibilidade_geografica",
+    "compatibilidade_salarial",
+    "match_nivel",
+    "match_cargo",
+    "skills_overlap",
+    "ods_overlap",
+    "dias_desde_candidatura",
+    "mes_candidatura",
+    "dia_semana",
+    "aceita_remoto_int",
+    "vaga_remoto_int",
+    "tipo_contratacao_encoded",
+    "disponibilidade_encoded"
+  ],
+  "trained_date": "2025-10-15T06:16:30.513825",
+  "dataset_size": 768,
+  "test_accuracy_rf": 0.6038961038961039,
+  "test_accuracy_xgb": 0.6168831168831169
+}

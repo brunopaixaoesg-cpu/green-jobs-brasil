@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #6366f1;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .login-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 60px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .login-banner i {
+            font-size: 80px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .login-banner h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .login-banner p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .login-form {
+            padding: 60px 50px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e5e7eb;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .input-group-text {
+            background: var(--light);
+            border: 2px solid #e5e7eb;
+            border-right: none;
+            color: var(--dark);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-dark);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #6b7280;
+        }
+
+        .register-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            .login-banner {
+                padding: 40px 20px;
+            }
+            
+            .login-banner h1 {
+                font-size: 1.8rem;
+            }
+            
+            .login-form {
+                padding: 40px 30px;
+            }
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.active {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container row g-0">
+            <!-- Banner Lateral -->
+            <div class="col-md-5 login-banner d-none d-md-flex">
+                <i class="fas fa-leaf"></i>
+                <h1>Green Jobs Brasil</h1>
+                <p>Conectando profissionais sustentáveis com empresas verdes</p>
+                <div class="mt-4">
+                    <i class="fas fa-check-circle me-2"></i> Vagas ESG<br>
+                    <i class="fas fa-check-circle me-2"></i> Empresas Certificadas<br>
+                    <i class="fas fa-check-circle me-2"></i> Matching Inteligente
+                </div>
+            </div>
+
+            <!-- Formulário de Login -->
+            <div class="col-md-7 login-form">
+                <h2 class="mb-1 fw-bold" style="color: var(--dark);">Bem-vindo de volta!</h2>
+                <p class="text-muted mb-4">Entre com suas credenciais para continuar</p>
+
+                <!-- Alertas -->
+                <div id="alertContainer"></div>
+
+                <!-- Formulário -->
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-2"></i>Email
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="seu@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Senha
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Digite sua senha" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Lembrar-me
+                            </label>
+                        </div>
+                        <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-login btn-primary">
+                        <span class="btn-text">Entrar</span>
+                        <span class="loading spinner-border spinner-border-sm ms-2"></span>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OU</span>
+                </div>
+
+                <div class="register-link">
+                    Não tem uma conta? <a href="/registro">Cadastre-se gratuitamente</a>
+                </div>
+
+                <div class="register-link mt-2">
+                    <a href="/"><i class="fas fa-home me-2"></i>Voltar para Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle visualização de senha
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Submit do formulário
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const loading = submitBtn.querySelector('.loading');
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            btnText.textContent = 'Entrando...';
+            loading.classList.add('active');
+            alertContainer.innerHTML = '';
+            
+            const formData = new FormData();
+            formData.append('username', document.getElementById('email').value);
+            formData.append('password', document.getElementById('password').value);
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Salvar token
+                    localStorage.setItem('access_token', data.access_token);
+                    if (data.refresh_token) {
+                        localStorage.setItem('refresh_token', data.refresh_token);
+                    }
+                    
+                    // Mostrar sucesso
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Login realizado com sucesso! Redirecionando...
+                        </div>
+                    `;
+                    
+                    // Redirecionar após 1 segundo
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                    
+                } else {
+                    // Mostrar erro
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            ${data.detail || 'Email ou senha incorretos'}
+                        </div>
+                    `;
+                    
+                    // Resetar botão
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Entrar';
+                    loading.classList.remove('active');
+                }
+            } catch (error) {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Erro ao conectar com o servidor. Tente novamente.
+                    </div>
+                `;
+                
+                submitBtn.disabled = false;
+                btnText.textContent = 'Entrar';
+                loading.classList.remove('active');
+            }
+        });
+
+        // Verificar se já está logado
+        if (localStorage.getItem('access_token')) {
+            fetch('/api/auth/verify-token', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

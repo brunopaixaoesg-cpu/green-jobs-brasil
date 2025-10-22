@@ -1,0 +1,23 @@
+RELATÓRIO DE RESPONSIVIDADE - GREEN JOBS BRASIL
+============================================================
+
+Data: 2025-10-19 07:44:52
+
+Dashboard Profissional:
+  Status: 200
+  Tempo: 0.01s
+  Sucesso: ✅
+  Responsivo: ✅
+
+Perfil Storytelling:
+  Status: 200
+  Tempo: 0.01s
+  Sucesso: ✅
+  Responsivo: ✅
+
+Edição Storytelling:
+  Status: 200
+  Tempo: 0.11s
+  Sucesso: ✅
+  Responsivo: ✅
+
