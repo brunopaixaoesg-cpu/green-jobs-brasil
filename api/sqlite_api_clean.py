@@ -284,15 +284,16 @@ async def profissional_perfil_page(request: Request, profissional_id: int):
 async def get_empresas():
     """Listar empresas verdes"""
     try:
-        conn = get_db_connection()
-        conn.row_factory = sqlite3.Row
+        conn = get_db()
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT cnpj, razao_social, nome_fantasia, cnae_principal, 
-                   cnaes_secundarias, porte, uf, municipio, 
-                   situacao_cadastral, score_verde as green_score, ods_tags,
-                   data_abertura, atualizado_em
+            SELECT cnpj, razao_social, nome_fantasia, score_verde,
+                   created_at
+            FROM empresas_esg 
+            ORDER BY score_verde DESC 
+            LIMIT 100
+        """)
             FROM empresas_verdes 
             ORDER BY score_verde DESC
         """)
@@ -330,7 +331,7 @@ async def get_empresas():
 async def get_stats():
     """Estatísticas gerais"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -455,7 +456,7 @@ async def add_company(cnpj: str = Form(...)):
 async def get_candidatos_vaga(vaga_id: int):
     """Retorna candidatos para uma vaga específica"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -493,7 +494,7 @@ async def get_candidatos_vaga(vaga_id: int):
 async def get_matching_stats():
     """Estatísticas de matching"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -535,7 +536,7 @@ async def get_matching_stats():
 async def get_matching_dashboard():
     """Dados completos do dashboard ML"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -610,7 +611,7 @@ async def get_matching_dashboard():
 async def get_vagas(limit: int = 10):
     """Lista vagas ESG"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -646,7 +647,7 @@ async def get_vagas(limit: int = 10):
 async def get_profissionais(limit: int = 10):
     """Lista profissionais ESG"""
     try:
-        conn = get_db_connection()
+        conn = get_db()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
