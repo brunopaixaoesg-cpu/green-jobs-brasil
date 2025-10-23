@@ -15,8 +15,8 @@ import os
 
 app = FastAPI(
     title="Green Jobs Brasil API",
-    description="API para consulta de empresas verdes no Brasil - PostgreSQL",
-    version="2.1.0"
+    description="API para consulta de empresas verdes no Brasil - PostgreSQL v2.2",
+    version="2.2.0"
 )
 
 # Configurar caminhos absolutos para templates e arquivos estáticos
