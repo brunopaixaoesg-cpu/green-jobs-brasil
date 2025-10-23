@@ -288,6 +288,11 @@ async def seed_database_endpoint():
             conn.close()
         raise HTTPException(status_code=500, detail=f"Erro ao popular banco: {str(e)}")
 
+@app.get("/api/populate")
+async def populate_database():
+    """GET version - Popula dados via URL simples"""
+    return await seed_database_endpoint()
+
 # =====================================================
 
 # Rota principal - Landing Page
