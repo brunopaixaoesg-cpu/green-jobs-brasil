@@ -204,6 +204,90 @@ async def listar_empresas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/seed")
+async def seed_database_endpoint():
+    """Popula banco PostgreSQL com dados de exemplo"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Limpar dados anteriores
+        try:
+            cursor.execute("DELETE FROM vagas")
+            cursor.execute("DELETE FROM empresas_esg") 
+            cursor.execute("DELETE FROM profissionais_esg")
+            conn.commit()
+            print("🧹 Dados antigos removidos")
+        except Exception as e:
+            print(f"⚠️ Aviso na limpeza: {e}")
+            conn.rollback()
+        
+        # Dados de profissionais
+        profissionais = [
+            ("Maria Silva", "maria@email.com", "Energia Solar", 5, "São Paulo", "SP"),
+            ("João Santos", "joao@email.com", "Sustentabilidade", 3, "Rio de Janeiro", "RJ"),
+            ("Ana Costa", "ana@email.com", "Gestão Ambiental", 7, "Belo Horizonte", "MG"),
+            ("Carlos Lima", "carlos@email.com", "Energia Eólica", 4, "Fortaleza", "CE"),
+            ("Lucia Fernandes", "lucia@email.com", "Reciclagem", 6, "Porto Alegre", "RS")
+        ]
+        
+        profissional_ids = []
+        for prof in profissionais:
+            cursor.execute("""
+                INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf)
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
+            """, prof)
+            prof_id = cursor.fetchone()[0]
+            profissional_ids.append(prof_id)
+        
+        # Dados de empresas
+        empresas = [
+            ("EcoTech Solutions", "12345678000123", "Tecnologia Verde", 85, "São Paulo", "SP"),
+            ("Verde Energia Ltda", "98765432000156", "Energia Renovável", 92, "Rio de Janeiro", "RJ"),
+            ("Sustenta Brasil SA", "11122233000144", "Consultoria ESG", 78, "Brasília", "DF")
+        ]
+        
+        empresa_ids = []
+        for emp in empresas:
+            cursor.execute("""
+                INSERT INTO empresas_esg (nome, cnpj, setor, score_verde, cidade, uf)
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
+            """, emp)
+            emp_id = cursor.fetchone()[0]
+            empresa_ids.append(emp_id)
+        
+        # Dados de vagas
+        vagas = [
+            ("Analista de Sustentabilidade", "Analista para projetos ESG", empresa_ids[0], "São Paulo", "SP", "CLT", False, 5500.00),
+            ("Engenheiro(a) de Energia Solar", "Desenvolvimento de projetos solares", empresa_ids[1], "Rio de Janeiro", "RJ", "CLT", True, 7200.00),
+            ("Consultor(a) Ambiental", "Consultoria em gestão ambiental", empresa_ids[2], "Brasília", "DF", "PJ", True, 8500.00),
+            ("Especialista em ESG", "Implementação de práticas ESG", empresa_ids[0], "São Paulo", "SP", "CLT", False, 9200.00),
+            ("Técnico(a) em Energia Eólica", "Manutenção de turbinas eólicas", empresa_ids[1], "Fortaleza", "CE", "CLT", False, 4800.00)
+        ]
+        
+        for vaga in vagas:
+            cursor.execute("""
+                INSERT INTO vagas (titulo, descricao, empresa_id, localizacao_cidade, localizacao_uf, tipo_contrato, remoto, salario)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, vaga)
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "message": "Banco populado com sucesso!",
+            "profissionais": len(profissionais),
+            "empresas": len(empresas), 
+            "vagas": len(vagas)
+        }
+        
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
+            conn.close()
+        raise HTTPException(status_code=500, detail=f"Erro ao popular banco: {str(e)}")
+
 # =====================================================
 
 # Rota principal - Landing Page
