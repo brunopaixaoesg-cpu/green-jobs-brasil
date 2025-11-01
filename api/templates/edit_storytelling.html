@@ -591,6 +591,9 @@
             <div class="header-section">
                 <h1><i class="fas fa-leaf"></i> Editar Perfil Storytelling</h1>
                 <p>Conte sua história verde e mostre quem você é além do CV</p>
+                <button type="button" class="btn btn-light btn-lg mt-3" onclick="openPreview()">
+                    <i class="fas fa-eye"></i> Visualizar Perfil
+                </button>
             </div>
 
             <!-- Formulário -->
@@ -814,6 +817,90 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Preview do Perfil -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%); color: white;">
+                    <h5 class="modal-title" id="previewModalLabel">
+                        <i class="fas fa-eye"></i> Preview do Perfil
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <!-- Banner Preview -->
+                    <div id="previewBanner" style="height: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); position: relative; overflow: hidden;">
+                        <img id="previewBannerImg" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    </div>
+                    
+                    <!-- Foto Perfil Preview -->
+                    <div style="margin-top: -60px; margin-left: 40px; position: relative; z-index: 10;">
+                        <div id="previewFotoPerfil" style="width: 120px; height: 120px; border-radius: 50%; border: 5px solid white; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fas fa-user fa-3x text-secondary"></i>
+                            <img id="previewFotoPerfilImg" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        </div>
+                    </div>
+                    
+                    <!-- Conteúdo do Perfil -->
+                    <div class="p-4">
+                        <h2 id="previewNome" class="mb-1">{{ dados.nome or 'Seu Nome' }}</h2>
+                        <p id="previewCargo" class="text-muted mb-3">{{ dados.cargo_atual or 'Seu Cargo' }}</p>
+                        
+                        <!-- História Verde -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-leaf text-success"></i> Minha História Verde</h5>
+                            <p id="previewHistoria" class="text-muted" style="white-space: pre-wrap;">Sua história verde aparecerá aqui...</p>
+                        </div>
+                        
+                        <!-- Motivação -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-heart text-danger"></i> Motivação ESG</h5>
+                            <p id="previewMotivacao" class="text-muted" style="white-space: pre-wrap;">Sua motivação aparecerá aqui...</p>
+                        </div>
+                        
+                        <!-- Valores Pessoais -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-star text-warning"></i> Valores Pessoais</h5>
+                            <p id="previewValores" class="text-muted" style="white-space: pre-wrap;">Seus valores aparecerão aqui...</p>
+                        </div>
+                        
+                        <!-- Objetivos de Carreira -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-bullseye text-primary"></i> Objetivos de Carreira</h5>
+                            <p id="previewObjetivos" class="text-muted" style="white-space: pre-wrap;">Seus objetivos aparecerão aqui...</p>
+                        </div>
+                        
+                        <!-- Conquistas -->
+                        <div class="mb-4" id="previewConquistasSection" style="display: none;">
+                            <h5><i class="fas fa-trophy text-warning"></i> Conquistas</h5>
+                            <div id="previewConquistas"></div>
+                        </div>
+                        
+                        <!-- Portfólio -->
+                        <div class="mb-4" id="previewPortfolioSection" style="display: none;">
+                            <h5><i class="fas fa-briefcase text-info"></i> Portfólio de Projetos</h5>
+                            <div id="previewPortfolio"></div>
+                        </div>
+                        
+                        <!-- Idiomas -->
+                        <div class="mb-4" id="previewIdiomasSection" style="display: none;">
+                            <h5><i class="fas fa-language text-primary"></i> Idiomas</h5>
+                            <div id="previewIdiomas" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="document.getElementById('storytellingForm').dispatchEvent(new Event('submit'))">
+                        <i class="fas fa-save"></i> Salvar e Publicar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1254,6 +1341,111 @@
 
         // Inicializar
         loadData();
+
+        /**
+         * Abrir modal de preview
+         */
+        function openPreview() {
+            // Atualizar dados do preview
+            updatePreview();
+            
+            // Abrir modal
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+        }
+
+        /**
+         * Atualizar preview com dados atuais do formulário
+         */
+        function updatePreview() {
+            // Textos principais
+            const historia = document.getElementById('historia_verde').value;
+            const motivacao = document.getElementById('motivacao').value;
+            const valores = document.getElementById('valores_pessoais').value;
+            const objetivos = document.getElementById('objetivos_carreira').value;
+            
+            document.getElementById('previewHistoria').textContent = historia || 'Sua história verde aparecerá aqui...';
+            document.getElementById('previewMotivacao').textContent = motivacao || 'Sua motivação aparecerá aqui...';
+            document.getElementById('previewValores').textContent = valores || 'Seus valores aparecerão aqui...';
+            document.getElementById('previewObjetivos').textContent = objetivos || 'Seus objetivos aparecerão aqui...';
+            
+            // Foto de perfil
+            const fotoPerfilImg = document.querySelector('#fotoPerfilPreview img');
+            const previewFotoPerfilImg = document.getElementById('previewFotoPerfilImg');
+            const previewFotoPerfilIcon = document.querySelector('#previewFotoPerfil i');
+            
+            if (fotoPerfilImg) {
+                previewFotoPerfilImg.src = fotoPerfilImg.src;
+                previewFotoPerfilImg.style.display = 'block';
+                if (previewFotoPerfilIcon) previewFotoPerfilIcon.style.display = 'none';
+            } else {
+                previewFotoPerfilImg.style.display = 'none';
+                if (previewFotoPerfilIcon) previewFotoPerfilIcon.style.display = 'flex';
+            }
+            
+            // Banner
+            const bannerImg = document.querySelector('#bannerPreview img');
+            const previewBannerImg = document.getElementById('previewBannerImg');
+            
+            if (bannerImg) {
+                previewBannerImg.src = bannerImg.src;
+                previewBannerImg.style.display = 'block';
+            } else {
+                previewBannerImg.style.display = 'none';
+            }
+            
+            // Conquistas
+            const conquistasSection = document.getElementById('previewConquistasSection');
+            const conquistasDiv = document.getElementById('previewConquistas');
+            
+            if (conquistas.length > 0) {
+                conquistasSection.style.display = 'block';
+                conquistasDiv.innerHTML = conquistas.map(c => `
+                    <div class="border-start border-success border-3 ps-3 mb-3">
+                        <strong>${c.titulo}</strong><br>
+                        <small class="text-muted">${c.ano}</small><br>
+                        <p class="mb-0 mt-1">${c.descricao}</p>
+                    </div>
+                `).join('');
+            } else {
+                conquistasSection.style.display = 'none';
+            }
+            
+            // Portfólio
+            const portfolioSection = document.getElementById('previewPortfolioSection');
+            const portfolioDiv = document.getElementById('previewPortfolio');
+            
+            if (projetos.length > 0) {
+                portfolioSection.style.display = 'block';
+                portfolioDiv.innerHTML = projetos.map(p => `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">${p.titulo}</h6>
+                            <p class="card-text small">${p.descricao}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">${p.impacto}</span>
+                                ${p.url ? `<a href="${p.url}" target="_blank" class="btn btn-sm btn-outline-primary">Ver projeto</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                portfolioSection.style.display = 'none';
+            }
+            
+            // Idiomas
+            const idiomasSection = document.getElementById('previewIdiomasSection');
+            const idiomasDiv = document.getElementById('previewIdiomas');
+            
+            if (idiomas.length > 0) {
+                idiomasSection.style.display = 'block';
+                idiomasDiv.innerHTML = idiomas.map(i => `
+                    <span class="badge bg-primary">${i.idioma} - ${i.nivel}</span>
+                `).join('');
+            } else {
+                idiomasSection.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

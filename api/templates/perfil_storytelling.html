@@ -679,6 +679,20 @@
                 const response = await fetch(`/api/profissionais/${profissionalId}/storytelling`);
                 const data = await response.json();
                 
+                // Banner
+                const banner = document.querySelector('.profile-banner');
+                if (data.banner_url) {
+                    banner.style.backgroundImage = `url('${data.banner_url}')`;
+                    banner.style.backgroundSize = 'cover';
+                    banner.style.backgroundPosition = 'center';
+                }
+                
+                // Foto de Perfil
+                const profilePhoto = document.getElementById('profilePhoto');
+                if (data.foto_perfil_url) {
+                    profilePhoto.innerHTML = `<img src="${data.foto_perfil_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                }
+                
                 // Header
                 document.getElementById('profileName').textContent = data.nome_completo;
                 document.getElementById('profileCargo').textContent = `${data.cargo_atual || 'Profissional ESG'} ${data.empresa_atual ? '@ ' + data.empresa_atual : ''}`;

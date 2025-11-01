@@ -1071,7 +1071,7 @@ async def obter_perfil_storytelling(profissional_id: int):
                 habilidades_esg, ods_experiencia, ods_interesse,
                 certificacoes, areas_interesse,
                 foto_perfil_url, banner_url,
-                historia_verde, motivacao, valores_pessoais, objetivos_carreira,
+                historia_verde, motivacao_esg, valores_pessoais, objetivos_carreira,
                 conquistas_json, portfolio_projetos_json,
                 redes_sociais_json, idiomas_json, 
                 voluntariado_json, publicacoes_json
@@ -1087,6 +1087,10 @@ async def obter_perfil_storytelling(profissional_id: int):
         
         # Converter para dict
         result = dict(prof)
+        
+        # Mapear campos
+        if 'motivacao_esg' in result:
+            result['motivacao'] = result['motivacao_esg']
         
         # Parse JSON fields
         json_fields = [
