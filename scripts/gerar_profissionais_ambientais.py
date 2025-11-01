@@ -6,12 +6,13 @@ Cria perfis específicos para área ambiental com dados mais realísticos
 para demonstração focada no setor que você conhece.
 """
 
-import sqlite3
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
+from scripts.db_wrapper import get_connection
 
 # Configurações
+
 DATABASE_PATH = Path("gjb_dev.db")
 
 # Dados específicos da área ambiental
@@ -80,9 +81,7 @@ ESPECIALIZACOES = [
     "Pós em Mudanças Climáticas", "MBA em Meio Ambiente e Desenvolvimento Sustentável"
 ]
 
-def conectar_db():
-    """Conecta ao banco de dados SQLite"""
-    return sqlite3.connect(DATABASE_PATH)
+# Use scripts.db_wrapper.get_connection() as context manager for DB access
 
 def gerar_perfil_ambiental():
     """Gera um perfil profissional realístico da área ambiental"""
@@ -205,39 +204,37 @@ def gerar_perfil_ambiental():
 
 def inserir_profissional_ambiental(perfil):
     """Insere profissional ambiental no banco de dados"""
-    conn = conectar_db()
-    cursor = conn.cursor()
-    
-    try:
-        query = """
-        INSERT INTO profissionais_esg (
-            email, nome_completo, telefone, linkedin_url, localizacao_uf, localizacao_cidade,
-            aceita_remoto, disponivel_mudanca, anos_experiencia_total, anos_experiencia_esg,
-            cargo_atual, empresa_atual, formacao_nivel, formacao_area, instituicao,
-            ods_interesse, ods_experiencia, habilidades_esg, certificacoes, areas_interesse,
-            nivel_desejado, tipo_contratacao_desejado, pretensao_salarial_min, pretensao_salarial_max,
-            resumo_profissional, motivacao_esg, status, perfil_completo, aceita_contato
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        
-        cursor.execute(query, (
-            perfil["email"], perfil["nome_completo"], perfil["telefone"], perfil["linkedin_url"],
-            perfil["localizacao_uf"], perfil["localizacao_cidade"], perfil["aceita_remoto"],
-            perfil["disponivel_mudanca"], perfil["anos_experiencia_total"], perfil["anos_experiencia_esg"],
-            perfil["cargo_atual"], perfil["empresa_atual"], perfil["formacao_nivel"], perfil["formacao_area"],
-            perfil["instituicao"], perfil["ods_interesse"], perfil["ods_experiencia"], perfil["habilidades_esg"],
-            perfil["certificacoes"], perfil["areas_interesse"], perfil["nivel_desejado"],
-            perfil["tipo_contratacao_desejado"], perfil["pretensao_salarial_min"], perfil["pretensao_salarial_max"],
-            perfil["resumo_profissional"], perfil["motivacao_esg"], "ativo", True, True
-        ))
-        
-        conn.commit()
-        return True
-        
-    except sqlite3.IntegrityError:
-        return False  # Email já existe
-    finally:
-        conn.close()
+    from sqlite3 import IntegrityError
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            query = """
+            INSERT INTO profissionais_esg (
+                email, nome_completo, telefone, linkedin_url, localizacao_uf, localizacao_cidade,
+                aceita_remoto, disponivel_mudanca, anos_experiencia_total, anos_experiencia_esg,
+                cargo_atual, empresa_atual, formacao_nivel, formacao_area, instituicao,
+                ods_interesse, ods_experiencia, habilidades_esg, certificacoes, areas_interesse,
+                nivel_desejado, tipo_contratacao_desejado, pretensao_salarial_min, pretensao_salarial_max,
+                resumo_profissional, motivacao_esg, status, perfil_completo, aceita_contato
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+
+            cursor.execute(query, (
+                perfil["email"], perfil["nome_completo"], perfil["telefone"], perfil["linkedin_url"],
+                perfil["localizacao_uf"], perfil["localizacao_cidade"], perfil["aceita_remoto"],
+                perfil["disponivel_mudanca"], perfil["anos_experiencia_total"], perfil["anos_experiencia_esg"],
+                perfil["cargo_atual"], perfil["empresa_atual"], perfil["formacao_nivel"], perfil["formacao_area"],
+                perfil["instituicao"], perfil["ods_interesse"], perfil["ods_experiencia"], perfil["habilidades_esg"],
+                perfil["certificacoes"], perfil["areas_interesse"], perfil["nivel_desejado"],
+                perfil["tipo_contratacao_desejado"], perfil["pretensao_salarial_min"], perfil["pretensao_salarial_max"],
+                perfil["resumo_profissional"], perfil["motivacao_esg"], "ativo", True, True
+            ))
+
+            conn.commit()
+            return True
+
+        except IntegrityError:
+            return False  # Email já existe
 
 def main():
     print("🌱 Gerando Profissionais da Área Ambiental - Green Jobs Brasil")
@@ -248,11 +245,11 @@ def main():
     # Limpar profissionais existentes se quiser recomeçar
     resposta = input("🗑️  Limpar profissionais existentes? (s/N): ").lower()
     if resposta == 's':
-        conn = conectar_db()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM profissionais_esg")
-        conn.commit()
-        conn.close()
+        from scripts.db_wrapper import get_connection
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM profissionais_esg")
+            conn.commit()
         print("✅ Profissionais anteriores removidos")
     
     # Gerar profissionais ambientais

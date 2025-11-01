@@ -10,16 +10,67 @@ from pydantic import BaseModel
 from datetime import datetime
 import hashlib
 import os
-import sys
 
-# Adicionar path do db.py
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from db import get_db
+from api.db import get_db
 
 router = APIRouter(prefix="/empresas", tags=["Empresas ESG"])
 
 # Templates
 templates = Jinja2Templates(directory="api/templates")
+
+# --- Cadastro de empresa (endpoint de API) ---
+from fastapi import Body
+import requests
+
+class EmpresaCadastro(BaseModel):
+    cnpj: str
+    email: str
+    senha: str
+    telefone: str = ""
+    website: str = ""
+    descricao: str = ""
+    logo_url: str = ""
+
+
+@router.post("/api/cadastro")
+async def cadastrar_empresa(dados: EmpresaCadastro = Body(...)):
+    """Cadastro de empresa ESG com validação de CNPJ e Receita Federal"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cnpj_clean = ''.join(filter(str.isdigit, dados.cnpj))
+    # Verificar duplicidade
+    cursor.execute("SELECT id FROM empresas_esg WHERE cnpj = ?", (dados.cnpj,))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=409, detail="Empresa já cadastrada com esse CNPJ")
+
+    # Consultar Receita Federal
+    url = f"https://www.receitaws.com.br/v1/cnpj/{cnpj_clean}"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status') == 'OK':
+                razao_social = data.get('nome', '')
+                nome_fantasia = data.get('fantasia', '')
+                cidade = data.get('municipio', '')
+                estado = data.get('uf', '')
+                setor = (data.get('atividade_principal', [{}])[0].get('text', '') if data.get('atividade_principal') else '')
+            else:
+                razao_social = nome_fantasia = cidade = estado = setor = ''
+        else:
+            razao_social = nome_fantasia = cidade = estado = setor = ''
+    except Exception:
+        razao_social = nome_fantasia = cidade = estado = setor = ''
+
+    senha_hash = hashlib.sha256(dados.senha.encode()).hexdigest()
+    cursor.execute("""
+        INSERT INTO empresas_esg (cnpj, razao_social, nome_fantasia, email, senha_hash, telefone, website, descricao, logo_url, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (dados.cnpj, razao_social, nome_fantasia, dados.email, senha_hash, dados.telefone, dados.website, dados.descricao, dados.logo_url, 'ativa'))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Empresa cadastrada com sucesso", "cnpj": dados.cnpj, "razao_social": razao_social, "nome_fantasia": nome_fantasia}
 
 # ==================== MODELS ====================
 
@@ -112,8 +163,8 @@ async def dashboard(request: Request, empresa_id: Optional[int] = None):
     # Buscar dados da empresa
     cursor.execute("""
         SELECT e.*, 
-               (SELECT COUNT(*) FROM vagas_esg WHERE cnpj=e.cnpj) as total_vagas,
-               (SELECT COUNT(*) FROM vagas_esg WHERE cnpj=e.cnpj AND status='ativa') as vagas_ativas
+               (SELECT COUNT(*) FROM vagas WHERE cnpj=e.cnpj) as total_vagas,
+               (SELECT COUNT(*) FROM vagas WHERE cnpj=e.cnpj AND status='ativa') as vagas_ativas
         FROM empresas_esg e
         WHERE e.id=?
     """, (empresa_id,))
@@ -129,9 +180,9 @@ async def dashboard(request: Request, empresa_id: Optional[int] = None):
         SELECT v.*, 
                (SELECT COUNT(*) FROM candidaturas_esg WHERE vaga_id=v.id) as total_candidaturas,
                (SELECT COUNT(*) FROM candidaturas_esg WHERE vaga_id=v.id AND status='pendente') as candidaturas_pendentes
-        FROM vagas_esg v
+        FROM vagas v
         WHERE v.cnpj=?
-        ORDER BY v.criada_em DESC
+        ORDER BY v.created_at DESC
     """, (empresa['cnpj'],))
     
     vagas = cursor.fetchall()
@@ -153,10 +204,10 @@ async def get_empresa_info(empresa_id: int):
     
     cursor.execute("""
         SELECT e.*, 
-               (SELECT COUNT(*) FROM vagas_esg WHERE cnpj=e.cnpj) as total_vagas,
-               (SELECT COUNT(*) FROM vagas_esg WHERE cnpj=e.cnpj AND status='ativa') as vagas_ativas,
+               (SELECT COUNT(*) FROM vagas WHERE cnpj=e.cnpj) as total_vagas,
+               (SELECT COUNT(*) FROM vagas WHERE cnpj=e.cnpj AND status='ativa') as vagas_ativas,
                (SELECT COUNT(*) FROM candidaturas_esg c 
-                JOIN vagas_esg v ON c.vaga_id=v.id 
+                JOIN vagas v ON c.vaga_id=v.id 
                 WHERE v.cnpj=e.cnpj) as total_candidaturas
         FROM empresas_esg e
         WHERE e.id=?
@@ -197,7 +248,7 @@ async def get_candidaturas(
                p.nome_completo as profissional_nome,
                p.email as profissional_email
         FROM candidaturas_esg c
-        JOIN vagas_esg v ON c.vaga_id = v.id
+        JOIN vagas v ON c.vaga_id = v.id
         JOIN profissionais_esg p ON c.profissional_id = p.id
         WHERE v.cnpj = ?
     """
@@ -282,14 +333,14 @@ async def get_estatisticas(empresa_id: int):
     stats = {}
     
     # Total de vagas
-    cursor.execute("SELECT COUNT(*) as total FROM vagas_esg WHERE cnpj=?", (empresa['cnpj'],))
+    cursor.execute("SELECT COUNT(*) as total FROM vagas WHERE cnpj=?", (empresa['cnpj'],))
     stats['total_vagas'] = cursor.fetchone()['total']
     
     # Candidaturas por status
     cursor.execute("""
         SELECT c.status, COUNT(*) as total
         FROM candidaturas_esg c
-        JOIN vagas_esg v ON c.vaga_id = v.id
+        JOIN vagas v ON c.vaga_id = v.id
         WHERE v.cnpj = ?
         GROUP BY c.status
     """, (empresa['cnpj'],))
@@ -300,7 +351,7 @@ async def get_estatisticas(empresa_id: int):
     cursor.execute("""
         SELECT AVG(c.compatibilidade_score) as score_medio
         FROM candidaturas_esg c
-        JOIN vagas_esg v ON c.vaga_id = v.id
+        JOIN vagas v ON c.vaga_id = v.id
         WHERE v.cnpj = ?
     """, (empresa['cnpj'],))
     
@@ -311,7 +362,7 @@ async def get_estatisticas(empresa_id: int):
     cursor.execute("""
         SELECT p.nome_completo, p.email, c.compatibilidade_score, v.titulo as vaga
         FROM candidaturas_esg c
-        JOIN vagas_esg v ON c.vaga_id = v.id
+        JOIN vagas v ON c.vaga_id = v.id
         JOIN profissionais_esg p ON c.profissional_id = p.id
         WHERE v.cnpj = ?
         ORDER BY c.compatibilidade_score DESC

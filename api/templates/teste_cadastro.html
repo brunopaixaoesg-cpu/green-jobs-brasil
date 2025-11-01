@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Cadastro</title>
+</head>
+<body>
+    <h1>Teste de Cadastro</h1>
+    <button onclick="testarCadastro()">Testar Cadastro</button>
+    <div id="resultado"></div>
+
+    <script>
+        async function testarCadastro() {
+            const formData = {
+                cnpj: "60.331.021/0001-11",
+                razao_social: "GREEN JOBS BRASIL INOVA SIMPLES (I.S.)",
+                email: "contato@greenjobsbrasil.com.br",
+                senha: "senha123",
+                telefone: "(32) 98844-7227",
+                website: "https://greenjobsbrasil.com.br",
+                descricao: "Empresa focada em soluções sustentáveis e inovação",
+                ods_tags: [7, 13, 15],
+                score_verde: 30
+            };
+
+            console.log('Enviando dados:', formData);
+
+            try {
+                const response = await fetch('/api/empresas/cadastro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                console.log('Status:', response.status);
+                const result = await response.json();
+                console.log('Resultado:', result);
+
+                const div = document.getElementById('resultado');
+                if (response.ok) {
+                    div.innerHTML = '✅ Cadastro realizado com sucesso! ID: ' + result.empresa_id;
+                    div.style.color = 'green';
+                } else {
+                    div.innerHTML = '❌ Erro no cadastro: ' + result.detail;
+                    div.style.color = 'red';
+                }
+            } catch (error) {
+                console.error('❌ Erro na comunicação:', error);
+                document.getElementById('resultado').innerHTML = '❌ Erro na comunicação: ' + error.message;
+                document.getElementById('resultado').style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

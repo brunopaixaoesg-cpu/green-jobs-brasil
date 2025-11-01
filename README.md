@@ -1,4 +1,17 @@
-# Green Jobs Brasil 🌱# Green Jobs Brasil 🌱
+# Green Jobs Brasil 🌱
+
+## 📌 Navegação Rápida
+
+| Documento | Descrição |
+|-----------|-----------|
+| [📋 ROADMAP.md](ROADMAP.md) | **Prioridades e próximos marcos** (P0-P3 + Q4/Q1) |
+| [🧹 PLANO_LIMPEZA.md](PLANO_LIMPEZA.md) | Análise de arquivos e estrutura proposta |
+| [▶️ executar_limpeza.ps1](executar_limpeza.ps1) | Script automatizado de limpeza |
+| [📊 RESUMO_RETOMADA.md](RESUMO_RETOMADA.md) | Resumo executivo e próximas ações |
+| [🗺️ MAPA_ROTAS.md](MAPA_ROTAS.md) | Mapa completo de rotas da API |
+| [📖 Como funciona](http://127.0.0.1:8002/explicacao-matching) | Página explicativa da plataforma |
+
+---
 
 
 

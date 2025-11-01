@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>🌎 Mapa de Profissionais ESG - Green Jobs Brasil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 80vh; width: 100%; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); margin: 2rem 0; }
+        body { font-family: 'Inter', sans-serif; background: #f0fdf4; color: #1f2937; }
+        .header { text-align: center; margin-top: 2rem; }
+        .legend { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: absolute; top: 20px; right: 20px; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌎 Mapa de Profissionais ESG</h1>
+        <p>Distribuição geográfica dos talentos verdes cadastrados</p>
+    </div>
+    <div id="map"></div>
+    <div class="legend" id="legend">
+        <strong>Legenda:</strong><br>
+        <span style="color: #059669; font-weight: bold;">●</span> Mais profissionais<br>
+        <span style="color: #34d399; font-weight: bold;">●</span> Menos profissionais
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Função para buscar dados do endpoint
+        async function fetchProfissionaisMapa() {
+            const response = await fetch('/api/profissionais/mapa');
+            const data = await response.json();
+            return data.mapa_profissionais;
+        }
+
+        // Função para buscar coordenadas de cidades (usando API externa)
+        async function getLatLng(cidade, uf) {
+            // Usar Nominatim (OpenStreetMap)
+            const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cidade)}&state=${encodeURIComponent(uf)}&country=Brazil&format=json&limit=1`;
+            const resp = await fetch(url);
+            const results = await resp.json();
+            if (results.length > 0) {
+                return [parseFloat(results[0].lat), parseFloat(results[0].lon)];
+            }
+            return null;
+        }
+
+        async function renderMap() {
+            const profissionais = await fetchProfissionaisMapa();
+            const map = L.map('map').setView([-15.78, -47.93], 4); // Centro do Brasil
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+            }).addTo(map);
+
+            // Definir escala de cor
+            const maxTotal = Math.max(...profissionais.map(p => p.total));
+            function getColor(total) {
+                // Verde escuro para maior concentração
+                if (total > maxTotal * 0.7) return '#059669';
+                if (total > maxTotal * 0.3) return '#34d399';
+                return '#bbf7d0';
+            }
+
+            // Adicionar marcadores
+            for (const prof of profissionais) {
+                const latlng = await getLatLng(prof.cidade, prof.uf);
+                if (latlng) {
+                    // Montar lista de profissionais para popup
+                    let profissionaisHtml = '';
+                    if (prof.profissionais && prof.profissionais.length > 0) {
+                        profissionaisHtml = '<ul style="margin:8px 0 0 0;padding-left:18px;">';
+                        for (const p of prof.profissionais) {
+                            profissionaisHtml += `<li><b>${p.nome_completo}</b> <span style='color:#059669;'>(${p.area_atuacao})</span></li>`;
+                        }
+                        profissionaisHtml += '</ul>';
+                    } else {
+                        profissionaisHtml = '<em>Nenhum profissional listado</em>';
+                    }
+                    L.circleMarker(latlng, {
+                        radius: 8 + Math.log(prof.total) * 2,
+                        color: getColor(prof.total),
+                        fillColor: getColor(prof.total),
+                        fillOpacity: 0.7,
+                        weight: 2
+                    }).addTo(map)
+                    .bindPopup(`
+                        <strong>${prof.cidade}/${prof.uf}</strong><br>
+                        Total: <b>${prof.total}</b> profissionais<br>
+                        <div style='margin-top:8px;'>
+                            <span style='font-weight:600;'>Exemplos:</span>
+                            ${profissionaisHtml}
+                        </div>
+                    `);
+                }
+            }
+        }
+        renderMap();
+    </script>
+</body>
+</html>

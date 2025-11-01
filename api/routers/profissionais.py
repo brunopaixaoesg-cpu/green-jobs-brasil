@@ -10,11 +10,9 @@ from pydantic import BaseModel, Field
 from datetime import datetime, date
 import json
 import os
-import sys
+import sqlite3
 
-# Adicionar path do db.py
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from db import get_db
+from api.db import get_db
 
 router = APIRouter(prefix="/api/profissionais", tags=["Profissionais ESG"])
 
@@ -114,8 +112,8 @@ class ProfissionalResponse(BaseModel):
     visualizacoes_perfil: Optional[int] = 0
     candidaturas_enviadas: Optional[int] = 0
     matches_recebidos: Optional[int] = 0
-    criado_em: Optional[str] = None
-    atualizado_em: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
     ultimo_acesso: Optional[str] = None
 
 # Função para calcular pontuação de sustentabilidade
@@ -248,12 +246,12 @@ async def listar_profissionais(
             query += " AND localizacao_uf LIKE ?"
             params.append(f"%{localizacao_uf}%")
         
-        if areas_interesse:
-            query += " AND areas_interesse LIKE ?"
-            params.append(f"%{areas_interesse}%")
+            if areas_interesse:
+                query += " AND areas_interesse LIKE ?"
+                params.append(f"%{areas_interesse}%")
         
-        query += " ORDER BY criado_em DESC LIMIT ? OFFSET ?"
-        params.extend([limit, skip])
+            query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+            params.extend([limit, skip])
         
         cursor.execute(query, params)
         profissionais = cursor.fetchall()
@@ -339,7 +337,7 @@ async def excluir_profissional(profissional_id: int):
         cursor = conn.cursor()
         
         cursor.execute(
-            "UPDATE profissionais_esg SET status = 'inativo', atualizado_em = CURRENT_TIMESTAMP WHERE id = ?",
+            "UPDATE profissionais_esg SET status = 'inativo', created_at = CURRENT_TIMESTAMP WHERE id = ?",
             (profissional_id,)
         )
         
@@ -525,8 +523,8 @@ async def obter_minhas_candidaturas(current_user: UserResponse = Depends(get_cur
                 v.ods_tags, v.habilidades_requeridas,
                 e.nome_fantasia as empresa_nome, e.razao_social as empresa_razao
             FROM candidaturas_esg c
-            INNER JOIN vagas_esg v ON c.vaga_id = v.id
-            LEFT JOIN empresas_verdes e ON v.cnpj = e.cnpj
+            INNER JOIN vagas v ON c.vaga_id = v.id
+            LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
             WHERE c.profissional_id = ?
             ORDER BY c.data_candidatura DESC
         """, (profissional_id,))
@@ -625,16 +623,16 @@ async def obter_vagas_recomendadas(
                 v.id, v.titulo, v.descricao, v.salario_min, v.salario_max,
                 v.nivel_experiencia, v.localizacao_cidade, v.localizacao_uf,
                 v.remoto, v.hibrido, v.ods_tags, v.habilidades_requeridas,
-                v.criada_em,
+                v.created_at,
                 e.nome_fantasia as empresa_nome, e.razao_social as empresa_razao,
                 e.score_verde as empresa_score
-            FROM vagas_esg v
-            LEFT JOIN empresas_verdes e ON v.cnpj = e.cnpj
+            FROM vagas v
+            LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
             WHERE v.status = 'ativa'
             AND v.id NOT IN (
                 SELECT vaga_id FROM candidaturas_esg WHERE profissional_id = ?
             )
-            ORDER BY v.criada_em DESC
+            ORDER BY v.created_at DESC
             LIMIT 50
         """, (profissional_id,))
         
@@ -920,8 +918,8 @@ async def atualizar_meu_perfil(
         if not campos_update:
             raise HTTPException(status_code=400, detail="Nenhum campo para atualizar")
         
-        # Adicionar timestamp de atualização
-        campos_update.append("atualizado_em = CURRENT_TIMESTAMP")
+        # Adicionar timestamp de atualização (usar created_at como coluna disponível no schema)
+        campos_update.append("created_at = CURRENT_TIMESTAMP")
         
         # Executar update
         query = f"""
@@ -1002,7 +1000,7 @@ async def obter_minhas_estatisticas(current_user: UserResponse = Depends(get_cur
         # Vagas disponíveis (que ainda não candidatou)
         cursor.execute("""
             SELECT COUNT(*) as total 
-            FROM vagas_esg 
+            FROM vagas 
             WHERE status = 'ativa' 
             AND id NOT IN (
                 SELECT vaga_id FROM candidaturas_esg WHERE profissional_id = ?

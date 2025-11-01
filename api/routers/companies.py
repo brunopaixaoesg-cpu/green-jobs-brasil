@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, text
 from api.db import get_db
+from api.services.receita import fetch_company
 from api.models import EmpresasVerdes, CnaeGreen, EmpresaCnae
 from api.schemas import (
     EmpresaVerdeResponse, 
@@ -142,6 +143,35 @@ async def obter_empresa(cnpj: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching company: {str(e)}")
 
+
+@router.get("/lookup", response_model=dict)
+async def lookup_empresa(cnpj: str = Query(..., description="CNPJ (numeric or formatted)"), db: Session = Depends(get_db)):
+    """Lookup a company on Receita + return our internal green score (if any).
+
+    This endpoint consults the configured Receita service (controlled by
+    environment variables) and returns the external data together with the
+    local `score_verde` and `empresa_id` when the CNPJ exists in our DB.
+    """
+    try:
+        cnpj_clean = ''.join(filter(str.isdigit, cnpj))
+
+        receita_data = fetch_company(cnpj_clean)
+
+        empresa = db.query(EmpresasVerdes).filter(EmpresasVerdes.cnpj == cnpj_clean).first()
+        local = None
+        if empresa:
+            local = {
+                "empresa_id": empresa.id,
+                "score_verde": float(empresa.score_verde) if empresa.score_verde is not None else None,
+                "razao_social": empresa.razao_social,
+                "nome_fantasia": empresa.nome_fantasia,
+            }
+
+        return {"receita": receita_data, "local": local}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during lookup: {e}")
+
 @router.get("/stats/por-uf")
 async def stats_por_uf(db: Session = Depends(get_db)):
     """Get company statistics grouped by state (UF)."""
@@ -153,8 +183,8 @@ async def stats_por_uf(db: Session = Depends(get_db)):
                 ROUND(AVG(score_verde), 2) as score_medio,
                 COUNT(CASE WHEN cg.prioridade = 'Core' THEN 1 END) as empresas_core,
                 COUNT(CASE WHEN cg.prioridade = 'Adjacente' THEN 1 END) as empresas_adjacentes
-            FROM gjb.empresas_verdes ev
-            LEFT JOIN gjb.cnae_green cg ON ev.cnae_principal = cg.cnae
+            FROM empresas_esg ev
+            LEFT JOIN cnae_green cg ON ev.cnae_principal = cg.cnae
             GROUP BY uf
             ORDER BY total_empresas DESC
         """)).fetchall()
@@ -182,7 +212,7 @@ async def stats_por_porte(db: Session = Depends(get_db)):
                 COALESCE(porte, 'NÃO_INFORMADO') as porte,
                 COUNT(*) as total_empresas,
                 ROUND(AVG(score_verde), 2) as score_medio
-            FROM gjb.empresas_verdes
+            FROM empresas_esg
             GROUP BY porte
             ORDER BY total_empresas DESC
         """)).fetchall()

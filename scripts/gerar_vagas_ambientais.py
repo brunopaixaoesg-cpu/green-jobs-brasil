@@ -6,7 +6,7 @@ Cria vagas específicas da área ambiental com dados realísticos
 baseados no mercado que você conhece.
 """
 
-import sqlite3
+from scripts.db_wrapper import get_connection
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -142,9 +142,7 @@ BENEFICIOS_AMBIENTAIS = [
     "Carro da empresa (para viagens)", "Ajuda de custo para viagens"
 ]
 
-def conectar_db():
-    """Conecta ao banco de dados SQLite"""
-    return sqlite3.connect(DATABASE_PATH)
+# Using scripts.db_wrapper.get_connection() for DB access
 
 def gerar_vaga_ambiental():
     """Gera uma vaga realística da área ambiental"""
@@ -257,36 +255,32 @@ def gerar_vaga_ambiental():
 
 def inserir_vaga_ambiental(vaga):
     """Insere vaga ambiental no banco de dados"""
-    conn = conectar_db()
-    cursor = conn.cursor()
-    
-    try:
-        query = """
-        INSERT INTO vagas_esg (
-            cnpj, titulo, descricao, ods_tags, habilidades_requeridas,
-            nivel_experiencia, tipo_contratacao, localizacao_uf, localizacao_cidade,
-            salario_min, salario_max, remoto, hibrido, status, vagas_disponiveis,
-            beneficios, requisitos_adicionais, diferenciais
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        
-        cursor.execute(query, (
-            vaga["cnpj"], vaga["titulo"], vaga["descricao"], vaga["ods_tags"],
-            vaga["habilidades_requeridas"], vaga["nivel_experiencia"], vaga["tipo_contratacao"],
-            vaga["localizacao_uf"], vaga["localizacao_cidade"], vaga["salario_min"],
-            vaga["salario_max"], vaga["remoto"], vaga["hibrido"], vaga["status"],
-            vaga["vagas_disponiveis"], vaga["beneficios"], vaga["requisitos_adicionais"],
-            vaga["diferenciais"]
-        ))
-        
-        conn.commit()
-        return True
-        
-    except Exception as e:
-        print(f"Erro ao inserir vaga: {e}")
-        return False
-    finally:
-        conn.close()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            query = """
+            INSERT INTO vagas_esg (
+                cnpj, titulo, descricao, ods_tags, habilidades_requeridas,
+                nivel_experiencia, tipo_contratacao, localizacao_uf, localizacao_cidade,
+                salario_min, salario_max, remoto, hibrido, status, vagas_disponiveis,
+                beneficios, requisitos_adicionais, diferenciais
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+
+            cursor.execute(query, (
+                vaga["cnpj"], vaga["titulo"], vaga["descricao"], vaga["ods_tags"],
+                vaga["habilidades_requeridas"], vaga["nivel_experiencia"], vaga["tipo_contratacao"],
+                vaga["localizacao_uf"], vaga["localizacao_cidade"], vaga["salario_min"],
+                vaga["salario_max"], vaga["remoto"], vaga["hibrido"], vaga["status"],
+                vaga["vagas_disponiveis"], vaga["beneficios"], vaga["requisitos_adicionais"],
+                vaga["diferenciais"]
+            ))
+
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Erro ao inserir vaga: {e}")
+            return False
 
 def main():
     print("🌱 Gerando Vagas da Área Ambiental - Green Jobs Brasil")
@@ -297,11 +291,10 @@ def main():
     # Limpar vagas existentes se quiser recomeçar
     resposta = input("🗑️  Limpar vagas existentes? (s/N): ").lower()
     if resposta == 's':
-        conn = conectar_db()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM vagas_esg")
-        conn.commit()
-        conn.close()
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM vagas_esg")
+            conn.commit()
         print("✅ Vagas anteriores removidas")
     
     # Gerar vagas ambientais

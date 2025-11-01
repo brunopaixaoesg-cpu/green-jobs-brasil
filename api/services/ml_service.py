@@ -7,9 +7,13 @@ Integração dos modelos treinados na API
 import joblib
 import numpy as np
 import json
-import sqlite3
 from typing import Dict, List, Optional
 import logging
+import sys
+import os
+
+# Use shared DB helper
+from api.db import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +44,7 @@ class MLMatchingService:
             self.feature_names = metadata['feature_names']
             self.is_loaded = True
             
-            logger.info("✅ Modelos ML carregados com sucesso")
+            logger.info("Modelos ML carregados com sucesso")
             return True
             
         except Exception as e:
@@ -210,21 +214,15 @@ class MLMatchingService:
     def get_profissional_data(self, profissional_id: int) -> Optional[Dict]:
         """Buscar dados do profissional no banco"""
         try:
-            conn = sqlite3.connect('gjb_dev.db')
+            conn = get_db()
             cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT * FROM profissionais_esg WHERE id = ?
-            """, (profissional_id,))
-            
+            cursor.execute("SELECT * FROM profissionais_esg WHERE id = ?", (profissional_id,))
             row = cursor.fetchone()
             if not row:
+                conn.close()
                 return None
-            
-            # Converter para dict
-            columns = [description[0] for description in cursor.description]
-            prof_data = dict(zip(columns, row))
-            
+
+            prof_data = dict(row)
             conn.close()
             return prof_data
             
@@ -235,21 +233,15 @@ class MLMatchingService:
     def get_vaga_data(self, vaga_id: int) -> Optional[Dict]:
         """Buscar dados da vaga no banco"""
         try:
-            conn = sqlite3.connect('gjb_dev.db')
+            conn = get_db()
             cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT * FROM vagas_esg WHERE id = ?
-            """, (vaga_id,))
-            
+            cursor.execute("SELECT * FROM vagas WHERE id = ?", (vaga_id,))
             row = cursor.fetchone()
             if not row:
+                conn.close()
                 return None
-            
-            # Converter para dict
-            columns = [description[0] for description in cursor.description]
-            vaga_data = dict(zip(columns, row))
-            
+
+            vaga_data = dict(row)
             conn.close()
             return vaga_data
             
@@ -333,7 +325,7 @@ class MLMatchingService:
 # Instância global do serviço (sem carregar modelos automaticamente)
 try:
     ml_service = MLMatchingService()
-    logger.info("✅ MLMatchingService instanciado com sucesso")
+    logger.info("MLMatchingService instanciado com sucesso")
 except Exception as e:
-    logger.error(f"❌ Erro ao instanciar MLMatchingService: {e}")
+    logger.error(f"Erro ao instanciar MLMatchingService: {e}")
     ml_service = None

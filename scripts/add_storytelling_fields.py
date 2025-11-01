@@ -2,15 +2,11 @@
 Script para adicionar campos de storytelling ao perfil profissional
 Versão v1.6 - Storytelling Profissional
 """
-import sqlite3
 from datetime import datetime
+from scripts.db_wrapper import get_connection
+from api.logger import logger
 
-print("="*70)
-print("🎨 ADICIONANDO CAMPOS DE STORYTELLING - v1.6")
-print("="*70)
-
-conn = sqlite3.connect('gjb_dev.db')
-cursor = conn.cursor()
+logger.info("ADICIONANDO CAMPOS DE STORYTELLING - v1.6")
 
 # Lista de novos campos
 novos_campos = [
@@ -28,39 +24,37 @@ novos_campos = [
     ("publicacoes_json", "TEXT", "JSON com artigos/publicações")
 ]
 
-print("\n📊 Verificando estrutura atual da tabela profissionais_esg...")
-cursor.execute("PRAGMA table_info(profissionais_esg)")
-colunas_existentes = {col[1] for col in cursor.fetchall()}
-print(f"   Total de colunas existentes: {len(colunas_existentes)}")
+with get_connection() as conn:
+    cursor = conn.cursor()
 
-print("\n✨ Adicionando novos campos:")
-print("-"*70)
+    logger.info("Verificando estrutura atual da tabela profissionais_esg...")
+    cursor.execute("PRAGMA table_info(profissionais_esg)")
+    colunas_existentes = {col[1] for col in cursor.fetchall()}
+    logger.info(f"Total de colunas existentes: {len(colunas_existentes)}")
 
-campos_adicionados = 0
-campos_existentes = 0
+    logger.info("Adicionando novos campos de storytelling")
 
-for campo, tipo, descricao in novos_campos:
-    if campo in colunas_existentes:
-        print(f"   ⚠️  {campo:30} - Já existe")
-        campos_existentes += 1
-    else:
-        try:
-            cursor.execute(f"ALTER TABLE profissionais_esg ADD COLUMN {campo} {tipo}")
-            print(f"   ✅ {campo:30} - Adicionado ({descricao})")
-            campos_adicionados += 1
-        except Exception as e:
-            print(f"   ❌ {campo:30} - Erro: {e}")
+    campos_adicionados = 0
+    campos_existentes = 0
 
-conn.commit()
+    for campo, tipo, descricao in novos_campos:
+        if campo in colunas_existentes:
+            logger.warning(f"{campo:30} - Já existe")
+            campos_existentes += 1
+        else:
+            try:
+                cursor.execute(f"ALTER TABLE profissionais_esg ADD COLUMN {campo} {tipo}")
+                logger.info(f"{campo:30} - Adicionado ({descricao})")
+                campos_adicionados += 1
+            except Exception as e:
+                logger.error(f"Erro adicionando campo {campo}: {e}")
 
-print("\n" + "="*70)
-print(f"📈 RESUMO:")
-print(f"   ✅ Campos adicionados: {campos_adicionados}")
-print(f"   ⚠️  Campos já existentes: {campos_existentes}")
-print("="*70)
+    conn.commit()
+
+logger.info("Resumo da alteração de storytelling: %s adicionados, %s já existentes", campos_adicionados, campos_existentes)
 
 # Criar dados exemplo para Maria (profissional_id=1)
-print("\n🎨 Criando dados exemplo para Maria Silva Santos...")
+logger.info("Criando dados exemplo para Maria Silva Santos...")
 
 historia_verde = """
 Minha jornada na sustentabilidade começou há 5 anos, quando percebi o impacto 
@@ -208,62 +202,51 @@ publicacoes = json.dumps([
 ])
 
 try:
-    cursor.execute("""
-        UPDATE profissionais_esg 
-        SET historia_verde = ?,
-            motivacao = ?,
-            conquistas_json = ?,
-            portfolio_projetos_json = ?,
-            valores_pessoais = ?,
-            objetivos_carreira = ?,
-            redes_sociais_json = ?,
-            idiomas_json = ?,
-            voluntariado_json = ?,
-            publicacoes_json = ?
-        WHERE id = 1
-    """, (
-        historia_verde.strip(),
-        motivacao.strip(),
-        conquistas,
-        portfolio_projetos,
-        valores_pessoais,
-        objetivos_carreira.strip(),
-        redes_sociais,
-        idiomas,
-        voluntariado,
-        publicacoes
-    ))
-    
-    conn.commit()
-    print("   ✅ Dados de Maria atualizados com sucesso!")
-    
-    # Verificar
-    cursor.execute("""
-        SELECT nome_completo, 
-               LENGTH(historia_verde) as hist_len,
-               LENGTH(portfolio_projetos_json) as port_len,
-               conquistas_json
-        FROM profissionais_esg 
-        WHERE id = 1
-    """)
-    
-    result = cursor.fetchone()
-    if result:
-        print(f"\n   📊 Perfil de {result[0]}:")
-        print(f"      - História: {result[1]} caracteres")
-        print(f"      - Portfólio: {result[2]} caracteres")
-        
-        conquistas_data = json.loads(result[3])
-        print(f"      - Conquistas: {len(conquistas_data)} itens")
-        
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE profissionais_esg 
+            SET historia_verde = ?,
+                motivacao = ?,
+                conquistas_json = ?,
+                portfolio_projetos_json = ?,
+                valores_pessoais = ?,
+                objetivos_carreira = ?,
+                redes_sociais_json = ?,
+                idiomas_json = ?,
+                voluntariado_json = ?,
+                publicacoes_json = ?
+            WHERE id = 1
+        """, (
+            historia_verde.strip(),
+            motivacao.strip(),
+            conquistas,
+            portfolio_projetos,
+            valores_pessoais,
+            objetivos_carreira.strip(),
+            redes_sociais,
+            idiomas,
+            voluntariado,
+            publicacoes
+        ))
+        conn.commit()
+        logger.info("Dados de Maria atualizados com sucesso")
+
+        # Verificar
+        cursor.execute("""
+            SELECT nome_completo, 
+                   LENGTH(historia_verde) as hist_len,
+                   LENGTH(portfolio_projetos_json) as port_len,
+                   conquistas_json
+            FROM profissionais_esg 
+            WHERE id = 1
+        """)
+        result = cursor.fetchone()
+        if result:
+            logger.info("Perfil de %s: história %s chars, portfólio %s chars", result[0], result[1], result[2])
+            conquistas_data = json.loads(result[3])
+            logger.info("Conquistas: %s itens", len(conquistas_data))
 except Exception as e:
-    print(f"   ❌ Erro ao atualizar dados: {e}")
-    conn.rollback()
+    logger.error("Erro ao atualizar dados de exemplo: %s", e)
 
-conn.close()
-
-print("\n" + "="*70)
-print("✅ BANCO ATUALIZADO COM SUCESSO!")
-print("="*70)
-print("\n💡 Próximo passo: Criar componentes visuais no dashboard")
-print()
+logger.info("Banco atualizado com sucesso e dados de exemplo criados")

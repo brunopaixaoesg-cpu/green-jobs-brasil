@@ -1,11 +1,14 @@
 """
 Script para popular banco de dados com dados de exemplo
 Green Jobs Brasil - Dados iniciais para demonstração
-PostgreSQL compatible
+SQLite Local
 """
 import os
 from datetime import datetime
-from db import get_db
+
+# Use centralized DB helper
+from api.db import get_db
+from api.logger import logger
 
 def seed_database():
     """Popula banco com dados de exemplo - SEMPRE roda no Render"""
@@ -20,12 +23,12 @@ def seed_database():
         cursor.execute("DELETE FROM empresas_esg")
         cursor.execute("DELETE FROM profissionais_esg")
         conn.commit()
-        print("🧹 Limpando dados antigos...")
+        logger.info("Limpando dados antigos...")
     except Exception as e:
-        print(f"⚠️ Aviso ao limpar dados: {e}")
+        logger.warning("Aviso ao limpar dados: %s", e)
         conn.rollback()
     
-    print("📊 Populando banco com dados de exemplo...")
+    logger.info("Populando banco com dados de exemplo...")
     
     # Inserir profissionais e capturar IDs reais
     profissionais = [
@@ -36,12 +39,12 @@ def seed_database():
     ]
     
     profissional_ids = []
-    for prof in profissionais:
+    for nome, email, area, experiencia, cidade, uf in profissionais:
         cursor.execute(
-            "INSERT INTO profissionais_esg (nome, email, area_atuacao, experiencia_anos, localizacao_cidade, localizacao_uf) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
-            prof
+            "INSERT INTO profissionais_esg (nome_completo, email, anos_experiencia_esg, localizacao_cidade, localizacao_uf) VALUES (?, ?, ?, ?, ?)",
+            (nome, email, experiencia, cidade, uf)
         )
-        prof_id = cursor.fetchone()[0]
+        prof_id = cursor.lastrowid
         profissional_ids.append(prof_id)
     
     # Inserir storytelling usando IDs reais
@@ -74,7 +77,7 @@ def seed_database():
     
     for story in storytelling_data:
         cursor.execute(
-            "INSERT INTO storytelling (profissional_id, jornada_verde, motivacao, impacto) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO storytelling (profissional_id, jornada_verde, motivacao, impacto) VALUES (?, ?, ?, ?)",
             story
         )
     
@@ -87,7 +90,7 @@ def seed_database():
     
     for emp in empresas:
         cursor.execute(
-            "INSERT INTO empresas_esg (cnpj, razao_social, nome_fantasia, score_verde) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO empresas_esg (cnpj, razao_social, nome_fantasia, score_verde) VALUES (?, ?, ?, ?)",
             emp
         )
     
@@ -100,16 +103,16 @@ def seed_database():
     
     for vaga in vagas:
         cursor.execute(
-            "INSERT INTO vagas (titulo, descricao, cnpj, nivel_experiencia, tipo_contratacao, localizacao_cidade, localizacao_uf, remoto, status, salario_min, salario_max) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO vagas (titulo, descricao, cnpj, nivel_experiencia, tipo_contratacao, localizacao_cidade, localizacao_uf, remoto, status, salario_min, salario_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             vaga
         )
     
     conn.commit()
-    print("✅ Dados inseridos com sucesso!")
-    print(f"   - {len(profissionais)} profissionais")
-    print(f"   - {len(storytelling_data)} perfis storytelling")
-    print(f"   - {len(empresas)} empresas ESG")
-    print(f"   - {len(vagas)} vagas")
+    logger.info("Dados inseridos com sucesso!")
+    logger.info("   - %s profissionais", len(profissionais))
+    logger.info("   - %s perfis storytelling", len(storytelling_data))
+    logger.info("   - %s empresas ESG", len(empresas))
+    logger.info("   - %s vagas", len(vagas))
     
     conn.close()
 

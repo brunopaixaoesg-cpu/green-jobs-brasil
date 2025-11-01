@@ -269,6 +269,29 @@
 
         .fade-in:nth-child(odd) { animation-delay: 0.1s; }
         .fade-in:nth-child(even) { animation-delay: 0.2s; }
+        
+        /* Animação do gráfico circular */
+        @keyframes drawCircle {
+            from {
+                stroke-dasharray: 0 534;
+            }
+        }
+        
+        /* Destaque do resultado da Receita */
+        #receita-result .company-card {
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         @media (max-width: 768px) {
             .company-name {
@@ -339,16 +362,26 @@
         <!-- Filters -->
         <div class="filters fade-in">
             <h4 class="mb-3">
-                <i class="fas fa-filter me-2"></i>
-                Filtros e Busca
+                <i class="fas fa-search me-2"></i>
+                Buscar Empresas
             </h4>
             <div class="filter-group">
                 <input 
                     type="text" 
                     id="search-input" 
                     class="filter-input" 
-                    placeholder="🔍 Buscar por nome, CNPJ ou cidade..."
+                    placeholder="🔍 Digite CNPJ para buscar na Receita Federal ou filtre por nome/cidade..."
                 >
+                <button id="receita-btn" class="btn btn-success" style="padding:1rem 1.5rem;font-weight:600;white-space:nowrap">
+                    <i class="fas fa-search me-2"></i>Buscar CNPJ na Receita
+                </button>
+            </div>
+            
+            <h4 class="mb-3 mt-4">
+                <i class="fas fa-filter me-2"></i>
+                Filtros
+            </h4>
+            <div class="filter-group">
                 <select id="score-filter" class="filter-select">
                     <option value="">Todos os Scores</option>
                     <option value="high">Alto (50-100)</option>
@@ -359,6 +392,7 @@
                     <option value="">Todos os Estados</option>
                 </select>
             </div>
+        <div id="receita-result" style="margin-top:1rem"></div>
         </div>
 
         <!-- Companies List -->
@@ -544,6 +578,154 @@
             return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
         }
 
+        // Buscar empresa na Receita e mostrar score calculado
+        async function buscarNaReceita(cnpj) {
+            const target = document.getElementById('receita-result');
+            target.innerHTML = '<div class="loading-spinner" style="width:36px;height:36px;border-width:4px"></div> <span style="margin-left:1rem">Consultando Receita Federal...</span>';
+            const cnpjClean = (cnpj || document.getElementById('search-input').value || '').replace(/\D/g, '');
+            if (!cnpjClean || cnpjClean.length !== 14) {
+                target.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Informe um CNPJ válido (14 dígitos) no campo de busca</div>';
+                return;
+            }
+
+            try {
+                const resp = await fetch(`/api/search-company/${cnpjClean}`);
+                if (resp.status === 200) {
+                    const data = await resp.json();
+                    const score = data.green_score || 0;
+                    const isGreen = data.is_green || false;
+                    
+                    // Determinar classificação
+                    let classificacao = 'Não Verde';
+                    let classificacaoClass = 'text-secondary';
+                    let classificacaoIcon = 'circle';
+                    
+                    if (score >= 80) {
+                        classificacao = 'Core Green';
+                        classificacaoClass = 'text-success';
+                        classificacaoIcon = 'check-circle';
+                    } else if (score >= 50) {
+                        classificacao = 'Adjacent Green';
+                        classificacaoClass = 'text-info';
+                        classificacaoIcon = 'leaf';
+                    } else if (score >= 20) {
+                        classificacao = 'Secondary Green';
+                        classificacaoClass = 'text-warning';
+                        classificacaoIcon = 'seedling';
+                    }
+                    
+                    // Montar cartão visual com score em destaque
+                    const html = `
+                        <div class="company-card" style="border-left: 6px solid ${score >= 80 ? '#10b981' : score >= 50 ? '#3b82f6' : score >= 20 ? '#f59e0b' : '#9ca3af'}">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h3 style="margin:0;color:var(--text-dark);font-family:'Poppins',sans-serif">
+                                        ${data.nome || data.razao_social || 'Nome não informado'}
+                                    </h3>
+                                    <div class="company-cnpj" style="font-size:1.1rem;color:var(--text-light);margin:0.5rem 0">
+                                        📋 ${formatarCNPJ(data.cnpj || cnpjClean)}
+                                    </div>
+                                    
+                                    <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+                                        <div class="info-item">
+                                            <i class="fas fa-building"></i>
+                                            <div>
+                                                <div class="info-label">Situação</div>
+                                                <div class="info-value">${data.situacao || 'Não informado'}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <div>
+                                                <div class="info-label">Localização</div>
+                                                <div class="info-value">${data.municipio || 'N/A'} - ${data.uf || 'N/A'}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-industry"></i>
+                                            <div>
+                                                <div class="info-label">Porte</div>
+                                                <div class="info-value">${data.porte || 'Não informado'}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-briefcase"></i>
+                                            <div>
+                                                <div class="info-label">Natureza Jurídica</div>
+                                                <div class="info-value">${data.natureza_juridica || 'Não informado'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-top:1.5rem;padding:1rem;background:#f8fafc;border-radius:12px">
+                                        <strong style="color:var(--text-dark)"><i class="fas fa-tasks me-2"></i>Atividade Principal:</strong>
+                                        <div style="margin-top:0.5rem;color:var(--text-light)">${data.atividade_principal || 'Não informado'}</div>
+                                    </div>
+                                    
+                                    ${data.cnaes && data.cnaes.length > 0 ? `
+                                    <div style="margin-top:1rem;padding:1rem;background:#f0fdf4;border-radius:12px;border:1px solid #d1fae5">
+                                        <strong style="color:#059669"><i class="fas fa-list me-2"></i>CNAEs Identificados:</strong>
+                                        <div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.5rem">
+                                            ${data.cnaes.map(cnae => `<span style="background:white;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.9rem;border:1px solid #d1fae5">${cnae}</span>`).join('')}
+                                        </div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div class="col-md-4" style="text-align:center;border-left:1px solid #e5e7eb;padding-left:2rem">
+                                    <div style="position:relative;width:200px;height:200px;margin:0 auto">
+                                        <svg viewBox="0 0 200 200" style="transform:rotate(-90deg)">
+                                            <circle cx="100" cy="100" r="85" fill="none" stroke="#e5e7eb" stroke-width="20"/>
+                                            <circle cx="100" cy="100" r="85" fill="none" 
+                                                    stroke="${score >= 80 ? '#10b981' : score >= 50 ? '#3b82f6' : score >= 20 ? '#f59e0b' : '#9ca3af'}" 
+                                                    stroke-width="20" 
+                                                    stroke-dasharray="${(score / 100) * 534} 534"
+                                                    stroke-linecap="round"
+                                                    style="transition:stroke-dasharray 1s ease"/>
+                                        </svg>
+                                        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+                                            <div style="font-size:3rem;font-weight:800;color:${score >= 80 ? '#10b981' : score >= 50 ? '#3b82f6' : score >= 20 ? '#f59e0b' : '#9ca3af'}">${score}</div>
+                                            <div style="font-size:0.9rem;color:var(--text-light);font-weight:600">SCORE VERDE</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-top:1.5rem;padding:1rem;background:${score >= 80 ? '#ecfdf5' : score >= 50 ? '#eff6ff' : score >= 20 ? '#fef3c7' : '#f3f4f6'};border-radius:12px">
+                                        <div style="font-size:1.1rem;font-weight:700;color:${score >= 80 ? '#059669' : score >= 50 ? '#3b82f6' : score >= 20 ? '#f59e0b' : '#6b7280'};margin-bottom:0.5rem">
+                                            <i class="fas fa-${classificacaoIcon} me-2"></i>${classificacao}
+                                        </div>
+                                        <div style="font-size:0.85rem;color:var(--text-light)">
+                                            ${score >= 80 ? 'Empresa altamente sustentável' : score >= 50 ? 'Empresa com atividades adjacentes verdes' : score >= 20 ? 'Empresa com impacto ambiental secundário' : 'Empresa sem atividades verdes identificadas'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:0.75rem">
+                                        <button class="btn btn-success" onclick="importarEmpresa('${cnpjClean}')" style="width:100%;font-weight:600">
+                                            <i class="fas fa-plus me-2"></i> Adicionar ao Banco
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="limparResultadoReceita()" style="width:100%">
+                                            <i class="fas fa-times me-2"></i> Fechar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    target.innerHTML = html;
+                } else {
+                    const err = await resp.json().catch(()=>({detail:resp.statusText}));
+                    target.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i><strong>Erro:</strong> ${err.detail || err.error || resp.statusText}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                target.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i><strong>Erro ao consultar a Receita:</strong> ${err.message}</div>`;
+            }
+        }
+        
+        // Limpar resultado da busca na Receita
+        function limparResultadoReceita() {
+            document.getElementById('receita-result').innerHTML = '';
+        }
+
         // Mostrar erro
         function mostrarErro(mensagem) {
             document.getElementById('companies-container').innerHTML = `
@@ -563,6 +745,46 @@
         document.getElementById('search-input').addEventListener('input', filtrarEmpresas);
         document.getElementById('score-filter').addEventListener('change', filtrarEmpresas);
         document.getElementById('uf-filter').addEventListener('change', filtrarEmpresas);
+        document.getElementById('receita-btn').addEventListener('click', () => buscarNaReceita());
+        
+        // Permitir buscar ao pressionar Enter no campo de busca
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const valor = e.target.value.trim();
+                // Se parece com CNPJ (tem números), buscar na Receita
+                if (valor.replace(/\D/g, '').length >= 14) {
+                    buscarNaReceita(valor);
+                }
+            }
+        });
+        
+        // Importar empresa retornada pela Receita para o banco local
+        async function importarEmpresa(cnpj) {
+            const cnpjClean = (cnpj || '').replace(/\D/g, '');
+            if (!cnpjClean || cnpjClean.length !== 14) {
+                alert('CNPJ inválido para importação');
+                return;
+            }
+            try {
+                const resp = await fetch('/api/empresas/import-receita', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cnpj: cnpjClean })
+                });
+                if (resp.status === 201 || resp.status === 200) {
+                    const data = await resp.json();
+                    alert('Empresa importada com sucesso: ID=' + (data.empresa_id || data.id));
+                    // Opcional: recarregar lista de empresas
+                    carregarEmpresas();
+                } else {
+                    const err = await resp.json().catch(()=>({detail:resp.statusText}));
+                    alert('Falha ao importar: ' + (err.detail || err.message || resp.statusText));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro na importação: ' + err.message);
+            }
+        }
 
         // Carregar dados ao iniciar
         carregarEmpresas();

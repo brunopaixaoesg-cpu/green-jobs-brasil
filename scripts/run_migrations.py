@@ -1,9 +1,9 @@
 """
 Script para executar migrations no banco de dados
 """
-import sqlite3
 import os
 from pathlib import Path
+from scripts.db_wrapper import get_connection
 
 def run_migration(db_path, migration_file):
     """Executa uma migration SQL no banco de dados"""
@@ -13,14 +13,14 @@ def run_migration(db_path, migration_file):
     with open(migration_file, 'r', encoding='utf-8') as f:
         sql = f.read()
     
-    # Conectar ao banco
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    # Conectar ao banco (via wrapper)
+    with get_connection() as conn:
+        cursor = conn.cursor()
     
     try:
-        # Executar SQL
-        cursor.executescript(sql)
-        conn.commit()
+    # Executar SQL
+    cursor.executescript(sql)
+    conn.commit()
         print(f"✅ Migration executada com sucesso!")
         
         # Verificar tabelas criadas
@@ -32,12 +32,11 @@ def run_migration(db_path, migration_file):
         print(f"❌ Erro ao executar migration: {e}")
         conn.rollback()
     finally:
-        conn.close()
+    pass
 
 def main():
     # Caminhos
     project_root = Path(__file__).parent
-    db_path = project_root / "gjb_dev.db"
     migrations_dir = project_root / "db" / "migrations"
     
     print("🚀 Green Jobs Brasil - Migration Runner")
@@ -63,7 +62,7 @@ def main():
     
     # Executar migrations
     for migration_file in migrations:
-        run_migration(db_path, migration_file)
+        run_migration(str(project_root / 'gjb_dev.db'), migration_file)
     
     print("\n✅ Todas as migrations foram executadas!")
     print("=" * 50)

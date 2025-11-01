@@ -78,6 +78,28 @@
         .score-regular { background: linear-gradient(135deg, #F39C12, #E67E22); }
         .score-baixo { background: linear-gradient(135deg, #95A5A6, #7F8C8D); }
         
+        .vaga-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            height: 100%;
+        }
+        
+        .vaga-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.2);
+        }
+        
+        .vaga-info small {
+            line-height: 1.6;
+        }
+        
+        .btn-group-sm .btn {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
         .status-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
@@ -176,13 +198,18 @@
         <!-- Tabs de Vagas -->
         <div class="card">
             <div class="card-body">
-                <h4 class="mb-3"><i class="fas fa-list"></i> Minhas Vagas</h4>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0"><i class="fas fa-list"></i> Minhas Vagas</h4>
+                    <a href="/vagas/criar" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Nova Vaga
+                    </a>
+                </div>
                 <div class="d-flex flex-wrap mb-3" id="vagasTabs">
                     <div class="vaga-tab active" onclick="filtrarPorVaga('todas')">
                         <i class="fas fa-th"></i> Todas
                     </div>
                     {% for vaga in vagas %}
-                    <div class="vaga-tab" onclick="filtrarPorVaga({{ vaga.id }})">
+                    <div class="vaga-tab" onclick="filtrarPorVaga('{{ vaga.id }}')">
                         {{ vaga.titulo }} 
                         <span class="badge bg-primary">{{ vaga.total_candidaturas or 0 }}</span>
                     </div>
@@ -226,6 +253,79 @@
                     <button class="btn btn-green w-100" onclick="filtrarCandidaturas()">
                         <i class="fas fa-filter"></i> Aplicar Filtros
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Vagas -->
+        <div id="vagasContainer" class="mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-4">
+                        <i class="fas fa-briefcase"></i> Suas Vagas Publicadas
+                        <span class="badge bg-success">{{ vagas|length }}</span>
+                    </h4>
+                    
+                    {% if vagas %}
+                        <div class="row">
+                            {% for vaga in vagas %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card vaga-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">{{ vaga.titulo }}</h5>
+                                            <span class="badge bg-{% if vaga.status == 'ativa' %}success{% else %}secondary{% endif %}">
+                                                {{ vaga.status|title }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="vaga-info mb-3">
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-map-marker-alt"></i> 
+                                                {% if vaga.localizacao_cidade %}{{ vaga.localizacao_cidade }}{% endif %}
+                                                {% if vaga.localizacao_uf %}, {{ vaga.localizacao_uf }}{% endif %}
+                                                {% if vaga.remoto %} • <i class="fas fa-home"></i> Remoto{% endif %}
+                                            </small>
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-user-tie"></i> {{ vaga.nivel_experiencia|title }} • {{ vaga.tipo_contratacao|upper }}
+                                            </small>
+                                            {% if vaga.salario_min %}
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-dollar-sign"></i> R$ {{ "%.0f"|format(vaga.salario_min) }}
+                                                {% if vaga.salario_max %} - R$ {{ "%.0f"|format(vaga.salario_max) }}{% endif %}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-users"></i> 
+                                                {{ vaga.total_candidaturas or 0 }} candidatura(s)
+                                            </small>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="verCandidatos('{{ vaga.id }}')">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="editarVaga('{{ vaga.id }}')">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-briefcase fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhuma vaga publicada ainda</h5>
+                            <p class="text-muted mb-4">Crie sua primeira vaga ESG e comece a atrair os melhores talentos sustentáveis!</p>
+                            <a href="/vagas/criar" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Criar Primeira Vaga
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -293,7 +393,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const empresaId = {{ empresa.id }};
+    const empresaId = "{{ empresa.id }}";
         let candidaturasData = [];
         let candidaturaAtual = null;
         let vagaFiltroAtual = 'todas';
@@ -499,6 +599,28 @@
                 alert('Erro ao atualizar status');
             }
         }
+
+        // Funções para gerenciar vagas
+        function verCandidatos(vagaId) {
+            console.log('👀 Ver candidatos da vaga:', vagaId);
+            // Filtrar candidaturas por essa vaga específica
+            filtrarPorVaga(vagaId);
+        }
+
+        function editarVaga(vagaId) {
+            console.log('✏️ Editar vaga:', vagaId);
+            // Por enquanto, redirecionar para criar vaga (futura funcionalidade de edição)
+            if (confirm('🚧 Funcionalidade em desenvolvimento.\n\nDeseja criar uma nova vaga?')) {
+                window.location.href = '/vagas/criar';
+            }
+        }
+
+        // Atualizar contadores na inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calcular total de candidaturas
+            const totalCandidaturas = parseInt("{{ vagas|sum(attribute='total_candidaturas') or 0 }}");
+            document.getElementById('totalCandidaturas').textContent = totalCandidaturas;
+        });
     </script>
 </body>
 </html>

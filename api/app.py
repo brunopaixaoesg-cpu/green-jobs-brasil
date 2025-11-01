@@ -116,26 +116,24 @@ async def internal_error_handler(request, exc):
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    """
-    Startup event handler.
-    """
-    print("🌱 Green Jobs Brasil API iniciando...")
-    print("📊 Verificando conectividade com banco de dados...")
-    
+    """Startup event handler."""
+    from api.logger import logger
+    logger.info("Green Jobs Brasil API iniciando...")
+    logger.info("Verificando conectividade com banco de dados...")
+
     if test_connection():
-        print("✅ Conexão com banco de dados estabelecida")
+        logger.info("Conexão com banco de dados estabelecida")
     else:
-        print("❌ Falha na conexão com banco de dados")
-    
-    print("🚀 API pronta para uso!")
+        logger.error("Falha na conexão com banco de dados")
+
+    logger.info("API pronta para uso!")
 
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
-    """
-    Shutdown event handler.
-    """
-    print("🛑 Green Jobs Brasil API encerrando...")
+    """Shutdown event handler."""
+    from api.logger import logger
+    logger.info("Green Jobs Brasil API encerrando...")
 
 if __name__ == "__main__":
     import uvicorn

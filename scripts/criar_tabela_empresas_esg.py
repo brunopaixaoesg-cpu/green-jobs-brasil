@@ -1,13 +1,13 @@
 """Script para criar tabela empresas_esg com autenticação"""
-import sqlite3
 import hashlib
 from datetime import datetime
+from scripts.db_wrapper import get_connection
 
-conn = sqlite3.connect('gjb_dev.db')
-cursor = conn.cursor()
+with get_connection() as conn:
+    cursor = conn.cursor()
 
-# Criar tabela empresas_esg
-cursor.execute("""
+    # Criar tabela empresas_esg
+    cursor.execute("""
 CREATE TABLE IF NOT EXISTS empresas_esg (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cnpj TEXT UNIQUE NOT NULL,
@@ -28,72 +28,70 @@ CREATE TABLE IF NOT EXISTS empresas_esg (
 )
 """)
 
-print("✅ Tabela empresas_esg criada com sucesso!")
+    print("✅ Tabela empresas_esg criada com sucesso!")
 
-# Criar 3 empresas exemplo baseadas nas empresas_verdes existentes
-cursor.execute("SELECT cnpj, razao_social, nome_fantasia, municipio, uf FROM empresas_verdes LIMIT 3")
-empresas = cursor.fetchall()
+    # Criar 3 empresas exemplo baseadas nas empresas_verdes existentes
+    cursor.execute("SELECT cnpj, razao_social, nome_fantasia, municipio, uf FROM empresas_verdes LIMIT 3")
+    empresas = cursor.fetchall()
 
-empresas_teste = []
-for i, emp in enumerate(empresas, 1):
-    cnpj, razao, fantasia, cidade, uf = emp
-    email = f"contato{i}@{razao[:10].lower().replace(' ', '')}.com.br"
-    senha_hash = hashlib.sha256(f"senha123".encode()).hexdigest()
-    
-    cursor.execute("""
-        INSERT OR IGNORE INTO empresas_esg 
-        (cnpj, razao_social, nome_fantasia, email, senha_hash, cidade, estado, setor, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (cnpj, razao, fantasia or razao, email, senha_hash, cidade, uf, 'Sustentabilidade', 'ativa'))
-    
-    empresas_teste.append({
-        'email': email,
-        'senha': 'senha123',
-        'razao_social': razao
-    })
+    empresas_teste = []
+    for i, emp in enumerate(empresas, 1):
+        cnpj, razao, fantasia, cidade, uf = emp
+        email = f"contato{i}@{razao[:10].lower().replace(' ', '')}.com.br"
+        senha_hash = hashlib.sha256(f"senha123".encode()).hexdigest()
+        
+        cursor.execute("""
+            INSERT OR IGNORE INTO empresas_esg 
+            (cnpj, razao_social, nome_fantasia, email, senha_hash, cidade, estado, setor, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (cnpj, razao, fantasia or razao, email, senha_hash, cidade, uf, 'Sustentabilidade', 'ativa'))
+        
+        empresas_teste.append({
+            'email': email,
+            'senha': 'senha123',
+            'razao_social': razao
+        })
 
-conn.commit()
+    conn.commit()
 
-print(f"\n✅ {len(empresas_teste)} empresas de teste criadas!")
-print("\n📋 CREDENCIAIS DE LOGIN:")
-print("="*60)
-for emp in empresas_teste:
-    print(f"\n🏢 {emp['razao_social']}")
-    print(f"   Email: {emp['email']}")
-    print(f"   Senha: {emp['senha']}")
+    print(f"\n✅ {len(empresas_teste)} empresas de teste criadas!")
+    print("\n📋 CREDENCIAIS DE LOGIN:")
+    print("="*60)
+    for emp in empresas_teste:
+        print(f"\n🏢 {emp['razao_social']}")
+        print(f"   Email: {emp['email']}")
+        print(f"   Senha: {emp['senha']}")
 
-# Vincular vagas às empresas (atualizar CNPJ nas vagas)
-cursor.execute("SELECT id, cnpj FROM empresas_esg")
-empresas_ids = cursor.fetchall()
+    # Vincular vagas às empresas (atualizar CNPJ nas vagas)
+    cursor.execute("SELECT id, cnpj FROM empresas_esg")
+    empresas_ids = cursor.fetchall()
 
-vagas_atualizadas = 0
-for emp_id, cnpj in empresas_ids:
-    # Buscar vagas sem empresa (limitado a 10 por empresa)
-    cursor.execute("""
-        SELECT id FROM vagas_esg 
-        WHERE cnpj IS NULL OR cnpj='' 
-        LIMIT 10
-    """)
-    vagas_sem_empresa = cursor.fetchall()
-    
-    for (vaga_id,) in vagas_sem_empresa:
-        cursor.execute("UPDATE vagas_esg SET cnpj=? WHERE id=?", (cnpj, vaga_id))
-        vagas_atualizadas += 1
+    vagas_atualizadas = 0
+    for emp_id, cnpj in empresas_ids:
+        # Buscar vagas sem empresa (limitado a 10 por empresa)
+        cursor.execute("""
+            SELECT id FROM vagas_esg 
+            WHERE cnpj IS NULL OR cnpj='' 
+            LIMIT 10
+        """)
+        vagas_sem_empresa = cursor.fetchall()
+        
+        for (vaga_id,) in vagas_sem_empresa:
+            cursor.execute("UPDATE vagas_esg SET cnpj=? WHERE id=?", (cnpj, vaga_id))
+            vagas_atualizadas += 1
 
-conn.commit()
-print(f"\n✅ {vagas_atualizadas} vagas vinculadas às empresas")
+    conn.commit()
+    print(f"\n✅ {vagas_atualizadas} vagas vinculadas às empresas")
 
-# Estatísticas
-cursor.execute("SELECT COUNT(*) FROM empresas_esg")
-total_empresas = cursor.fetchone()[0]
+    # Estatísticas
+    cursor.execute("SELECT COUNT(*) FROM empresas_esg")
+    total_empresas = cursor.fetchone()[0]
 
-cursor.execute("SELECT COUNT(*) FROM vagas_esg WHERE cnpj IS NOT NULL")
-vagas_vinculadas = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM vagas_esg WHERE cnpj IS NOT NULL")
+    vagas_vinculadas = cursor.fetchone()[0]
 
-print("\n" + "="*60)
-print("📊 ESTATÍSTICAS:")
-print(f"   • {total_empresas} empresas cadastradas")
-print(f"   • {vagas_vinculadas} vagas vinculadas a empresas")
-print("="*60)
-
-conn.close()
+    print("\n" + "="*60)
+    print("📊 ESTATÍSTICAS:")
+    print(f"   • {total_empresas} empresas cadastradas")
+    print(f"   • {vagas_vinculadas} vagas vinculadas a empresas")
+    print("="*60)

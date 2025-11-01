@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Cadastro de Empresa - Green Jobs Brasil</title>
+    
+    <!-- Fonts e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-green: #059669;
+            --light-green: #10b981;
+            --dark-green: #047857;
+            --accent-green: #34d399;
+            --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 1rem;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .step.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .step.completed {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 2rem;
+            height: 2px;
+            background: #e5e7eb;
+            transform: translateY(-50%);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step.completed::after {
+            background: var(--accent-green);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-green);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .cnpj-info {
+            background: #f0fdf4;
+            border: 2px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .cnpj-info.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--primary-green);
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            background: var(--primary-green);
+            height: 6px;
+            border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        .sustainability-score {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-green) 0deg, var(--accent-green) 180deg, #e5e7eb 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .score-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-card">
+            <h1><i class="fas fa-building"></i> Cadastro de Empresa Verde</h1>
+            <p class="mb-0">Conecte sua empresa ao maior hub de talentos ESG do Brasil</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">1</div>
+            <div class="step" id="step2">2</div>
+            <div class="step" id="step3">3</div>
+            <div class="step" id="step4">4</div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card">
+            <form id="empresaForm">
+                <!-- Etapa 1: CNPJ e Dados Básicos -->
+                <div class="form-step active" id="etapa1">
+                    <h3><i class="fas fa-id-card"></i> Dados da Empresa</h3>
+                    <p class="text-muted mb-4">Vamos começar validando os dados da sua empresa na Receita Federal</p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="cnpj">CNPJ *</label>
+                        <input type="text" class="form-control" id="cnpj" placeholder="00.000.000/0000-00">
+                        <small class="text-muted">Digite apenas números ou com formatação</small>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="validarCNPJ()" id="btnValidarCNPJ">
+                        <i class="fas fa-search"></i> Validar CNPJ
+                    </button>
+
+                    <div class="loading" id="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Consultando Receita Federal...
+                    </div>
+
+                    <div class="cnpj-info" id="cnpjInfo">
+                        <h5 id="empresaNome">Nome da Empresa</h5>
+                        <p><strong>CNPJ:</strong> <span id="empresaCNPJ"></span></p>
+                        <p><strong>Situação:</strong> <span id="empresaSituacao"></span></p>
+                        <p><strong>Localização:</strong> <span id="empresaLocal"></span></p>
+                        <p><strong>Atividade Principal:</strong> <span id="empresaAtividade"></span></p>
+                        
+                        <div class="sustainability-score mt-3">
+                            <div class="score-circle">
+                                <div class="score-text" id="scoreText">0%</div>
+                            </div>
+                            <h6>Score Verde Inicial</h6>
+                            <p class="mb-0 small" id="scoreDesc">Baseado na atividade principal</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 2: Contato e Acesso -->
+                <div class="form-step" id="etapa2">
+                    <h3><i class="fas fa-envelope"></i> Dados de Contato</h3>
+                    <p class="text-muted mb-4">Informações para contato e acesso à plataforma</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email Corporativo *</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="telefone">Telefone</label>
+                                <input type="tel" class="form-control" id="telefone" placeholder="(11) 99999-9999">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="senha">Senha de Acesso *</label>
+                        <input type="password" class="form-control" id="senha">
+                        <small class="text-muted">Mínimo 8 caracteres</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirmarSenha">Confirmar Senha *</label>
+                        <input type="password" class="form-control" id="confirmarSenha">
+                    </div>
+                </div>
+
+                <!-- Etapa 3: Informações ESG -->
+                <div class="form-step" id="etapa3">
+                    <h3><i class="fas fa-leaf"></i> Informações ESG</h3>
+                    <p class="text-muted mb-4">Conte-nos sobre as práticas sustentáveis da sua empresa</p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="descricao">Descrição da Empresa</label>
+                        <textarea class="form-control" id="descricao" rows="4" placeholder="Descreva brevemente sua empresa e missão..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="website">Website</label>
+                        <input type="url" class="form-control" id="website" placeholder="https://suaempresa.com.br">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Principais ODS (Objetivos de Desenvolvimento Sustentável)</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods7" value="7">
+                                    <label class="form-check-label" for="ods7">ODS 7 - Energia Limpa</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods11" value="11">
+                                    <label class="form-check-label" for="ods11">ODS 11 - Cidades Sustentáveis</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods12" value="12">
+                                    <label class="form-check-label" for="ods12">ODS 12 - Consumo Responsável</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods13" value="13">
+                                    <label class="form-check-label" for="ods13">ODS 13 - Ação Climática</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods14" value="14">
+                                    <label class="form-check-label" for="ods14">ODS 14 - Vida na Água</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods15" value="15">
+                                    <label class="form-check-label" for="ods15">ODS 15 - Vida Terrestre</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods6" value="6">
+                                    <label class="form-check-label" for="ods6">ODS 6 - Água Limpa</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods8" value="8">
+                                    <label class="form-check-label" for="ods8">ODS 8 - Trabalho Decente</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ods9" value="9">
+                                    <label class="form-check-label" for="ods9">ODS 9 - Inovação</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 4: Revisão e Confirmação -->
+                <div class="form-step" id="etapa4">
+                    <h3><i class="fas fa-check-circle"></i> Revisão dos Dados</h3>
+                    <p class="text-muted mb-4">Confirme os dados antes de finalizar o cadastro</p>
+
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-building"></i> Dados da Empresa</h6>
+                        <p class="mb-1"><strong>Nome:</strong> <span id="reviewNome"></span></p>
+                        <p class="mb-1"><strong>CNPJ:</strong> <span id="reviewCNPJ"></span></p>
+                        <p class="mb-0"><strong>Score Verde:</strong> <span id="reviewScore"></span></p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-envelope"></i> Contato</h6>
+                        <p class="mb-1"><strong>Email:</strong> <span id="reviewEmail"></span></p>
+                        <p class="mb-0"><strong>Telefone:</strong> <span id="reviewTelefone"></span></p>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="termos">
+                        <label class="form-check-label" for="termos">
+                            Aceito os <a href="#" class="text-decoration-none">Termos de Uso</a> e <a href="#" class="text-decoration-none">Política de Privacidade</a>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botões de Navegação -->
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-secondary" onclick="anteriorEtapa()" id="btnAnterior" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="proximaEtapa()" id="btnProximo" disabled>
+                        Próximo <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="btn btn-success" id="btnFinalizar" style="display: none;">
+                        <i class="fas fa-check"></i> Finalizar Cadastro
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Voltar ao Home -->
+        <div class="text-center">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-home"></i> Voltar ao Início
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let etapaAtual = 1;
+        let empresaData = {};
+
+        // Formatação do CNPJ
+        document.getElementById('cnpj').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+
+        // Validação CNPJ via API
+        async function validarCNPJ() {
+            const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+            if (cnpj.length !== 14) {
+                alert('CNPJ deve ter 14 dígitos');
+                return;
+            }
+
+            const btnValidar = document.getElementById('btnValidarCNPJ');
+            btnValidar.disabled = true;
+            btnValidar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+            document.getElementById('loading').classList.add('show');
+
+            // 1. Verificar duplicidade instantânea
+            try {
+                const dupResponse = await fetch(`/api/empresas/validar-cnpj/${cnpj}`);
+                const dupData = await dupResponse.json();
+                if (dupResponse.ok && dupData.exists) {
+                    alert('❌ Este CNPJ já está cadastrado no sistema!');
+                    document.getElementById('btnProximo').disabled = true;
+                    btnValidar.disabled = false;
+                    btnValidar.innerHTML = '<i class="fas fa-search"></i> Validar CNPJ';
+                    document.getElementById('loading').classList.remove('show');
+                    return;
+                }
+            } catch (error) {
+                alert('Erro ao verificar duplicidade: ' + error.message);
+                document.getElementById('btnProximo').disabled = true;
+                btnValidar.disabled = false;
+                btnValidar.innerHTML = '<i class="fas fa-search"></i> Validar CNPJ';
+                document.getElementById('loading').classList.remove('show');
+                return;
+            }
+
+            // 2. Consulta Receita Federal (mantém fluxo original)
+            try {
+                const response = await fetch(`/api/search-company/${cnpj}`);
+                const data = await response.json();
+                if (response.ok) {
+                    empresaData = data;
+                    mostrarDadosEmpresa(data);
+                    document.getElementById('btnProximo').disabled = false;
+                    console.log('✅ CNPJ validado:', data);
+                } else {
+                    alert('Erro ao consultar CNPJ: ' + data.detail);
+                    document.getElementById('btnProximo').disabled = true;
+                }
+            } catch (error) {
+                alert('Erro na consulta: ' + error.message);
+                document.getElementById('btnProximo').disabled = true;
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                btnValidar.disabled = false;
+                btnValidar.innerHTML = '<i class="fas fa-search"></i> Validar CNPJ';
+            }
+        }
+
+        function mostrarDadosEmpresa(data) {
+            document.getElementById('empresaNome').textContent = data.nome;
+            document.getElementById('empresaCNPJ').textContent = data.cnpj;
+            document.getElementById('empresaSituacao').textContent = data.situacao;
+            document.getElementById('empresaLocal').textContent = `${data.municipio}/${data.uf}`;
+            document.getElementById('empresaAtividade').textContent = data.atividade_principal;
+            
+            const score = data.green_score || 0;
+            document.getElementById('scoreText').textContent = score + '%';
+            document.getElementById('scoreDesc').textContent = data.is_green ? 
+                'Empresa com atividade sustentável identificada!' : 
+                'Score inicial baseado na atividade principal';
+
+            document.getElementById('cnpjInfo').classList.add('show');
+        }
+
+        function proximaEtapa() {
+            if (validarEtapaAtual()) {
+                document.getElementById(`etapa${etapaAtual}`).classList.remove('active');
+                document.getElementById(`step${etapaAtual}`).classList.remove('active');
+                document.getElementById(`step${etapaAtual}`).classList.add('completed');
+                
+                etapaAtual++;
+                
+                document.getElementById(`etapa${etapaAtual}`).classList.add('active');
+                document.getElementById(`step${etapaAtual}`).classList.add('active');
+                
+                atualizarBotoes();
+                
+                if (etapaAtual === 4) {
+                    preencherRevisao();
+                }
+            }
+        }
+
+        function anteriorEtapa() {
+            document.getElementById(`etapa${etapaAtual}`).classList.remove('active');
+            document.getElementById(`step${etapaAtual}`).classList.remove('active');
+            
+            etapaAtual--;
+            
+            document.getElementById(`step${etapaAtual}`).classList.remove('completed');
+            document.getElementById(`step${etapaAtual}`).classList.add('active');
+            document.getElementById(`etapa${etapaAtual}`).classList.add('active');
+            
+            atualizarBotoes();
+        }
+
+        function atualizarBotoes() {
+            document.getElementById('btnAnterior').style.display = etapaAtual > 1 ? 'block' : 'none';
+            document.getElementById('btnProximo').style.display = etapaAtual < 4 ? 'block' : 'none';
+            document.getElementById('btnFinalizar').style.display = etapaAtual === 4 ? 'block' : 'none';
+        }
+
+        function validarEtapaAtual() {
+            switch(etapaAtual) {
+                case 1:
+                    if (!empresaData.nome || !document.getElementById('cnpj').value) {
+                        alert('Por favor, valide o CNPJ primeiro!');
+                        return false;
+                    }
+                    return true;
+                case 2:
+                    const email = document.getElementById('email').value;
+                    const senha = document.getElementById('senha').value;
+                    const confirmar = document.getElementById('confirmarSenha').value;
+                    
+                    if (!email || !senha || senha !== confirmar) {
+                        alert('Verifique email e senhas');
+                        return false;
+                    }
+                    if (senha.length < 8) {
+                        alert('Senha deve ter pelo menos 8 caracteres');
+                        return false;
+                    }
+                    return true;
+                case 3:
+                    return true; // Etapa opcional
+                default:
+                    return true;
+            }
+        }
+
+        function validarStep4() {
+            // Validar se temos os dados essenciais
+            if (!empresaData.nome || !document.getElementById('cnpj').value) {
+                alert('❌ CNPJ não foi validado corretamente');
+                return false;
+            }
+            
+            const email = document.getElementById('email').value;
+            if (!email || !email.includes('@')) {
+                alert('❌ Email inválido');
+                return false;
+            }
+            
+            const senha = document.getElementById('senha').value;
+            if (!senha || senha.length < 8) {
+                alert('❌ Senha deve ter pelo menos 8 caracteres');
+                return false;
+            }
+            
+            const telefone = document.getElementById('telefone').value;
+            if (!telefone) {
+                alert('❌ Telefone é obrigatório');
+                return false;
+            }
+            
+            // Verificar se pelo menos um ODS foi selecionado
+            const odsCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="ods"]:checked');
+            console.log('🎯 ODS selecionados:', odsCheckboxes.length, Array.from(odsCheckboxes).map(cb => cb.value));
+            
+            if (odsCheckboxes.length === 0) {
+                alert('❌ Selecione pelo menos um Objetivo de Desenvolvimento Sustentável (ODS)');
+                return false;
+            }
+            
+            // Verificar termos
+            const termos = document.getElementById('termos');
+            if (!termos || !termos.checked) {
+                alert('❌ É necessário aceitar os Termos de Uso e Política de Privacidade');
+                return false;
+            }
+            
+            console.log('✅ Validação Step 4 passou!');
+            return true;
+        }
+
+        function calcularScoreVerde() {
+            // Score base por ter se cadastrado
+            let score = 30;
+            
+            // Pontos por ODS selecionados (5 pontos por ODS, máximo 50)
+            const odsSelected = document.querySelectorAll('input[type="checkbox"][id^="ods"]:checked').length;
+            score += Math.min(odsSelected * 5, 50);
+            
+            // Pontos por ter website
+            const website = document.getElementById('website').value;
+            if (website && website.length > 0) {
+                score += 10;
+            }
+            
+            // Pontos por ter descrição detalhada
+            const descricao = document.getElementById('descricao').value;
+            if (descricao && descricao.length > 100) {
+                score += 10;
+            }
+            
+            // Máximo 100
+            return Math.min(score, 100);
+        }
+
+        function preencherRevisao() {
+            document.getElementById('reviewNome').textContent = empresaData.nome;
+            document.getElementById('reviewCNPJ').textContent = empresaData.cnpj;
+            document.getElementById('reviewScore').textContent = (empresaData.green_score || 0) + '%';
+            document.getElementById('reviewEmail').textContent = document.getElementById('email').value;
+            document.getElementById('reviewTelefone').textContent = document.getElementById('telefone').value || 'Não informado';
+        }
+
+        // Submit do formulário
+        document.getElementById('empresaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('🚀 Submit triggered!');
+            
+            if (!document.getElementById('termos').checked) {
+                alert('Você deve aceitar os termos de uso');
+                return;
+            }
+
+            // Validar se temos todos os dados necessários
+            if (!empresaData.cnpj || !empresaData.nome) {
+                alert('Dados da empresa não foram validados corretamente');
+                return;
+            }
+
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+
+            if (!email || !senha) {
+                alert('Email e senha são obrigatórios');
+                return;
+            }
+
+            // Mostrar loading
+            const btnFinalizar = document.getElementById('btnFinalizar');
+            btnFinalizar.disabled = true;
+            btnFinalizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+            const formData = {
+                cnpj: empresaData.cnpj,
+                razao_social: empresaData.nome,
+                email: email,
+                senha: senha,
+                telefone: document.getElementById('telefone').value,
+                website: document.getElementById('website').value,
+                descricao: document.getElementById('descricao').value,
+                ods_tags: getSelectedODS(),
+                score_verde: empresaData.green_score || 0
+            };
+
+            console.log('📤 Enviando dados:', formData);
+
+            try {
+                const response = await fetch('/api/empresas/cadastro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Sucesso:', result);
+                    alert('Cadastro realizado com sucesso!');
+                    window.location.href = '/empresas/login';
+                } else {
+                    const error = await response.json();
+                    console.error('Erro do servidor:', error);
+                    alert('Erro no cadastro: ' + error.detail);
+                }
+            } catch (error) {
+                console.error('Erro na comunicação:', error);
+                alert('Erro na comunicação: ' + error.message);
+            } finally {
+                // Restaurar botão
+                btnFinalizar.disabled = false;
+                btnFinalizar.innerHTML = '<i class="fas fa-check"></i> Finalizar Cadastro';
+            }
+        });
+
+        // Formatação do telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                if (value.length > 6) {
+                    value = value.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+                } else if (value.length > 2) {
+                    value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+                } else {
+                    value = value.replace(/^(\d*)/, '($1');
+                }
+                e.target.value = value;
+            }
+        });
+
+        function getSelectedODS() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="ods"]:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // Função de teste para debug
+        function testarSubmit() {
+            console.log('🧪 Teste de submit manual');
+            console.log('Etapa atual:', etapaAtual);
+            console.log('Empresa data:', empresaData);
+            console.log('Email:', document.getElementById('email').value);
+            console.log('Termos:', document.getElementById('termos').checked);
+
+            // Disparar submit manualmente
+            document.getElementById('empresaForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Debug: adicionar listener ao botão finalizar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM carregado, configurando eventos...');
+            
+            const btnFinalizar = document.getElementById('btnFinalizar');
+            if (btnFinalizar) {
+                btnFinalizar.addEventListener('click', function(e) {
+                    console.log('🎯 Botão Finalizar clicado!');
+                    e.preventDefault();
+                    
+                    // Prevenir múltiplos clicks
+                    if (this.disabled) {
+                        console.log('⚠️ Botão já desabilitado, ignorando click');
+                        return;
+                    }
+                    
+                    // Validar step final
+                    if (!validarStep4()) {
+                        console.log('❌ Validação Step 4 falhou');
+                        return;
+                    }
+                    
+                    // Coletar todos os dados
+                    const dadosCompletos = {
+                        cnpj: document.getElementById('cnpj').value,
+                        razao_social: empresaData.nome,
+                        email: document.getElementById('email').value,
+                        senha: document.getElementById('senha').value,
+                        telefone: document.getElementById('telefone').value,
+                        website: document.getElementById('website').value || '',
+                        descricao: document.getElementById('descricao').value || '',
+                        ods_tags: Array.from(document.querySelectorAll('input[type="checkbox"][id^="ods"]:checked')).map(cb => parseInt(cb.value)),
+                        score_verde: calcularScoreVerde()
+                    };
+                    
+                    console.log('📋 Dados completos:', dadosCompletos);
+                    
+                    // Mostrar loading
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
+                    btn.disabled = true;
+                    
+                    console.log('🚀 Enviando requisição para /api/empresas/cadastro...');
+                    
+                    // Submeter para API
+                    fetch('/api/empresas/cadastro', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(dadosCompletos)
+                    })
+                    .then(response => {
+                        console.log('📡 Status da resposta:', response.status, response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ Resposta da API:', data);
+                        
+                        if (data.message && data.empresa_id) {
+                            // Mostrar modal de sucesso
+                            alert(`🎉 ${data.message}
+
+CNPJ: ${data.cnpj}
+Score Verde: ${data.score_verde}%
+ID: ${data.empresa_id}
+
+Bem-vinda ao Green Jobs Brasil!`);
+                            
+                            // Redirecionar após confirmação
+                            window.location.href = '/empresas/dashboard';
+                        } else {
+                            console.error('❌ Erro retornado pela API:', data);
+                            alert('❌ Erro no cadastro: ' + (data.error || data.detail || 'Erro desconhecido'));
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('💥 Erro na requisição:', error);
+                        alert(`❌ Erro de conexão: ${error.message}
+
+Verifique se:
+- A API está rodando
+- Sua conexão com a internet está funcionando
+- Tente novamente em alguns segundos`);
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

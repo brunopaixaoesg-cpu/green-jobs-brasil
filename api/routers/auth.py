@@ -2,7 +2,28 @@
 Router de Autenticação
 Endpoints para registro, login, logout e gerenciamento de usuários
 """
+from datetime import datetime
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+import sqlite3
+
 from api.db import get_db
+from api.services.auth import (
+    UserInDB,
+    UserCreate,
+    UserResponse,
+    Token,
+    UserLogin,
+    get_password_hash,
+    verify_password,
+    create_tokens_for_user,
+    decode_token,
+    validate_user_type,
+    validate_password_strength,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticação"])
 

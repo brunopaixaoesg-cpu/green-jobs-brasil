@@ -4,18 +4,17 @@ API endpoints for generating statistics and analytics.
 """
 
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import text, func
+from fastapi import APIRouter, HTTPException
 from datetime import datetime
+import sqlite3
+import json
 from api.db import get_db
-from api.models import EmpresasVerdes, CnaeGreen
-from api.schemas import StatsResponse
 
 router = APIRouter(prefix="/stats", tags=["statistics"])
 
-@router.get("", response_model=StatsResponse)
-async def obter_estatisticas_completas(db: Session = Depends(get_db)):
+
+@router.get("")
+async def obter_estatisticas_completas():
     """
     Get comprehensive statistics about green companies.
     
@@ -28,131 +27,69 @@ async def obter_estatisticas_completas(db: Session = Depends(get_db)):
     - Last update timestamp
     """
     try:
-        # Get total companies count
-        total_empresas = db.query(EmpresasVerdes).count()
-        
-        # Get last update
-        ultima_atualizacao_result = db.query(
-            func.max(EmpresasVerdes.atualizado_em)
-        ).scalar()
-        ultima_atualizacao = ultima_atualizacao_result or datetime.now()
-        
-        # Statistics by UF
-        uf_stats_query = text("""
-            SELECT 
-                ev.uf,
-                COUNT(*) as total_empresas,
-                ROUND(AVG(ev.score_verde), 2) as score_medio,
-                COUNT(CASE WHEN cg.prioridade = 'Core' THEN 1 END) as empresas_core,
-                COUNT(CASE WHEN cg.prioridade = 'Adjacente' THEN 1 END) as empresas_adjacentes
-            FROM gjb.empresas_verdes ev
-            LEFT JOIN gjb.cnae_green cg ON ev.cnae_principal = cg.cnae
-            GROUP BY ev.uf
-            ORDER BY total_empresas DESC
-        """)
-        uf_stats_raw = db.execute(uf_stats_query).fetchall()
-        
-        por_uf = [
-            {
-                "uf": row.uf,
-                "total_empresas": row.total_empresas,
-                "score_medio": float(row.score_medio or 0),
-                "empresas_core": row.empresas_core,
-                "empresas_adjacentes": row.empresas_adjacentes
-            }
-            for row in uf_stats_raw
-        ]
-        
-        # Statistics by CNAE
-        cnae_stats_query = text("""
-            SELECT 
-                cg.cnae,
-                cg.titulo,
-                cg.categoria,
-                COUNT(ev.cnpj) as total_empresas,
-                array_agg(DISTINCT ev.uf ORDER BY ev.uf) as ufs
-            FROM gjb.cnae_green cg
-            LEFT JOIN gjb.empresas_verdes ev ON cg.cnae = ev.cnae_principal
-            GROUP BY cg.cnae, cg.titulo, cg.categoria
-            HAVING COUNT(ev.cnpj) > 0
-            ORDER BY total_empresas DESC
-            LIMIT 20
-        """)
-        cnae_stats_raw = db.execute(cnae_stats_query).fetchall()
-        
+        # Use sqlite3 connection and simple queries compatible with SQLite
+        conn = get_db()
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # Total companies
+        cur.execute("SELECT COUNT(*) as total FROM empresas_esg")
+        total_empresas = cur.fetchone()['total']
+
+        # Last update (fallback to now)
+        try:
+            cur.execute("SELECT MAX(created_at) as ultima FROM empresas_esg")
+            ultima = cur.fetchone()['ultima']
+            ultima_atualizacao = ultima if ultima else datetime.now().isoformat()
+        except Exception:
+            ultima_atualizacao = datetime.now().isoformat()
+
+        # By UF
+        cur.execute("SELECT COALESCE(localizacao_uf, 'NA') as uf, COUNT(*) as total_empresas, AVG(score_verde) as score_medio FROM empresas_esg GROUP BY uf ORDER BY total_empresas DESC LIMIT 50")
+        por_uf = [dict(r) for r in cur.fetchall()]
+
+        # By CNAE (top 20)
+        cur.execute("SELECT cnae_principal as cnae, COUNT(*) as total_empresas FROM empresas_esg WHERE cnae_principal IS NOT NULL GROUP BY cnae_principal ORDER BY total_empresas DESC LIMIT 20")
         por_cnae = []
-        for row in cnae_stats_raw:
-            # Get UF distribution for this CNAE
-            uf_dist_query = text("""
-                SELECT uf, COUNT(*) as count
-                FROM gjb.empresas_verdes
-                WHERE cnae_principal = :cnae
-                GROUP BY uf
-                ORDER BY count DESC
-            """)
-            uf_dist = db.execute(uf_dist_query, {"cnae": row.cnae}).fetchall()
-            
-            por_cnae.append({
-                "cnae": row.cnae,
-                "titulo": row.titulo,
-                "categoria": row.categoria,
-                "total_empresas": row.total_empresas,
-                "por_uf": [{"uf": r.uf, "count": r.count} for r in uf_dist]
-            })
-        
-        # Statistics by company size (porte)
-        porte_stats_query = text("""
-            SELECT 
-                COALESCE(porte, 'NÃO_INFORMADO') as porte,
-                COUNT(*) as total_empresas,
-                ROUND(AVG(score_verde), 2) as score_medio
-            FROM gjb.empresas_verdes
-            GROUP BY porte
-            ORDER BY total_empresas DESC
-        """)
-        porte_stats_raw = db.execute(porte_stats_query).fetchall()
-        
-        por_porte = [
-            {
-                "porte": row.porte,
-                "total_empresas": row.total_empresas,
-                "score_medio": float(row.score_medio or 0)
-            }
-            for row in porte_stats_raw
-        ]
-        
-        # Most frequent ODS
-        ods_stats_query = text("""
-            SELECT 
-                unnest(ods_tags) as ods_numero,
-                COUNT(*) as frequencia
-            FROM gjb.empresas_verdes
-            WHERE ods_tags IS NOT NULL AND array_length(ods_tags, 1) > 0
-            GROUP BY ods_numero
-            ORDER BY frequencia DESC
-            LIMIT 10
-        """)
-        ods_stats_raw = db.execute(ods_stats_query).fetchall()
-        
-        ods_mais_frequentes = [
-            {"ods": row.ods_numero, "frequencia": row.frequencia}
-            for row in ods_stats_raw
-        ]
-        
-        return StatsResponse(
-            total_empresas_verdes=total_empresas,
-            ultima_atualizacao=ultima_atualizacao,
-            por_uf=por_uf,
-            por_cnae=por_cnae,
-            por_porte=por_porte,
-            ods_mais_frequentes=ods_mais_frequentes
-        )
+        for r in cur.fetchall():
+            por_cnae.append({"cnae": r['cnae'], "total_empresas": r['total_empresas']})
+
+        # By porte
+        cur.execute("SELECT COALESCE(porte, 'NAO_INFORMADO') as porte, COUNT(*) as total_empresas, AVG(score_verde) as score_medio FROM empresas_esg GROUP BY porte ORDER BY total_empresas DESC")
+        por_porte = [dict(r) for r in cur.fetchall()]
+
+        # Simple ODS frequency (assumes ods_tags is a JSON array string)
+        ods_counts = {}
+        try:
+            cur.execute("SELECT ods_tags FROM empresas_esg WHERE ods_tags IS NOT NULL")
+            for row in cur.fetchall():
+                try:
+                    tags = json.loads(row['ods_tags']) if row['ods_tags'] else []
+                    for t in tags:
+                        ods_counts[str(t)] = ods_counts.get(str(t), 0) + 1
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        ods_mais_frequentes = sorted([{"ods": k, "frequencia": v} for k, v in ods_counts.items()], key=lambda x: x['frequencia'], reverse=True)[:10]
+
+        conn.close()
+
+        return {
+            "total_empresas_verdes": total_empresas,
+            "ultima_atualizacao": ultima_atualizacao,
+            "por_uf": por_uf,
+            "por_cnae": por_cnae,
+            "por_porte": por_porte,
+            "ods_mais_frequentes": ods_mais_frequentes
+        }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating statistics: {str(e)}")
 
 @router.get("/dashboard/kpis")
-async def obter_kpis_dashboard(db: Session = Depends(get_db)):
+async def obter_kpis_dashboard():
     """
     Get key performance indicators for dashboard display.
     
@@ -160,51 +97,41 @@ async def obter_kpis_dashboard(db: Session = Depends(get_db)):
     """
     try:
         # Main KPIs
-        kpis_query = text("""
-            SELECT 
-                COUNT(*) as total_empresas,
-                COUNT(DISTINCT uf) as total_ufs,
-                COUNT(DISTINCT cnae_principal) as total_cnaes_ativos,
-                ROUND(AVG(score_verde), 1) as score_medio_geral,
-                COUNT(CASE WHEN score_verde >= 80 THEN 1 END) as empresas_alto_score,
-                COUNT(CASE WHEN situacao_cadastral = 'ATIVA' THEN 1 END) as empresas_ativas
-            FROM gjb.empresas_verdes
-        """)
-        
-        kpis_result = db.execute(kpis_query).fetchone()
-        
-        # Recent activity
-        atividade_recente_query = text("""
-            SELECT DATE(atualizado_em) as data, COUNT(*) as empresas_atualizadas
-            FROM gjb.empresas_verdes
-            WHERE atualizado_em >= CURRENT_DATE - INTERVAL '7 days'
-            GROUP BY DATE(atualizado_em)
-            ORDER BY data DESC
-        """)
-        
-        atividade_recente = db.execute(atividade_recente_query).fetchall()
-        
+        conn = get_db()
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("SELECT COUNT(*) as total_empresas, COUNT(DISTINCT localizacao_uf) as total_ufs, COUNT(DISTINCT cnae_principal) as total_cnaes_ativos, AVG(score_verde) as score_medio_geral, SUM(CASE WHEN score_verde >= 80 THEN 1 ELSE 0 END) as empresas_alto_score, SUM(CASE WHEN status = 'ativa' THEN 1 ELSE 0 END) as empresas_ativas FROM empresas_esg")
+        kpis = cur.fetchone()
+
+        # Recent activity (simple last 7 days by created_at)
+        try:
+            cur.execute("SELECT DATE(created_at) as data, COUNT(*) as empresas_atualizadas FROM empresas_esg WHERE DATE(created_at) >= DATE('now','-7 days') GROUP BY DATE(created_at) ORDER BY data DESC")
+            atividade_recente = [{"data": row['data'], "empresas_atualizadas": row['empresas_atualizadas']} for row in cur.fetchall()]
+        except Exception:
+            atividade_recente = []
+
+        conn.close()
+
+        total_empresas = kpis['total_empresas'] if kpis else 0
         return {
             "kpis_principais": {
-                "total_empresas": kpis_result.total_empresas,
-                "total_ufs": kpis_result.total_ufs,
-                "total_cnaes_ativos": kpis_result.total_cnaes_ativos,
-                "score_medio_geral": float(kpis_result.score_medio_geral or 0),
-                "empresas_alto_score": kpis_result.empresas_alto_score,
-                "empresas_ativas": kpis_result.empresas_ativas,
-                "percentual_ativas": round((kpis_result.empresas_ativas / kpis_result.total_empresas) * 100, 1) if kpis_result.total_empresas > 0 else 0
+                "total_empresas": total_empresas,
+                "total_ufs": kpis['total_ufs'] if kpis else 0,
+                "total_cnaes_ativos": kpis['total_cnaes_ativos'] if kpis else 0,
+                "score_medio_geral": float(kpis['score_medio_geral'] or 0) if kpis else 0,
+                "empresas_alto_score": kpis['empresas_alto_score'] if kpis else 0,
+                "empresas_ativas": kpis['empresas_ativas'] if kpis else 0,
+                "percentual_ativas": round((kpis['empresas_ativas'] / total_empresas) * 100, 1) if total_empresas > 0 else 0
             },
-            "atividade_recente": [
-                {"data": row.data.isoformat(), "empresas_atualizadas": row.empresas_atualizadas}
-                for row in atividade_recente
-            ]
+            "atividade_recente": atividade_recente
         }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating KPIs: {str(e)}")
 
 @router.get("/trends/crescimento")
-async def obter_trends_crescimento(db: Session = Depends(get_db)):
+async def obter_trends_crescimento():
     """
     Get growth trends for green companies.
     
@@ -212,28 +139,16 @@ async def obter_trends_crescimento(db: Session = Depends(get_db)):
     """
     try:
         # Growth by registration date
-        crescimento_query = text("""
-            SELECT 
-                DATE_TRUNC('month', data_abertura) as mes,
-                COUNT(*) as novas_empresas
-            FROM gjb.empresas_verdes
-            WHERE data_abertura IS NOT NULL 
-              AND data_abertura >= CURRENT_DATE - INTERVAL '2 years'
-            GROUP BY DATE_TRUNC('month', data_abertura)
-            ORDER BY mes
-        """)
-        
-        crescimento_result = db.execute(crescimento_query).fetchall()
-        
-        return {
-            "crescimento_mensal": [
-                {
-                    "mes": row.mes.strftime("%Y-%m") if row.mes else None,
-                    "novas_empresas": row.novas_empresas
-                }
-                for row in crescimento_result
-            ]
-        }
+        conn = get_db()
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # Aggregate by month using SQLite strftime
+        cur.execute("SELECT strftime('%Y-%m', created_at) as mes, COUNT(*) as novas_empresas FROM empresas_esg WHERE created_at IS NOT NULL AND created_at >= date('now','-2 years') GROUP BY mes ORDER BY mes")
+        crescimento_result = cur.fetchall()
+        conn.close()
+
+        return {"crescimento_mensal": [{"mes": row['mes'], "novas_empresas": row['novas_empresas']} for row in crescimento_result]}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating growth trends: {str(e)}")

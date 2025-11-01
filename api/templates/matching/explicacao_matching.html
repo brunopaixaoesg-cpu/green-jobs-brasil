@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧠 Como Funciona o Sistema de Matching ML</title>
+    <title>🌱 Como funciona a plataforma Green Jobs Brasil</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -49,6 +49,25 @@
             color: #4a5568;
             margin-bottom: 30px;
         }
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 20px 0 10px 0;
+        }
+        .kpi {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+        }
+        .kpi i { color: #667eea; font-size: 1.4rem; }
+        .kpi .value { font-size: 1.4rem; font-weight: 700; color: #2d3748; }
+        .kpi .label { font-size: 0.95rem; color: #4a5568; }
 
         .section {
             margin-bottom: 40px;
@@ -291,78 +310,153 @@
     </style>
 </head>
 <body>
-    <a href="/ml-avancado" class="back-button">
+    <a href="/" class="back-button">
         <i class="fas fa-arrow-left"></i>
-        Voltar ao Dashboard
+        Voltar
     </a>
 
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-brain"></i> Como Funciona o Sistema de Matching ML</h1>
-            <p>Inteligência Artificial aplicada ao recrutamento de profissionais para o setor ambiental</p>
-        </div>
+            <h1><i class="fas fa-leaf"></i> Como funciona a plataforma Green Jobs Brasil</h1>
+            <p>Classificamos empresas verdes via CNAE/ODS, oferecemos APIs e dashboards, e utilizamos IA para matching entre profissionais e vagas ESG.</p>
 
-        <div class="section">
-            <h2><i class="fas fa-lightbulb"></i> Visão Geral do Sistema</h2>
-            <p>Nosso sistema utiliza <strong>Machine Learning</strong> para automatizar e otimizar o processo de seleção de candidatos, analisando múltiplas dimensões de compatibilidade entre profissionais e vagas ambientais.</p>
-            
-            <div class="highlight-box">
-                <h4><i class="fas fa-chart-line"></i> Resultado Comprovado</h4>
-                <p>O sistema processa <strong>768 candidaturas</strong> e identifica os <strong>10 melhores matches</strong> com precisão de 42% a 64% de compatibilidade</p>
+            <div class="kpis" id="kpis">
+                <div class="kpi">
+                    <i class="fas fa-building"></i>
+                    <div>
+                        <div class="value" id="kpi-empresas">—</div>
+                        <div class="label">Empresas verdes</div>
+                    </div>
+                </div>
+                <div class="kpi">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <div class="value" id="kpi-score">—</div>
+                        <div class="label">Score verde médio</div>
+                    </div>
+                </div>
+                <div class="kpi">
+                    <i class="fas fa-briefcase"></i>
+                    <div>
+                        <div class="value" id="kpi-vagas">—</div>
+                        <div class="label">Vagas disponíveis</div>
+                    </div>
+                </div>
+                <div class="kpi">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <div class="value" id="kpi-profissionais">—</div>
+                        <div class="label">Profissionais cadastrados</div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="section">
-            <h2><i class="fas fa-cogs"></i> Processo de Matching Passo a Passo</h2>
+            <h2><i class="fas fa-lightbulb"></i> Visão geral</h2>
+            <p>A Green Jobs Brasil identifica e classifica <strong>empresas verdes</strong> no Brasil a partir de <strong>CNAEs</strong> e mapeamento para <strong>ODS</strong>, expõe esses dados via <strong>API FastAPI</strong> e entrega <strong>dashboards</strong> para empresas e profissionais. Um módulo de <strong>matching (ML)</strong> calcula compatibilidade entre perfis e vagas ESG.</p>
+            
+            <div class="highlight-box">
+                <h4><i class="fas fa-rocket"></i> MVP validado</h4>
+                <p>Base demo com <strong>857 candidaturas</strong>, <strong>101 vagas</strong>, <strong>120 profissionais</strong> e <strong>43 CNAEs verdes</strong>; API e dashboards funcionais.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-project-diagram"></i> Fluxo de dados</h2>
+            <div class="process-flow">
+                <div class="process-step" data-step="1">
+                    <h4><i class="fas fa-file-upload"></i> Fontes</h4>
+                    <p>Dados públicos da RFB (CNPJ), mapeamento próprio de CNAEs verdes e ODS.</p>
+                </div>
+                <div class="process-step" data-step="2">
+                    <h4><i class="fas fa-sync-alt"></i> ETL</h4>
+                    <p>DuckDB processa os dados, gera Parquet por UF e carrega no SQLite (empresas_verdes, empresa_cnae).</p>
+                </div>
+                <div class="process-step" data-step="3">
+                    <h4><i class="fas fa-plug"></i> API</h4>
+                    <p>FastAPI expõe endpoints: <code>/empresas</code>, <code>/cnaes</code>, <code>/stats</code>, <code>/search-company/{cnpj}</code>, entre outros.</p>
+                </div>
+                <div class="process-step" data-step="4">
+                    <h4><i class="fas fa-chart-bar"></i> Dashboards</h4>
+                    <p>Interfaces para profissionais, empresas e ML, com filtros e visualizações.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-seedling"></i> Classificação verde (CNAE → ODS)</h2>
+            <p>Classificamos CNAEs em <strong>Core</strong>, <strong>Adjacent</strong> e <strong>Secondary</strong> e mapeamos para ODS relevantes. Empresas são marcadas verdes se possuírem CNAE principal ou secundários em nossa lista.</p>
+            <ul style="margin-left:20px; margin-top:10px; line-height:1.8;">
+                <li><strong>Core</strong>: atividades centrais (ex.: geração de energia renovável, gestão de resíduos, água)</li>
+                <li><strong>Adjacent</strong>: suporte direto (ex.: obras e testes para energia, consultoria ambiental)</li>
+                <li><strong>Secondary</strong>: apoio indireto (ex.: tecnologia, serviços profissionais ligados a ESG)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-leaf"></i> Score Verde</h2>
+            <p>O score (0–100) reflete o quão verde é a empresa, considerando a categoria do CNAE e status cadastral.</p>
+            <div class="feature-list">
+                <div class="feature-item"><strong>+80</strong> pontos: CNAE principal Core</div>
+                <div class="feature-item"><strong>+60</strong> pontos: CNAE principal Adjacent</div>
+                <div class="feature-item"><strong>+10</strong> por CNAE secundário verde (até +20)</div>
+                <div class="feature-item"><strong>-50</strong> pontos: penalidade para empresas inativas</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-search"></i> Busca por CNPJ</h2>
+            <p>Usamos a ReceitaWS para consultar empresas por CNPJ (com cache e TTL) e calculamos um <strong>green_score</strong> heurístico com base em CNAE, atividade e palavras-chave ambientais.</p>
+            <div class="feature-list">
+                <div class="feature-item"><strong>Endpoint:</strong> <code>/api/search-company/{cnpj}</code></div>
+                <div class="feature-item"><strong>Retorna:</strong> nome, situação, UF, CNAEs, atividade principal, green_score, is_green</div>
+                <div class="feature-item"><strong>Uso:</strong> alimenta o cadastro e auditoria de empresas verdes</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-cogs"></i> Matching (ML) — como calculamos a compatibilidade</h2>
             
             <div class="process-flow">
                 <div class="process-step" data-step="1">
-                    <h4><i class="fas fa-database"></i> Coleta de Dados</h4>
-                    <p>Sistema extrai dados do candidato (experiência, habilidades, área de atuação) e da vaga (requisitos, nível, setor)</p>
+                    <h4><i class="fas fa-database"></i> Coleta</h4>
+                    <p>Dados do candidato (habilidades, experiência, certificações, UF) e da vaga (requisitos, ODS, local).</p>
                 </div>
 
                 <div class="process-step" data-step="2">
-                    <h4><i class="fas fa-filter"></i> Pré-processamento</h4>
-                    <p>Normalização dos dados, tratamento de valores ausentes e padronização das variáveis categóricas</p>
+                    <h4><i class="fas fa-filter"></i> Preparação</h4>
+                    <p>Normalização, tratamento de faltantes e padronização de categorias e taxonomia de skills.</p>
                 </div>
 
                 <div class="process-step" data-step="3">
-                    <h4><i class="fas fa-robot"></i> Aplicação do Ensemble</h4>
-                    <p>Dois algoritmos trabalham em conjunto: Random Forest + XGBoost para máxima precisão</p>
+                    <h4><i class="fas fa-robot"></i> Cálculo</h4>
+                    <p>Pontuamos dimensões com pesos realistas e calibrados (v3), com foco em explicabilidade.</p>
                 </div>
 
                 <div class="process-step" data-step="4">
                     <h4><i class="fas fa-calculator"></i> Cálculo da Compatibilidade</h4>
-                    <p>Sistema gera score de 0 a 100% baseado na probabilidade de sucesso do match</p>
+                    <p>Score de 0 a 100% representando compatibilidade candidato–vaga.</p>
                 </div>
 
                 <div class="process-step" data-step="5">
-                    <h4><i class="fas fa-sort-amount-down"></i> Ranking Final</h4>
-                    <p>Candidatos são ordenados por compatibilidade e apresentados no dashboard visual</p>
+                    <h4><i class="fas fa-sort-amount-down"></i> Ranking</h4>
+                    <p>Candidatos ordenados por compatibilidade com dashboards e filtros.</p>
                 </div>
             </div>
         </div>
 
         <div class="section">
-            <h2><i class="fas fa-brain"></i> Algoritmos de Machine Learning</h2>
+            <h2><i class="fas fa-brain"></i> Fórmula de compatibilidade (v3)</h2>
             
-            <div class="algorithm-box">
-                <h3><i class="fas fa-tree"></i> Random Forest</h3>
-                <p><strong>Função:</strong> Analisa padrões complexos entre múltiplas variáveis</p>
-                <p><strong>Vantagem:</strong> Robusto contra overfitting, funciona bem com dados categóricos</p>
-                <p><strong>Aplicação:</strong> Identifica quais características são mais importantes para cada tipo de vaga</p>
-            </div>
-
-            <div class="algorithm-box">
-                <h3><i class="fas fa-rocket"></i> XGBoost</h3>
-                <p><strong>Função:</strong> Otimização gradient boosting para máxima precisão</p>
-                <p><strong>Vantagem:</strong> Excelente performance em dados tabulares, ajuste fino automático</p>
-                <p><strong>Aplicação:</strong> Refina as predições do Random Forest para maior acurácia</p>
-            </div>
-
             <div class="formula-box">
-                <strong>Score Final = (Random Forest + XGBoost) / 2</strong><br>
-                <em>// Ensemble que combina as forças de ambos os algoritmos</em>
+                <strong>score =</strong> (match_habilidades × 0.35)
+                + (match_experiencia × 0.25)
+                + (match_certificacoes × 0.20)
+                + (match_localizacao × 0.10)
+                + (match_ods × 0.10)
+                <br>
+                <em>// Pesos calibrados para refletir impacto realista e explicável</em>
             </div>
         </div>
 
@@ -503,30 +597,47 @@
         </div>
 
         <div class="section">
-            <h2><i class="fas fa-leaf"></i> Impacto no Setor Ambiental</h2>
-            <p>Este sistema é especialmente desenvolvido para o <strong>setor de sustentabilidade e meio ambiente</strong>, considerando:</p>
+            <h2><i class="fas fa-shield-alt"></i> Privacidade, LGPD e limitações</h2>
+            <p>Seguimos princípios de <strong>minimização de dados</strong>, controle de acesso por perfil e armazenamento local (SQLite) no MVP. Para produção, prevemos <strong>migrar para Postgres</strong>, adicionar RBAC e observabilidade.</p>
             
-            <h3><i class="fas fa-seedling"></i> Especificidades do Setor Verde</h3>
+            <h3><i class="fas fa-exclamation-triangle"></i> Limitações atuais do MVP</h3>
             <ul style="margin-left: 20px; margin-top: 15px;">
-                <li><strong>Certificações ambientais</strong> específicas (ISO 14001, LEED, etc.)</li>
-                <li><strong>Experiência em projetos sustentáveis</strong> e energia renovável</li>
-                <li><strong>Conhecimento em regulamentações</strong> ambientais brasileiras</li>
-                <li><strong>Paixão pela causa ambiental</strong> como fator diferencial</li>
-                <li><strong>Capacidade de inovação</strong> em soluções verdes</li>
+                <li>Dados RFB ainda em fase de expansão e normalização</li>
+                <li>Heurísticas de green_score por CNPJ sujeitas a ajuste</li>
+                <li>Alguns endpoints podem variar entre as portas 8000/8002 durante o refactor</li>
             </ul>
 
             <div class="highlight-box">
-                <h4><i class="fas fa-globe-americas"></i> Objetivo Final</h4>
-                <p>Acelerar a transição para uma economia verde conectando os <strong>melhores talentos</strong> com as <strong>oportunidades certas</strong> no setor ambiental brasileiro</p>
+                <h4><i class="fas fa-road"></i> Próximos passos</h4>
+                <p>Storytelling UX, filtros avançados por ODS/UF/porte, deploy beta, ingestão RFB incremental e matching v4.</p>
             </div>
         </div>
 
         <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 15px;">
             <p style="font-size: 1.1rem; color: #4a5568;">
                 <i class="fas fa-rocket" style="color: #667eea;"></i> 
-                <strong>Sistema em Produção</strong> • Processando candidatos reais • Resultados comprovados
+                <strong>MVP em operação</strong> • API + Dashboards • Dados demo realistas
             </p>
         </div>
     </div>
+
+    <script>
+      // Carregar KPIs dinamicamente da API /api/stats
+      (function loadKpis() {
+        fetch('/api/stats').then(r => r.json()).then(s => {
+          const fmt = (v) => (v==null? '—' : (typeof v==='number' ? new Intl.NumberFormat('pt-BR').format(v) : v));
+          document.getElementById('kpi-empresas').textContent = fmt(s.empresas_verdes);
+          document.getElementById('kpi-score').textContent = (s.score_medio != null ? (s.score_medio + '%') : '—');
+          document.getElementById('kpi-vagas').textContent = fmt(s.vagas_disponiveis);
+          document.getElementById('kpi-profissionais').textContent = fmt(s.profissionais_cadastrados);
+        }).catch(() => {
+          // fallback para valores conhecidos do README
+          document.getElementById('kpi-empresas').textContent = '10';
+          document.getElementById('kpi-score').textContent = '47,4%';
+          document.getElementById('kpi-vagas').textContent = '101';
+          document.getElementById('kpi-profissionais').textContent = '120';
+        });
+      })();
+    </script>
 </body>
 </html>
