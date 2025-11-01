@@ -224,7 +224,7 @@ async def criar_profissional(profissional: ProfissionalCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
-@router.get("/", response_model=List[ProfissionalResponse])
+@router.get("/")
 async def listar_profissionais(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -248,12 +248,12 @@ async def listar_profissionais(
             query += " AND localizacao_uf LIKE ?"
             params.append(f"%{localizacao_uf}%")
         
-            if areas_interesse:
-                query += " AND areas_interesse LIKE ?"
-                params.append(f"%{areas_interesse}%")
+        if areas_interesse:
+            query += " AND areas_interesse LIKE ?"
+            params.append(f"%{areas_interesse}%")
         
-            query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-            params.extend([limit, skip])
+        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        params.extend([limit, skip])
         
         cursor.execute(query, params)
         profissionais = cursor.fetchall()
@@ -1188,7 +1188,7 @@ async def atualizar_storytelling(profissional_id: int, dados: dict):
             UPDATE profissionais_esg 
             SET 
                 historia_verde = ?,
-                motivacao = ?,
+                motivacao_esg = ?,
                 valores_pessoais = ?,
                 objetivos_carreira = ?,
                 conquistas_json = ?,
