@@ -676,7 +676,7 @@
 
         async function carregarPerfil() {
             try {
-                const response = await fetch(`/api/profissionais/api/${profissionalId}/storytelling`);
+                const response = await fetch(`/api/profissionais/${profissionalId}/storytelling`);
                 const data = await response.json();
                 
                 // Header

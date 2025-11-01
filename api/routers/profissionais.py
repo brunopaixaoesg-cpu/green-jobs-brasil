@@ -2,8 +2,8 @@
 Router de Profissionais ESG - Green Jobs Brasil
 Endpoints para gerenciamento de profissionais verdes
 """
-from fastapi import APIRouter, HTTPException, Query, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, HTTPException, Query, Depends, Request, File, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -11,6 +11,8 @@ from datetime import datetime, date
 import json
 import os
 import sqlite3
+import shutil
+from pathlib import Path
 
 from api.db import get_db
 
@@ -1050,7 +1052,7 @@ async def pagina_perfil_storytelling(request: Request, profissional_id: int):
     return templates.TemplateResponse("perfil_storytelling.html", {"request": request, "profissional_id": profissional_id})
 
 
-@router.get("/api/{profissional_id}/storytelling")
+@router.get("/{profissional_id}/storytelling")
 async def obter_perfil_storytelling(profissional_id: int):
     """Obter perfil completo com storytelling do profissional"""
     try:
@@ -1145,7 +1147,7 @@ async def pagina_editar_storytelling(request: Request, profissional_id: int):
     })
 
 
-@router.put("/api/{profissional_id}/storytelling")
+@router.put("/{profissional_id}/storytelling")
 async def atualizar_storytelling(profissional_id: int, dados: dict):
     """Atualizar storytelling do profissional"""
     try:
@@ -1217,4 +1219,152 @@ async def atualizar_storytelling(profissional_id: int, dados: dict):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao atualizar: {str(e)}")
+
+
+# ==================== UPLOAD DE IMAGENS ====================
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+def validate_image(file: UploadFile) -> bool:
+    """Valida tipo e tamanho do arquivo de imagem"""
+    # Validar extensão
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Tipo de arquivo não permitido. Use: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Validar content-type
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="O arquivo deve ser uma imagem")
+    
+    return True
+
+
+@router.post("/{profissional_id}/upload")
+async def upload_imagem_perfil(
+    profissional_id: int,
+    tipo: str = Query(..., regex="^(foto_perfil|banner)$"),
+    file: UploadFile = File(...)
+):
+    """
+    Upload de foto de perfil ou banner
+    
+    - **tipo**: 'foto_perfil' ou 'banner'
+    - **file**: Arquivo de imagem (jpg, png, webp, max 5MB)
+    """
+    try:
+        # Validar imagem
+        validate_image(file)
+        
+        # Verificar se profissional existe
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM profissionais_esg WHERE id = ?", (profissional_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=404, detail="Profissional não encontrado")
+        
+        # Ler arquivo
+        contents = await file.read()
+        
+        # Validar tamanho
+        if len(contents) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Arquivo muito grande. Tamanho máximo: {MAX_FILE_SIZE / 1024 / 1024}MB"
+            )
+        
+        # Criar diretório de uploads se não existir
+        upload_dir = Path(BASE_DIR) / "static" / "uploads" / "profissionais" / str(profissional_id)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Gerar nome único do arquivo
+        ext = file.filename.split('.')[-1].lower()
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{tipo}_{timestamp}.{ext}"
+        filepath = upload_dir / filename
+        
+        # Salvar arquivo
+        with open(filepath, 'wb') as f:
+            f.write(contents)
+        
+        # URL relativa para acessar a imagem
+        url_path = f"/static/uploads/profissionais/{profissional_id}/{filename}"
+        
+        # Atualizar banco de dados
+        campo_db = f"{tipo}_url"
+        cursor.execute(f"""
+            UPDATE profissionais_esg 
+            SET {campo_db} = ?
+            WHERE id = ?
+        """, (url_path, profissional_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            "success": True,
+            "message": f"{tipo.replace('_', ' ').title()} atualizado com sucesso",
+            "url": url_path,
+            "filename": filename,
+            "size_kb": round(len(contents) / 1024, 2)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao fazer upload: {str(e)}")
+
+
+@router.delete("/{profissional_id}/upload")
+async def remover_imagem_perfil(
+    profissional_id: int,
+    tipo: str = Query(..., regex="^(foto_perfil|banner)$")
+):
+    """Remove foto de perfil ou banner"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Buscar URL da imagem atual
+        campo_db = f"{tipo}_url"
+        cursor.execute(f"SELECT {campo_db} FROM profissionais_esg WHERE id = ?", (profissional_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Profissional não encontrado")
+        
+        url_atual = result[campo_db] if result else None
+        
+        # Remover arquivo físico se existir
+        if url_atual:
+            filepath = Path(BASE_DIR) / url_atual.lstrip('/')
+            
+            if filepath.exists():
+                filepath.unlink()
+        
+        # Atualizar banco (remover URL)
+        cursor.execute(f"""
+            UPDATE profissionais_esg 
+            SET {campo_db} = NULL
+            WHERE id = ?
+        """, (profissional_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            "success": True,
+            "message": f"{tipo.replace('_', ' ').title()} removido com sucesso"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao remover imagem: {str(e)}")
+
 
