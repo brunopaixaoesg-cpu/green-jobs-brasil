@@ -1187,10 +1187,20 @@ async def atualizar_storytelling(profissional_id: int, dados: dict):
                 except json.JSONDecodeError:
                     raise HTTPException(status_code=400, detail=f"Campo {field} contém JSON inválido")
         
-        # Atualizar banco
+        # Atualizar banco - incluindo dados básicos
         cursor.execute("""
             UPDATE profissionais_esg 
             SET 
+                nome_completo = ?,
+                email = ?,
+                telefone = ?,
+                cargo_atual = ?,
+                empresa_atual = ?,
+                anos_experiencia_esg = ?,
+                localizacao_cidade = ?,
+                localizacao_uf = ?,
+                linkedin_url = ?,
+                portfolio_url = ?,
                 historia_verde = ?,
                 motivacao_esg = ?,
                 valores_pessoais = ?,
@@ -1200,6 +1210,16 @@ async def atualizar_storytelling(profissional_id: int, dados: dict):
                 idiomas_json = ?
             WHERE id = ?
         """, (
+            dados.get('nome_completo'),
+            dados.get('email'),
+            dados.get('telefone'),
+            dados.get('cargo_atual'),
+            dados.get('empresa_atual'),
+            dados.get('anos_experiencia_esg'),
+            dados.get('localizacao_cidade'),
+            dados.get('localizacao_uf'),
+            dados.get('linkedin_url'),
+            dados.get('portfolio_url'),
             dados.get('historia_verde'),
             dados.get('motivacao'),
             dados.get('valores_pessoais'),

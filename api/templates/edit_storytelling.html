@@ -687,6 +687,153 @@
                     </div>
                 </div>
 
+                <!-- Seção: Dados Básicos -->
+                <div class="mb-5">
+                    <div class="section-title">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Dados Básicos</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome Completo *</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="nome_completo" 
+                                name="nome_completo"
+                                placeholder="Seu nome completo"
+                                value="{{ dados.nome_completo or dados.nome or '' }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">E-mail *</label>
+                            <input 
+                                type="email" 
+                                class="form-control" 
+                                id="email" 
+                                name="email"
+                                placeholder="seu@email.com"
+                                value="{{ dados.email or '' }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            <input 
+                                type="tel" 
+                                class="form-control" 
+                                id="telefone" 
+                                name="telefone"
+                                placeholder="(11) 99999-9999"
+                                value="{{ dados.telefone or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Cargo Atual</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="cargo_atual" 
+                                name="cargo_atual"
+                                placeholder="Ex: Analista ESG, Gerente de Sustentabilidade"
+                                value="{{ dados.cargo_atual or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Empresa Atual</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="empresa_atual" 
+                                name="empresa_atual"
+                                placeholder="Nome da empresa"
+                                value="{{ dados.empresa_atual or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Anos de Experiência em ESG</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="anos_experiencia_esg" 
+                                name="anos_experiencia_esg"
+                                placeholder="0"
+                                min="0"
+                                max="50"
+                                value="{{ dados.anos_experiencia_esg or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Cidade</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="localizacao_cidade" 
+                                name="localizacao_cidade"
+                                placeholder="Ex: São Paulo"
+                                value="{{ dados.localizacao_cidade or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Estado (UF)</label>
+                            <select class="form-select" id="localizacao_uf" name="localizacao_uf">
+                                <option value="">Selecione o estado</option>
+                                <option value="AC" {% if dados.localizacao_uf == 'AC' %}selected{% endif %}>Acre</option>
+                                <option value="AL" {% if dados.localizacao_uf == 'AL' %}selected{% endif %}>Alagoas</option>
+                                <option value="AP" {% if dados.localizacao_uf == 'AP' %}selected{% endif %}>Amapá</option>
+                                <option value="AM" {% if dados.localizacao_uf == 'AM' %}selected{% endif %}>Amazonas</option>
+                                <option value="BA" {% if dados.localizacao_uf == 'BA' %}selected{% endif %}>Bahia</option>
+                                <option value="CE" {% if dados.localizacao_uf == 'CE' %}selected{% endif %}>Ceará</option>
+                                <option value="DF" {% if dados.localizacao_uf == 'DF' %}selected{% endif %}>Distrito Federal</option>
+                                <option value="ES" {% if dados.localizacao_uf == 'ES' %}selected{% endif %}>Espírito Santo</option>
+                                <option value="GO" {% if dados.localizacao_uf == 'GO' %}selected{% endif %}>Goiás</option>
+                                <option value="MA" {% if dados.localizacao_uf == 'MA' %}selected{% endif %}>Maranhão</option>
+                                <option value="MT" {% if dados.localizacao_uf == 'MT' %}selected{% endif %}>Mato Grosso</option>
+                                <option value="MS" {% if dados.localizacao_uf == 'MS' %}selected{% endif %}>Mato Grosso do Sul</option>
+                                <option value="MG" {% if dados.localizacao_uf == 'MG' %}selected{% endif %}>Minas Gerais</option>
+                                <option value="PA" {% if dados.localizacao_uf == 'PA' %}selected{% endif %}>Pará</option>
+                                <option value="PB" {% if dados.localizacao_uf == 'PB' %}selected{% endif %}>Paraíba</option>
+                                <option value="PR" {% if dados.localizacao_uf == 'PR' %}selected{% endif %}>Paraná</option>
+                                <option value="PE" {% if dados.localizacao_uf == 'PE' %}selected{% endif %}>Pernambuco</option>
+                                <option value="PI" {% if dados.localizacao_uf == 'PI' %}selected{% endif %}>Piauí</option>
+                                <option value="RJ" {% if dados.localizacao_uf == 'RJ' %}selected{% endif %}>Rio de Janeiro</option>
+                                <option value="RN" {% if dados.localizacao_uf == 'RN' %}selected{% endif %}>Rio Grande do Norte</option>
+                                <option value="RS" {% if dados.localizacao_uf == 'RS' %}selected{% endif %}>Rio Grande do Sul</option>
+                                <option value="RO" {% if dados.localizacao_uf == 'RO' %}selected{% endif %}>Rondônia</option>
+                                <option value="RR" {% if dados.localizacao_uf == 'RR' %}selected{% endif %}>Roraima</option>
+                                <option value="SC" {% if dados.localizacao_uf == 'SC' %}selected{% endif %}>Santa Catarina</option>
+                                <option value="SP" {% if dados.localizacao_uf == 'SP' %}selected{% endif %}>São Paulo</option>
+                                <option value="SE" {% if dados.localizacao_uf == 'SE' %}selected{% endif %}>Sergipe</option>
+                                <option value="TO" {% if dados.localizacao_uf == 'TO' %}selected{% endif %}>Tocantins</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">LinkedIn</label>
+                            <input 
+                                type="url" 
+                                class="form-control" 
+                                id="linkedin_url" 
+                                name="linkedin_url"
+                                placeholder="https://linkedin.com/in/seu-perfil"
+                                value="{{ dados.linkedin_url or '' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Portfólio / Site</label>
+                            <input 
+                                type="url" 
+                                class="form-control" 
+                                id="portfolio_url" 
+                                name="portfolio_url"
+                                placeholder="https://seusite.com"
+                                value="{{ dados.portfolio_url or '' }}">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Seção: Minha História -->
                 <div class="mb-5">
                     <div class="section-title">
@@ -1292,6 +1439,18 @@
             saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Salvando...';
 
             const formData = {
+                // Dados básicos
+                nome_completo: document.getElementById('nome_completo').value,
+                email: document.getElementById('email').value,
+                telefone: document.getElementById('telefone').value,
+                cargo_atual: document.getElementById('cargo_atual').value,
+                empresa_atual: document.getElementById('empresa_atual').value,
+                anos_experiencia_esg: document.getElementById('anos_experiencia_esg').value ? parseInt(document.getElementById('anos_experiencia_esg').value) : null,
+                localizacao_cidade: document.getElementById('localizacao_cidade').value,
+                localizacao_uf: document.getElementById('localizacao_uf').value,
+                linkedin_url: document.getElementById('linkedin_url').value,
+                portfolio_url: document.getElementById('portfolio_url').value,
+                // Storytelling
                 historia_verde: document.getElementById('historia_verde').value,
                 motivacao: document.getElementById('motivacao').value,
                 valores_pessoais: document.getElementById('valores_pessoais').value,
@@ -1358,6 +1517,14 @@
          * Atualizar preview com dados atuais do formulário
          */
         function updatePreview() {
+            // Dados básicos
+            const nomeCompleto = document.getElementById('nome_completo').value;
+            const cargo = document.getElementById('cargo_atual').value;
+            const empresa = document.getElementById('empresa_atual').value;
+            
+            document.getElementById('previewNome').textContent = nomeCompleto || 'Seu Nome';
+            document.getElementById('previewCargo').textContent = cargo || (empresa ? `@ ${empresa}` : 'Seu Cargo');
+            
             // Textos principais
             const historia = document.getElementById('historia_verde').value;
             const motivacao = document.getElementById('motivacao').value;
