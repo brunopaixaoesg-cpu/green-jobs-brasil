@@ -131,12 +131,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 try:
     original_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    from routers import profissionais, empresas
+    from routers import profissionais, empresas, kpis
     os.chdir(original_dir)
     app.include_router(profissionais.router)
     app.include_router(empresas.router)
+    app.include_router(kpis.router)
     logger.info("✅ Profissionais router carregado com sucesso!")
     logger.info("✅ Empresas router carregado com sucesso!")
+    logger.info("✅ KPIs router carregado com sucesso!")
 except Exception as e:
     logger.error(f"❌ Não foi possível carregar routers: {e}")
     import traceback
