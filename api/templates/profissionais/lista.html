@@ -189,6 +189,130 @@
             background: var(--primary-green);
             color: white;
         }
+
+        /* ========================================
+           MOBILE FIRST - RESPONSIVE DESIGN
+           ======================================== */
+
+        /* Mobile (< 576px) */
+        @media (max-width: 575px) {
+            .hero-section {
+                padding: 2rem 0 1.5rem;
+            }
+
+            .hero-section h1 {
+                font-size: 1.75rem !important;
+            }
+
+            .hero-section p {
+                font-size: 0.95rem !important;
+            }
+
+            .filter-card {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-control, .form-select {
+                font-size: 16px; /* Evita zoom no iOS */
+                min-height: 48px; /* Touch-friendly */
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
+
+            .profissional-card {
+                padding: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+            .profissional-name {
+                font-size: 1.1rem;
+            }
+
+            .skill-tag {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            .stats-summary {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Stack buttons vertically */
+            .profissional-card .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Reduce spacing */
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+
+        /* Tablet (576px - 768px) */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .hero-section {
+                padding: 3rem 0 1.5rem;
+            }
+
+            .profissional-card {
+                padding: 1.5rem;
+            }
+
+            .btn-primary {
+                padding: 0.75rem 1.5rem;
+            }
+        }
+
+        /* Touch devices improvements */
+        @media (hover: none) and (pointer: coarse) {
+            /* Larger touch targets */
+            .btn, .form-control, .form-select {
+                min-height: 48px;
+            }
+
+            /* Remove hover effects */
+            .profissional-card:hover {
+                transform: none;
+            }
+
+            /* Add active states */
+            .profissional-card:active {
+                transform: scale(0.98);
+            }
+
+            .btn:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Lazy loading placeholder */
+        img.lazy {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        img.lazy.loaded {
+            opacity: 1;
+        }
+
+        .img-placeholder {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -308,10 +432,28 @@
         let currentPage = 1;
         const itemsPerPage = 10;
 
-        // Carregar profissionais
+        // Intersection Observer para lazy loading de imagens
+        let imageObserver;
+        if ('IntersectionObserver' in window) {
+            imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.add('loaded');
+                        observer.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '50px' // Carregar 50px antes de entrar na viewport
+            });
+        }
+
+        // Carregar profissionais com paginação do servidor
         async function carregarProfissionais() {
             try {
-                const response = await fetch('/api/profissionais/?limit=100');
+                // Carregar apenas o necessário
+                const response = await fetch('/api/profissionais/?limit=50&skip=0');
                 const data = await response.json();
                 
                 profissionais = data;
@@ -324,12 +466,30 @@
                 renderizarProfissionais();
                 renderizarPaginacao();
                 
+                // Inicializar lazy loading após renderizar
+                initLazyLoading();
+                
             } catch (error) {
                 console.error('Erro ao carregar profissionais:', error);
                 document.getElementById('loading').innerHTML = `
                     <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
                     <p class="mt-3">Erro ao carregar profissionais</p>
                 `;
+            }
+        }
+
+        // Inicializar lazy loading de imagens
+        function initLazyLoading() {
+            if (imageObserver) {
+                const lazyImages = document.querySelectorAll('img.lazy');
+                lazyImages.forEach(img => imageObserver.observe(img));
+            } else {
+                // Fallback para navegadores antigos
+                const lazyImages = document.querySelectorAll('img.lazy');
+                lazyImages.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                });
             }
         }
 
@@ -445,11 +605,29 @@
 
         // Mudar página
         function mudarPagina(page) {
+            event.preventDefault();
             currentPage = page;
             renderizarProfissionais();
             renderizarPaginacao();
+            initLazyLoading(); // Reativar lazy loading após mudar página
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // Debounce para otimizar filtros
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Aplicar filtros com debounce
+        const aplicarFiltrosDebounced = debounce(aplicarFiltros, 300);
 
         // Aplicar filtros
         function aplicarFiltros() {
@@ -493,17 +671,23 @@
             currentPage = 1;
             renderizarProfissionais();
             renderizarPaginacao();
+            initLazyLoading(); // Reativar lazy loading após filtrar
         }
 
         // Ver perfil
         function verPerfil(id) {
-            window.open(`/profissionais/perfil?id=${id}`, '_blank');
+            window.location.href = `/api/profissionais/perfil/${id}`;
         }
 
         // Carregar ao iniciar
         document.addEventListener('DOMContentLoaded', carregarProfissionais);
 
-        // Enter nos filtros
+        // Event listeners com debounce
+        document.getElementById('filtro-nome').addEventListener('input', aplicarFiltrosDebounced);
+        document.getElementById('filtro-uf').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtro-experiencia').addEventListener('change', aplicarFiltros);
+        
+        // Enter no campo de busca
         document.getElementById('filtro-nome').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 aplicarFiltros();
