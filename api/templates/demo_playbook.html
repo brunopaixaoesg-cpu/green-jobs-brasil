@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Jobs Brasil — Demo Playbook</title>
+  <style>
+    :root { --bg1:#0f172a; --bg2:#111827; --card:#0b1220; --text:#e5e7eb; --muted:#94a3b8; --pri:#22c55e; --pri-2:#16a34a; --acc:#60a5fa; --chip:#1f2937; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial; color:var(--text);
+      background: radial-gradient(1000px 600px at 10% -10%, #0b1220 20%, transparent 60%),
+                 radial-gradient(1000px 600px at 110% -10%, #0b1220 20%, transparent 60%),
+                 linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%); }
+    .container { max-width: 1100px; margin:0 auto; padding:32px 20px 48px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
+    .title { font-size:28px; font-weight:800; letter-spacing:.3px; }
+    .subtitle { color:var(--muted); font-size:14px; }
+    .cta-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn { border:1px solid #22304a; background:#0b1220; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; text-decoration:none; }
+    .btn:hover { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.15) inset; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:16px; margin:18px 0 6px; }
+    .card { background:linear-gradient(180deg, #0d1628 0%, #0a1020 100%); border:1px solid #1f2a44; border-radius:14px; padding:18px; position:relative; overflow:hidden; }
+    .card h3 { margin:0 0 6px; font-size:16px; letter-spacing:.2px; }
+    .card p { margin:0; color:var(--muted); font-size:13px; }
+    .badge { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid #234; background:#0b1220; color:var(--muted); }
+    .row { display:grid; grid-template-columns:1.2fr .8fr; gap:16px; margin-top:18px; }
+    .panel { background:linear-gradient(180deg, #0d1628 0%, #0a1020 100%); border:1px solid #1f2a44; border-radius:14px; padding:18px; }
+    .panel h2 { margin:0 0 10px; font-size:18px; }
+    .links { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:8px; margin-top:10px; }
+    a.link { display:flex; align-items:center; gap:10px; text-decoration:none; color:#e5e7eb; background:#0b1220; border:1px solid #20304d; padding:10px 12px; border-radius:10px; }
+    a.link:hover { border-color:#3b82f6; }
+    .code { position:relative; background:#0b1220; border:1px solid #22304a; color:#d1e7ff; font-family:Consolas, Menlo, Monaco, monospace; font-size:12px; padding:12px; border-radius:10px; overflow:auto; }
+    .copy { position:absolute; top:8px; right:8px; background:#12203a; color:#cbd5e1; border:1px solid #2b3a57; padding:6px 8px; border-radius:8px; cursor:pointer; font-size:12px; }
+    .steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:10px; }
+    .step { background:#0b1220; border:1px solid #22304a; border-radius:12px; padding:12px; }
+    .muted { color:var(--muted); font-size:13px; }
+    footer { margin-top:28px; color:var(--muted); text-align:center; font-size:12px; }
+    .chip { background:var(--chip); color:#cbd5e1; border:1px solid #233044; padding:6px 10px; border-radius:999px; font-size:12px; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .tag { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#0b1220; border:1px solid #22304a; font-size:12px; color:#cbd5e1 }
+    .hr{height:1px;background:linear-gradient(90deg,transparent, #1f2a44 20%, #1f2a44 80%, transparent);margin:18px 0}
+    @media (max-width:860px){ .row{grid-template-columns:1fr;} }
+  </style>
+  <script>
+    function copyFrom(id){ const el=document.getElementById(id); if(!el) return; const t=el.innerText||el.textContent||''; navigator.clipboard.writeText(t).then(()=>{ const b=el.parentElement.querySelector('.copy'); if(b){const o=b.textContent;b.textContent='Copiado'; setTimeout(()=>b.textContent=o,1200);} }); }
+  </script>
+  <meta name="robots" content="noindex" />
+  <meta name="color-scheme" content="dark" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="/static/img/logo_gjb.png" alt="Green Jobs Brasil" width="56" height="56" onerror="this.style.display='none'" style="border-radius:10px; background:#0b1220; padding:4px; border:1px solid #1f2a44;" />
+        <div>
+          <div class="title">🌱 Green Jobs Brasil — Demo Playbook</div>
+          <div class="subtitle">Guia visual para preparar, iniciar e apresentar o sistema (Windows)</div>
+        </div>
+      </div>
+      <div class="cta-row">
+        <a class="btn" href="/docs" target="_blank">Open API Docs</a>
+        <a class="btn" href="/test-api" target="_blank">Testar Filtros/Paginação</a>
+        <a class="btn" href="/empresas/dashboard" target="_blank">Dashboard Empresa</a>
+        <a class="btn" href="/kpis" target="_blank">KPIs</a>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Arquitetura</h3>
+        <p>FastAPI + SQLite, templates Jinja2, endpoints com filtros, paginação e ordenação.</p>
+        <div class="hr"></div>
+        <div class="chips">
+          <div class="chip">api/main.py</div>
+          <div class="chip">api/sqlite_api_clean.py</div>
+          <div class="chip">api/routers/*</div>
+          <div class="chip">api/templates/*</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Dados de Demonstração</h3>
+        <p>Seed rápido via endpoint, ou dataset rico por scripts dedicados.</p>
+        <div class="hr"></div>
+        <div class="chips">
+          <div class="chip">/api/populate</div>
+          <div class="chip">scripts/popular_dados_demo.py</div>
+          <div class="chip">scripts/gerar_vagas_ambientais.py</div>
+          <div class="chip">scripts/gerar_profissionais_ambientais.py</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Listagens Avançadas</h3>
+        <p>Profissionais, Empresas e Vagas com filtros compostos e resposta padronizada.</p>
+        <div class="hr"></div>
+        <span class="tag">X-Total-Count</span>
+        <span class="tag">X-Page</span>
+        <span class="tag">X-Total-Pages</span>
+        <span class="tag">X-Per-Page</span>
+      </div>
+      <div class="card">
+        <h3>Automação em 1 clique</h3>
+        <p>Roteiro completo de demo (deps, porta, API, seed, smoke e páginas).</p>
+        <div class="hr"></div>
+        <div class="badge">scripts/demo_playbook.ps1</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <section class="panel">
+        <h2>Como rodar a demo (PowerShell)</h2>
+        <div class="steps">
+          <div class="step">
+            <strong>1) Abrir o terminal</strong>
+            <p class="muted">Caminho do projeto</p>
+            <div class="code"><button class="copy" onclick="copyFrom('c1')">Copiar</button><pre id="c1">cd "C:\Users\Bruno\Empresas Verdes"</pre></div>
+          </div>
+          <div class="step">
+            <strong>2) Orquestrar tudo</strong>
+            <p class="muted">Executa preparação completa</p>
+            <div class="code"><button class="copy" onclick="copyFrom('c2')">Copiar</button><pre id="c2">powershell -ExecutionPolicy Bypass -File .\scripts\demo_playbook.ps1</pre></div>
+          </div>
+          <div class="step">
+            <strong>3) (Opcional) Reinstalar deps</strong>
+            <p class="muted">Caso bibliotecas faltem</p>
+            <div class="code"><button class="copy" onclick="copyFrom('c3')">Copiar</button><pre id="c3">powershell -ExecutionPolicy Bypass -File .\scripts\demo_playbook.ps1 -ReinstallDeps</pre></div>
+          </div>
+          <div class="step">
+            <strong>4) (Manual) Iniciar API</strong>
+            <p class="muted">Alternativa ao script</p>
+            <div class="code"><button class="copy" onclick="copyFrom('c4')">Copiar</button><pre id="c4">python start_api.py</pre></div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">Links rápidos</h3>
+        <div class="links">
+          <a class="link" href="/docs" target="_blank">📘 Swagger /docs</a>
+          <a class="link" href="/test-api" target="_blank">🧪 Filtros & Paginação</a>
+          <a class="link" href="/empresas/dashboard" target="_blank">🏢 Dashboard Empresa</a>
+          <a class="link" href="/vagas" target="_blank">💼 Vagas (UI)</a>
+          <a class="link" href="/kpis" target="_blank">📊 KPIs</a>
+          <a class="link" href="/api/status" target="_blank">🩺 Status API</a>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>Roteiro de apresentação (10–15 min)</h2>
+        <ul>
+          <li>1. /docs e /kpis (contexto e maturidade)</li>
+          <li>2. Profissionais: /test-api (UF/ODS/experiência e ordenação)</li>
+          <li>3. Empresas: UF, score mínimo, setor (vagas/candidaturas)</li>
+          <li>4. Vagas: UF, remoto, salário mínimo, nível (enriquecido)</li>
+          <li>5. Dashboard Empresa (encerramento)</li>
+        </ul>
+
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">Endpoints úteis</h3>
+        <div class="code"><button class="copy" onclick="copyFrom('e1')">Copiar</button><pre id="e1">GET /api/profissionais?uf=SP,RJ&ods=7,13&anos_exp_min=3&nivel=pleno&sort=anos_experiencia_esg&order=desc&page=1&limit=10
+GET /empresas/api/listar?uf=SP&score_min=70&setor=energia&sort=score_verde&order=desc&page=1&limit=10
+GET /api/vagas?uf=SP&salario_min=7000&remoto=true&nivel=pleno&sort=salario_max&order=desc&page=1&limit=10</pre></div>
+
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">Quando algo não inicia</h3>
+        <ul>
+          <li>Porta 8002 ocupada → finalize processo Python e reinicie</li>
+          <li>Dependências → pip install -r requirements.txt (e/ou api/requirements.txt)</li>
+          <li>Banco vazio → GET /api/populate ou python scripts/popular_dados_demo.py</li>
+        </ul>
+      </aside>
+    </div>
+
+    <footer>
+      Green Jobs Brasil • Playbook visual • Servido pela API local (templates)
+    </footer>
+  </div>
+</body>
+</html>

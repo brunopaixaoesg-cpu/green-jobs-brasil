@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap Visual • Green Jobs Brasil</title>
+  <link rel="icon" href="/static/img/logo_gjb.png" type="image/png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #10b981;
+      --primary: #667eea;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e5e7eb;
+    }
+
+    @page { size: A4; margin: 16mm; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #ffffff !important; }
+      .container { box-shadow: none !important; }
+      a[href]::after { content: ""; } /* remove print URL */
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-grad); color: var(--ink); }
+    .container { max-width: 1200px; margin: 24px auto; padding: 24px; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .title { display:flex; align-items:center; gap:12px; }
+    .badge-logo { height: 44px; width: 44px; border-radius: 50%; background:#0b1220; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 0 0 1px #22304a; }
+    .badge-logo img { max-height: 28px; display:block; }
+    .title h1 { margin: 0; font-size: 1.6rem; letter-spacing: .2px; }
+    .subtitle { color: var(--muted); font-size: .95rem; }
+
+    .btn { border: 1px solid #22304a; background:#0b1220; color:#e5e7eb; padding:10px 14px; border-radius:10px; text-decoration: none; font-weight:600; }
+    .btn.secondary { background:#ffffff; color:#1f2937; border-color:#d1d5db; }
+
+    .section { margin: 24px 0; }
+    .section h2 { margin: 0 0 12px 0; font-size: 1.25rem; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .card { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .card h3 { margin: 0 0 6px 0; font-size: 1.05rem; }
+    .meta { color: var(--muted); font-size: .9rem; }
+    .tag { display:inline-block; padding: 2px 8px; border-radius: 999px; font-size: .75rem; font-weight:700; border:1px solid #d1d5db; margin-right:6px; }
+    .tag.success{ background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
+    .tag.warn{ background:#fffbeb; color:#92400e; border-color:#fde68a; }
+    .tag.info{ background:#eff6ff; color:#1e40af; border-color:#bfdbfe; }
+
+    /* Timeline */
+    .timeline-wrap { background:#f9fafb; border:1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .timeline { position: relative; display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-top: 28px; }
+    .timeline::before { content:""; position:absolute; left:0; right:0; top: 26px; height: 3px; background: linear-gradient(90deg, #d1d5db, #a5b4fc); border-radius:2px; }
+    .tcol { position:relative; text-align:center; }
+    .tcol .month { font-weight: 800; color:#374151; margin-bottom: 8px; letter-spacing: .3px; }
+    .tcol .node { position: relative; height: 18px; width: 18px; border-radius: 50%; background: #6366f1; border: 3px solid #eef2ff; margin: 0 auto 10px auto; box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
+    .tcol .items { display:flex; flex-direction: column; gap: 8px; }
+    .titem { background:#ffffff; border:1px solid var(--border); border-left:4px solid var(--primary); padding:10px 12px; border-radius: 8px; text-align:left; }
+    .titem .when { font-size: .78rem; color:#6b7280; }
+    .titem .what { font-weight: 700; font-size: .95rem; }
+    .titem .codes { margin-top: 6px; }
+
+    .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
+    .legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+
+    .kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .kpi { background:#ffffff; border:1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .kpi .val { font-size: 1.6rem; font-weight: 800; }
+
+    .footnote { color:#6b7280; font-size: .85rem; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% include 'partials/brand_header.html' %}
+
+    <div class="toolbar no-print">
+      <div class="title">
+        <div class="badge-logo"><img src="/static/img/logo_gjb.png" alt="GJB" onerror="this.style.display='none'"></div>
+        <div>
+          <h1>Roadmap Visual — Green Jobs Brasil</h1>
+          <div class="subtitle">Atualizado em 2025-11-01 • Plataforma ESG com API, ML e dashboards</div>
+        </div>
+      </div>
+      <div>
+        <a class="btn" href="#" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> Salvar em PDF</a>
+        <a class="btn secondary" href="/demo-playbook">📘 Playbook</a>
+      </div>
+    </div>
+
+    <!-- Visão e Objetivos -->
+    <div class="section">
+      <h2>Visão e objetivos</h2>
+      <div class="card">
+        <ul>
+          <li>Mapear e classificar empresas verdes (Core/Adjacent/Secondary) conectadas a ODS</li>
+          <li>Expor dados via API REST e dashboards para profissionais e empresas</li>
+          <li>Oferecer matching inteligente (ML) explicável e realista</li>
+          <li>Preparar base para escalabilidade (dados RFB) e deploy em produção</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Entregas Concluídas -->
+    <div class="section">
+      <h2>Entregas concluídas (MVP v1.6)</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Banco de dados</h3>
+          <p class="meta">SQLite • 43 CNAEs verdes • 10 empresas • 857 candidaturas</p>
+          <ul>
+            <li>Relacionamentos empresa ⇄ CNAE; ODS e score verde</li>
+            <li>Dados demo: 101 vagas, 120 profissionais</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>ETL (DuckDB + SQLite)</h3>
+          <ul>
+            <li>Mapeamento CNAE verde + cálculo de score</li>
+            <li>Particionado por UF (Parquet) e carga no SQLite</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>API (FastAPI)</h3>
+          <ul>
+            <li>Rotas: /empresas, /cnaes, /stats, /health, /info</li>
+            <li>Busca por CNPJ e KPIs consolidados</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Dashboards e UI</h3>
+          <ul>
+            <li>Dashboard Profissional v1.4 • Dashboard Empresa v1.5</li>
+            <li>ML Dashboard e templates Jinja2</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Storytelling Profissional v1.6</h3>
+          <p>12 campos narrativos + página dedicada</p>
+        </div>
+        <div class="card">
+          <h3>Autenticação v1.3</h3>
+          <p>Hash SHA256, sessões por token, login de empresa</p>
+        </div>
+        <div class="card">
+          <h3>Operação e DX</h3>
+          <ul>
+            <li>Scripts de inicialização e preparação de demo</li>
+            <li>Suite de testes essenciais e documentação</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prioridades Imediatas -->
+    <div class="section">
+      <h2>🔥 Prioridades imediatas (Nov/2025)</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>P0 - Organização e Estabilização</h3>
+          <span class="tag success">Concluído</span>
+          <ul>
+            <li>ROADMAP atualizado e página "Como Funciona"</li>
+            <li>Limpeza de projeto: backups, scripts, testes, docs</li>
+            <li>Padronização da porta 8002 e entrypoint unificado</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>P1 - Storytelling UX</h3>
+          <span class="tag success">Concluído</span>
+          <ul>
+            <li>Editor completo, upload de imagem e preview</li>
+            <li>Mobile First e otimização de imagens</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>P2 - API Avançada e KPIs</h3>
+          <span class="tag success">Concluído</span>
+          <ul>
+            <li>/api/kpis consolidado + dashboard</li>
+            <li>Filtros compostos, paginação e headers</li>
+            <li>Testes automatizados (28/33)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>P3 - Preparação para Deploy</h3>
+          <span class="tag warn">Em aberto</span>
+          <ul>
+            <li>Env vars, CORS, segurança e health checks</li>
+            <li>Logging estruturado e métricas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="section">
+      <h2>🗓️ Linha do tempo (Q4/2025 → Q1/2026)</h2>
+      <div class="timeline-wrap">
+        <div class="timeline">
+          <div class="tcol">
+            <div class="month">Nov/2025</div>
+            <div class="node"></div>
+            <div class="items">
+              <div class="titem"><div class="when">Sem 1–2</div><div class="what">P3 — Preparação para Deploy</div><div class="codes">CORS, env vars, health checks</div></div>
+            </div>
+          </div>
+          <div class="tcol">
+            <div class="month">Dez/2025</div>
+            <div class="node"></div>
+            <div class="items">
+              <div class="titem"><div class="when">Sem 1</div><div class="what">DATA-01 — Expansão RFB</div><div class="codes">Ingestão 1M/lote, qualidade, scoring</div></div>
+              <div class="titem"><div class="when">Sem 2</div><div class="what">WEB-01 — Interface Unificada</div><div class="codes">Design system, navegação global</div></div>
+            </div>
+          </div>
+          <div class="tcol">
+            <div class="month">Jan/2026</div>
+            <div class="node"></div>
+            <div class="items">
+              <div class="titem"><div class="when">Sem 1</div><div class="what">API-02 — Autorização e Quotas</div><div class="codes">RBAC, cursor pagination, rate limit</div></div>
+              <div class="titem"><div class="when">Sem 2</div><div class="what">ML-04 — Matching v4 (XAI)</div><div class="codes">SHAP/LIME, calibração, A/B</div></div>
+            </div>
+          </div>
+          <div class="tcol">
+            <div class="month">Fev/2026</div>
+            <div class="node"></div>
+            <div class="items">
+              <div class="titem"><div class="when">Sem 1</div><div class="what">DEP-01 — Deploy Produção</div><div class="codes">Postgres, CI/CD, observabilidade</div></div>
+              <div class="titem"><div class="when">Sem 2</div><div class="what">INT-01 & ADM-01</div><div class="codes">Integrações externas e Admin</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:#6366f1"></span>Milestone</span>
+          <span><span class="dot" style="background:#10b981"></span>Dados/API</span>
+          <span><span class="dot" style="background:#f59e0b"></span>Produto/UI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Próximos marcos -->
+    <div class="section">
+      <h2>Próximos marcos</h2>
+      <div class="grid">
+        <div class="card"><h3>DATA-01 — Expansão de dados RFB</h3><p class="meta">Dez/2025 • 2 semanas</p><ul>
+          <li>Ingestão incremental (1M/lote), dedupe e validação</li>
+          <li>Qualidade de dados e atualização mensal do mapeamento</li>
+          <li>Scoring em batch para novas empresas</li></ul></div>
+        <div class="card"><h3>WEB-01 — Interface Web unificada</h3><p class="meta">Dez/2025 • 2 semanas</p><ul>
+          <li>Design system e navegação global</li>
+          <li>Landing aprimorada, empresas/profissionais com filtros</li>
+          <li>Dashboard ML acessível e explicável</li></ul></div>
+        <div class="card"><h3>API-02 — API avançada com autorização</h3><p class="meta">Jan/2026 • 2 semanas</p><ul>
+          <li>RBAC (Admin/Empresa/Profissional), JWT</li>
+          <li>Cursor-based pagination e quotas por plano</li>
+          <li>OpenAPI 3.0 com exemplos</li></ul></div>
+        <div class="card"><h3>ML-04 — Matching v4 com explicabilidade</h3><p class="meta">Jan/2026 • 2 semanas</p><ul>
+          <li>Taxonomia ESG, senioridade, trajetória e fit</li>
+          <li>SHAP/LIME e calibração de scores</li>
+          <li>A/B testing (precision@k, NDCG)</li></ul></div>
+        <div class="card"><h3>DEP-01 — Deploy de produção</h3><p class="meta">Fev/2026 • 1 semana</p><ul>
+          <li>PostgreSQL + Alembic, backups diários</li>
+          <li>CI/CD (Actions), observabilidade e alertas</li>
+          <li>Plano de recuperação (RTO/RPO)</li></ul></div>
+        <div class="card"><h3>INT-01 — Integrações externas</h3><p class="meta">Fev/2026 • 2 semanas</p><ul>
+          <li>ReceitaWS com fallback, dados estaduais/municipais</li>
+          <li>APIs de certificação e enriquecimento ético</li>
+        </ul></div>
+        <div class="card"><h3>ADM-01 — Analytics & Admin</h3><p class="meta">Fev/2026 • 1 semana</p><ul>
+          <li>Dashboard operacional (DAU/MAU, vagas, conversões)</li>
+          <li>Gestão de usuários e auditoria de ações</li>
+          <li>Relatórios exportáveis (CSV/Excel/PDF)</li></ul></div>
+      </div>
+    </div>
+
+    <!-- Backlog & Métricas -->
+    <div class="section">
+      <h2>Backlog (consolidado)</h2>
+      <div class="card">
+        <ul>
+          <li>Cadastro de empresas; criação de vagas</li>
+          <li>Notificações por email; chat empresa–candidato</li>
+          <li>Mobile First amplo; acessibilidade WCAG AA</li>
+          <li>Analytics/admin; dados reais (scraping/validação de mercado)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Métricas de sucesso (indicativas)</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="meta">API</div><div class="val">p95 < 300ms</div><div class="meta">Uptime ≥ 99%, erro < 1%</div></div>
+        <div class="kpi"><div class="meta">ETL</div><div class="val">< 15 min/dia</div><div class="meta">Falhas recuperáveis</div></div>
+        <div class="kpi"><div class="meta">Dados</div><div class="val">500k+ empresas</div><div class="meta">Cobertura 26 UFs + DF</div></div>
+        <div class="kpi"><div class="meta">ML</div><div class="val">Precisão 75%+</div><div class="meta">XAI e calibração</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Riscos e mitigação</h2>
+      <div class="grid">
+        <div class="card"><h3>Dados externos</h3><p>Qualidade/limites de APIs</p><p class="meta">→ Cache, retries, monitoramento</p></div>
+        <div class="card"><h3>LGPD</h3><p>Privacidade e segurança</p><p class="meta">→ Minimização e controles de acesso</p></div>
+        <div class="card"><h3>Performance</h3><p>Concorrência no SQLite</p><p class="meta">→ Migração gradual para Postgres</p></div>
+        <div class="card"><h3>Entrypoints</h3><p>Divergências históricas</p><p class="meta">→ Unificar app e documentar</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Dívida técnica</h2>
+      <div class="card">
+        <ul>
+          <li>Unificar entrypoint da API (api/main.py vs sqlite_api_clean.py)</li>
+          <li>Padronizar rotas e porta 8002 em toda a doc</li>
+          <li>Reorganizar README (duplos/formatos)</li>
+        </ul>
+        <div class="footnote">Sugestão: adicionar CHANGELOG.md e etiquetas (epics) nas issues: DATA-01, WEB-01, API-02, ML-04, DEP-01, INT-01, ADM-01.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

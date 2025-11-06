@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Avançada - Green Jobs Brasil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+        }
+
+        .panel {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item strong {
+            color: #1976d2;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .pagination span {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .card-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid #f5c6cb;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% include 'partials/brand_header.html' %}
+        <h1>🚀 API Avançada - Green Jobs Brasil</h1>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('profissionais')">
+                👥 Profissionais
+            </div>
+            <div class="tab" onclick="switchTab('empresas')">
+                🏢 Empresas
+            </div>
+            <div class="tab" onclick="switchTab('vagas')">
+                💼 Vagas
+            </div>
+        </div>
+
+        <!-- PROFISSIONAIS -->
+        <div id="profissionais" class="panel active">
+            <h2 style="margin-bottom: 20px; color: #333;">Filtrar Profissionais ESG</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>UF (ex: SP,RJ,MG)</label>
+                    <input type="text" id="prof-uf" placeholder="SP,RJ">
+                </div>
+                <div class="filter-group">
+                    <label>ODS (ex: 7,13,15)</label>
+                    <input type="text" id="prof-ods" placeholder="7,13">
+                </div>
+                <div class="filter-group">
+                    <label>Anos Experiência Mínima</label>
+                    <input type="number" id="prof-anos" placeholder="3" min="0">
+                </div>
+                <div class="filter-group">
+                    <label>Área</label>
+                    <input type="text" id="prof-area" placeholder="ESG,Sustentabilidade">
+                </div>
+                <div class="filter-group">
+                    <label>Aceita Remoto</label>
+                    <select id="prof-remoto">
+                        <option value="">Todos</option>
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Nível</label>
+                    <select id="prof-nivel">
+                        <option value="">Todos</option>
+                        <option value="junior">Júnior</option>
+                        <option value="pleno">Pleno</option>
+                        <option value="senior">Sênior</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordenar Por</label>
+                    <select id="prof-sort">
+                        <option value="created_at">Data Cadastro</option>
+                        <option value="nome_completo">Nome</option>
+                        <option value="anos_experiencia_esg">Experiência</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordem</label>
+                    <select id="prof-order">
+                        <option value="desc">Decrescente</option>
+                        <option value="asc">Crescente</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="buscarProfissionais()">
+                    🔍 Buscar
+                </button>
+                <button class="btn-secondary" onclick="limparFiltrosProfissionais()">
+                    🗑️ Limpar Filtros
+                </button>
+            </div>
+
+            <div id="prof-info" class="info-bar" style="display: none;"></div>
+            <div id="prof-pagination" class="pagination" style="display: none;"></div>
+            <div id="prof-results" class="results"></div>
+        </div>
+
+        <!-- EMPRESAS -->
+        <div id="empresas" class="panel">
+            <h2 style="margin-bottom: 20px; color: #333;">Filtrar Empresas Verdes</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>UF (ex: SP,RJ,MG)</label>
+                    <input type="text" id="emp-uf" placeholder="SP,RJ">
+                </div>
+                <div class="filter-group">
+                    <label>ODS (ex: 7,13,15)</label>
+                    <input type="text" id="emp-ods" placeholder="7,13">
+                </div>
+                <div class="filter-group">
+                    <label>Score Verde Mínimo</label>
+                    <input type="number" id="emp-score" placeholder="70" min="0" max="100">
+                </div>
+                <div class="filter-group">
+                    <label>Setor</label>
+                    <input type="text" id="emp-setor" placeholder="Energia">
+                </div>
+                <div class="filter-group">
+                    <label>Ordenar Por</label>
+                    <select id="emp-sort">
+                        <option value="created_at">Data Cadastro</option>
+                        <option value="nome_fantasia">Nome</option>
+                        <option value="score_verde">Score Verde</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordem</label>
+                    <select id="emp-order">
+                        <option value="desc">Decrescente</option>
+                        <option value="asc">Crescente</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="buscarEmpresas()">
+                    🔍 Buscar
+                </button>
+                <button class="btn-secondary" onclick="limparFiltrosEmpresas()">
+                    🗑️ Limpar Filtros
+                </button>
+            </div>
+
+            <div id="emp-info" class="info-bar" style="display: none;"></div>
+            <div id="emp-pagination" class="pagination" style="display: none;"></div>
+            <div id="emp-results" class="results"></div>
+        </div>
+
+        <!-- VAGAS -->
+        <div id="vagas" class="panel">
+            <h2 style="margin-bottom: 20px; color: #333;">Filtrar Vagas Verdes</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>UF (ex: SP,RJ,MG)</label>
+                    <input type="text" id="vaga-uf" placeholder="SP,RJ">
+                </div>
+                <div class="filter-group">
+                    <label>ODS (ex: 7,13,15)</label>
+                    <input type="text" id="vaga-ods" placeholder="7,13">
+                </div>
+                <div class="filter-group">
+                    <label>Salário Mínimo</label>
+                    <input type="number" id="vaga-salario" placeholder="5000" min="0">
+                </div>
+                <div class="filter-group">
+                    <label>Remoto</label>
+                    <select id="vaga-remoto">
+                        <option value="">Todos</option>
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Nível</label>
+                    <select id="vaga-nivel">
+                        <option value="">Todos</option>
+                        <option value="junior">Júnior</option>
+                        <option value="pleno">Pleno</option>
+                        <option value="senior">Sênior</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordenar Por</label>
+                    <select id="vaga-sort">
+                        <option value="created_at">Data Publicação</option>
+                        <option value="titulo">Título</option>
+                        <option value="salario_max">Salário</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordem</label>
+                    <select id="vaga-order">
+                        <option value="desc">Decrescente</option>
+                        <option value="asc">Crescente</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="buscarVagas()">
+                    🔍 Buscar
+                </button>
+                <button class="btn-secondary" onclick="limparFiltrosVagas()">
+                    🗑️ Limpar Filtros
+                </button>
+            </div>
+
+            <div id="vaga-info" class="info-bar" style="display: none;"></div>
+            <div id="vaga-pagination" class="pagination" style="display: none;"></div>
+            <div id="vaga-results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = { profissionais: 1, empresas: 1, vagas: 1 };
+        const LIMIT = 10;
+
+        function switchTab(tab) {
+            // Desativar todas as tabs e painéis
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            
+            // Ativar tab e painel selecionados
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+
+        // ==================== PROFISSIONAIS ====================
+        
+        async function buscarProfissionais(page = 1) {
+            currentPage.profissionais = page;
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('limit', LIMIT);
+
+            const uf = document.getElementById('prof-uf').value;
+            const ods = document.getElementById('prof-ods').value;
+            const anos = document.getElementById('prof-anos').value;
+            const area = document.getElementById('prof-area').value;
+            const remoto = document.getElementById('prof-remoto').value;
+            const nivel = document.getElementById('prof-nivel').value;
+            const sort = document.getElementById('prof-sort').value;
+            const order = document.getElementById('prof-order').value;
+
+            if (uf) params.append('uf', uf);
+            if (ods) params.append('ods', ods);
+            if (anos) params.append('anos_exp_min', anos);
+            if (area) params.append('area', area);
+            if (remoto) params.append('remoto', remoto);
+            if (nivel) params.append('nivel', nivel);
+            if (sort) params.append('sort', sort);
+            if (order) params.append('order', order);
+
+            const resultsDiv = document.getElementById('prof-results');
+            resultsDiv.innerHTML = '<div class="loading"><span class="spinner"></span> Carregando...</div>';
+
+            try {
+                const response = await fetch(`/api/profissionais?${params.toString()}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Erro ao buscar profissionais');
+
+                renderProfissionais(data);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        function renderProfissionais(data) {
+            const infoDiv = document.getElementById('prof-info');
+            const paginationDiv = document.getElementById('prof-pagination');
+            const resultsDiv = document.getElementById('prof-results');
+
+            // Info bar
+            infoDiv.style.display = 'flex';
+            infoDiv.innerHTML = `
+                <div class="info-item">
+                    <strong>Total:</strong> ${data.pagination.total}
+                </div>
+                <div class="info-item">
+                    <strong>Página:</strong> ${data.pagination.page}/${data.pagination.pages}
+                </div>
+                <div class="info-item">
+                    <strong>Exibindo:</strong> ${data.data.length} profissionais
+                </div>
+            `;
+
+            // Paginação
+            paginationDiv.style.display = 'flex';
+            paginationDiv.innerHTML = `
+                <button class="btn-secondary" ${!data.pagination.has_prev ? 'disabled' : ''} 
+                        onclick="buscarProfissionais(${data.pagination.page - 1})">
+                    ← Anterior
+                </button>
+                <span>Página ${data.pagination.page} de ${data.pagination.pages}</span>
+                <button class="btn-secondary" ${!data.pagination.has_next ? 'disabled' : ''} 
+                        onclick="buscarProfissionais(${data.pagination.page + 1})">
+                    Próxima →
+                </button>
+            `;
+
+            // Resultados
+            if (data.data.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty">📭 Nenhum profissional encontrado</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = data.data.map(prof => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${prof.nome_completo || 'Nome não informado'}</div>
+                        <span class="badge badge-info">${prof.anos_experiencia_esg || 0} anos ESG</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">📍 Localização:</span>
+                            <span class="info-value">${prof.localizacao_cidade || ''}, ${prof.localizacao_uf || ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">💼 Cargo:</span>
+                            <span class="info-value">${prof.cargo_atual || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏢 Empresa:</span>
+                            <span class="info-value">${prof.empresa_atual || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📧 Email:</span>
+                            <span class="info-value">${prof.email || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🎓 Formação:</span>
+                            <span class="info-value">${prof.formacao_nivel || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏠 Remoto:</span>
+                            <span class="info-value">${prof.aceita_remoto ? '✅ Sim' : '❌ Não'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function limparFiltrosProfissionais() {
+            document.getElementById('prof-uf').value = '';
+            document.getElementById('prof-ods').value = '';
+            document.getElementById('prof-anos').value = '';
+            document.getElementById('prof-area').value = '';
+            document.getElementById('prof-remoto').value = '';
+            document.getElementById('prof-nivel').value = '';
+            buscarProfissionais(1);
+        }
+
+        // ==================== EMPRESAS ====================
+        
+        async function buscarEmpresas(page = 1) {
+            currentPage.empresas = page;
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('limit', LIMIT);
+
+            const uf = document.getElementById('emp-uf').value;
+            const ods = document.getElementById('emp-ods').value;
+            const score = document.getElementById('emp-score').value;
+            const setor = document.getElementById('emp-setor').value;
+            const sort = document.getElementById('emp-sort').value;
+            const order = document.getElementById('emp-order').value;
+
+            if (uf) params.append('uf', uf);
+            if (ods) params.append('ods', ods);
+            if (score) params.append('score_min', score);
+            if (setor) params.append('setor', setor);
+            if (sort) params.append('sort', sort);
+            if (order) params.append('order', order);
+
+            const resultsDiv = document.getElementById('emp-results');
+            resultsDiv.innerHTML = '<div class="loading"><span class="spinner"></span> Carregando...</div>';
+
+            try {
+                const response = await fetch(`/empresas/api/listar?${params.toString()}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Erro ao buscar empresas');
+
+                renderEmpresas(data);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        function renderEmpresas(data) {
+            const infoDiv = document.getElementById('emp-info');
+            const paginationDiv = document.getElementById('emp-pagination');
+            const resultsDiv = document.getElementById('emp-results');
+
+            infoDiv.style.display = 'flex';
+            infoDiv.innerHTML = `
+                <div class="info-item">
+                    <strong>Total:</strong> ${data.pagination.total}
+                </div>
+                <div class="info-item">
+                    <strong>Página:</strong> ${data.pagination.page}/${data.pagination.pages}
+                </div>
+                <div class="info-item">
+                    <strong>Exibindo:</strong> ${data.data.length} empresas
+                </div>
+            `;
+
+            paginationDiv.style.display = 'flex';
+            paginationDiv.innerHTML = `
+                <button class="btn-secondary" ${!data.pagination.has_prev ? 'disabled' : ''} 
+                        onclick="buscarEmpresas(${data.pagination.page - 1})">
+                    ← Anterior
+                </button>
+                <span>Página ${data.pagination.page} de ${data.pagination.pages}</span>
+                <button class="btn-secondary" ${!data.pagination.has_next ? 'disabled' : ''} 
+                        onclick="buscarEmpresas(${data.pagination.page + 1})">
+                    Próxima →
+                </button>
+            `;
+
+            if (data.data.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty">📭 Nenhuma empresa encontrada</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = data.data.map(emp => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${emp.nome_fantasia || emp.razao_social}</div>
+                        <span class="badge badge-success">Score: ${emp.score_verde?.toFixed(1) || 0}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">📍 Localização:</span>
+                            <span class="info-value">${emp.cidade || ''}, ${emp.estado || ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏭 Setor:</span>
+                            <span class="info-value">${emp.setor || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📄 CNPJ:</span>
+                            <span class="info-value">${emp.cnpj || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">💼 Total Vagas:</span>
+                            <span class="info-value">${emp.total_vagas || 0} (${emp.vagas_ativas || 0} ativas)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📬 Candidaturas:</span>
+                            <span class="info-value">${emp.total_candidaturas || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function limparFiltrosEmpresas() {
+            document.getElementById('emp-uf').value = '';
+            document.getElementById('emp-ods').value = '';
+            document.getElementById('emp-score').value = '';
+            document.getElementById('emp-setor').value = '';
+            buscarEmpresas(1);
+        }
+
+        // ==================== VAGAS ====================
+        
+        async function buscarVagas(page = 1) {
+            currentPage.vagas = page;
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('limit', LIMIT);
+
+            const uf = document.getElementById('vaga-uf').value;
+            const ods = document.getElementById('vaga-ods').value;
+            const salario = document.getElementById('vaga-salario').value;
+            const remoto = document.getElementById('vaga-remoto').value;
+            const nivel = document.getElementById('vaga-nivel').value;
+            const sort = document.getElementById('vaga-sort').value;
+            const order = document.getElementById('vaga-order').value;
+
+            if (uf) params.append('uf', uf);
+            if (ods) params.append('ods', ods);
+            if (salario) params.append('salario_min', salario);
+            if (remoto) params.append('remoto', remoto);
+            if (nivel) params.append('nivel', nivel);
+            if (sort) params.append('sort', sort);
+            if (order) params.append('order', order);
+
+            const resultsDiv = document.getElementById('vaga-results');
+            resultsDiv.innerHTML = '<div class="loading"><span class="spinner"></span> Carregando...</div>';
+
+            try {
+                const response = await fetch(`/api/vagas?${params.toString()}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Erro ao buscar vagas');
+
+                renderVagas(data);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        function renderVagas(data) {
+            const infoDiv = document.getElementById('vaga-info');
+            const paginationDiv = document.getElementById('vaga-pagination');
+            const resultsDiv = document.getElementById('vaga-results');
+
+            infoDiv.style.display = 'flex';
+            infoDiv.innerHTML = `
+                <div class="info-item">
+                    <strong>Total:</strong> ${data.pagination.total}
+                </div>
+                <div class="info-item">
+                    <strong>Página:</strong> ${data.pagination.page}/${data.pagination.pages}
+                </div>
+                <div class="info-item">
+                    <strong>Exibindo:</strong> ${data.data.length} vagas
+                </div>
+            `;
+
+            paginationDiv.style.display = 'flex';
+            paginationDiv.innerHTML = `
+                <button class="btn-secondary" ${!data.pagination.has_prev ? 'disabled' : ''} 
+                        onclick="buscarVagas(${data.pagination.page - 1})">
+                    ← Anterior
+                </button>
+                <span>Página ${data.pagination.page} de ${data.pagination.pages}</span>
+                <button class="btn-secondary" ${!data.pagination.has_next ? 'disabled' : ''} 
+                        onclick="buscarVagas(${data.pagination.page + 1})">
+                    Próxima →
+                </button>
+            `;
+
+            if (data.data.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty">📭 Nenhuma vaga encontrada</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = data.data.map(vaga => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${vaga.titulo || 'Vaga sem título'}</div>
+                        <span class="badge badge-warning">${vaga.nivel_experiencia || 'N/A'}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">🏢 Empresa:</span>
+                            <span class="info-value">${vaga.empresa_nome || 'N/A'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📍 Localização:</span>
+                            <span class="info-value">${vaga.localizacao_cidade || ''}, ${vaga.localizacao_uf || ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">💰 Salário:</span>
+                            <span class="info-value">
+                                ${vaga.salario_min ? 'R$ ' + vaga.salario_min.toLocaleString() : 'N/A'} - 
+                                ${vaga.salario_max ? 'R$ ' + vaga.salario_max.toLocaleString() : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏠 Remoto:</span>
+                            <span class="info-value">${vaga.remoto ? '✅ Sim' : (vaga.hibrido ? '🔄 Híbrido' : '❌ Não')}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📬 Candidaturas:</span>
+                            <span class="info-value">${vaga.total_candidaturas || 0}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">⭐ Score Empresa:</span>
+                            <span class="info-value">${vaga.empresa_score?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function limparFiltrosVagas() {
+            document.getElementById('vaga-uf').value = '';
+            document.getElementById('vaga-ods').value = '';
+            document.getElementById('vaga-salario').value = '';
+            document.getElementById('vaga-remoto').value = '';
+            document.getElementById('vaga-nivel').value = '';
+            buscarVagas(1);
+        }
+
+        // Carregar dados iniciais
+        buscarProfissionais(1);
+    </script>
+</body>
+</html>

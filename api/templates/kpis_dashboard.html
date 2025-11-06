@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPIs - Dashboard | Green Jobs Brasil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #10b981;
+            --dark-green: #059669;
+            --light-green: #d1fae5;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header-section h1 {
+            color: var(--dark-green);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .kpi-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-card.primary .icon { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .kpi-card.success .icon { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .kpi-card.warning .icon { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .kpi-card.info .icon { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .kpi-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-growth {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .kpi-growth.positive {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .kpi-growth.neutral {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h5 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        .ranking-item:hover {
+            background: #f9fafb;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-position {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .ranking-position.top-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+        .ranking-position.top-2 { background: linear-gradient(135deg, #9ca3af, #6b7280); color: white; }
+        .ranking-position.top-3 { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+        .ranking-position.other { background: #f3f4f6; color: #6b7280; }
+
+        .ranking-name {
+            flex: 1;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .ranking-value {
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .kpi-value {
+                font-size: 2rem;
+            }
+
+            .chart-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        {% include 'partials/brand_header.html' %}
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-chart-line me-3"></i>Dashboard de KPIs</h1>
+                    <p class="text-muted mb-0">Métricas e estatísticas da plataforma Green Jobs Brasil</p>
+                </div>
+                <div>
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-3">Carregando KPIs...</p>
+        </div>
+
+        <!-- KPIs Content -->
+        <div id="kpis-content" style="display: none;">
+            <!-- Cards de Métricas Gerais -->
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card primary">
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="kpi-label">Profissionais</div>
+                        <h2 class="kpi-value" id="total-profissionais">-</h2>
+                        <span class="kpi-growth positive" id="growth-profissionais">
+                            <i class="fas fa-arrow-up"></i> +0%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card success">
+                        <div class="icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="kpi-label">Empresas</div>
+                        <h2 class="kpi-value" id="total-empresas">-</h2>
+                        <span class="kpi-growth neutral">
+                            <i class="fas fa-check"></i> Cadastradas
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card warning">
+                        <div class="icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="kpi-label">Vagas</div>
+                        <h2 class="kpi-value" id="total-vagas">-</h2>
+                        <span class="kpi-growth positive" id="growth-vagas">
+                            <i class="fas fa-arrow-up"></i> +0%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card info">
+                        <div class="icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="kpi-label">Candidaturas</div>
+                        <h2 class="kpi-value" id="total-candidaturas">-</h2>
+                        <span class="kpi-growth neutral" id="taxa-match">
+                            Match: 0%
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards Secundários -->
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="kpi-card">
+                        <div class="d-flex align-items-center">
+                            <div class="icon bg-success me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <div class="kpi-label mb-1">Profissionais Ativos</div>
+                                <h3 class="kpi-value" style="font-size: 1.5rem;" id="profissionais-ativos">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="kpi-card">
+                        <div class="d-flex align-items-center">
+                            <div class="icon bg-warning me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <div>
+                                <div class="kpi-label mb-1">Vagas Abertas</div>
+                                <h3 class="kpi-value" style="font-size: 1.5rem;" id="vagas-abertas">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="kpi-card">
+                        <div class="d-flex align-items-center">
+                            <div class="icon bg-info me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <div>
+                                <div class="kpi-label mb-1">Taxa de Match</div>
+                                <h3 class="kpi-value" style="font-size: 1.5rem;" id="taxa-match-value">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Tendências -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-chart-area me-2"></i>Tendências Mensais</h5>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-bullseye me-2"></i>ODS Mais Buscados</h5>
+                        <canvas id="odsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rankings -->
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-trophy me-2 text-warning"></i>Top Profissionais</h5>
+                        <ul class="ranking-list" id="top-profissionais">
+                            <!-- Será preenchido via JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-building me-2 text-success"></i>Top Empresas</h5>
+                        <ul class="ranking-list" id="top-empresas">
+                            <!-- Será preenchido via JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-briefcase me-2 text-primary"></i>Top Vagas</h5>
+                        <ul class="ranking-list" id="top-vagas">
+                            <!-- Será preenchido via JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Áreas Mais Demandadas -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="chart-card">
+                        <h5><i class="fas fa-industry me-2 text-info"></i>Áreas Mais Demandadas</h5>
+                        <div class="row" id="areas-demandadas">
+                            <!-- Será preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let trendChart, odsChart;
+
+        async function carregarKPIs() {
+            try {
+                const response = await fetch('/api/kpis/?periodo=mes&limit_top=5');
+                const data = await response.json();
+
+                // Ocultar loading e mostrar conteúdo
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('kpis-content').style.display = 'block';
+
+                // Preencher cards principais
+                document.getElementById('total-profissionais').textContent = data.gerais.total_profissionais;
+                document.getElementById('total-empresas').textContent = data.gerais.total_empresas;
+                document.getElementById('total-vagas').textContent = data.gerais.total_vagas;
+                document.getElementById('total-candidaturas').textContent = data.gerais.total_candidaturas;
+                document.getElementById('profissionais-ativos').textContent = data.gerais.profissionais_ativos;
+                document.getElementById('vagas-abertas').textContent = data.gerais.vagas_abertas;
+                document.getElementById('taxa-match-value').textContent = data.gerais.taxa_match.toFixed(1) + '%';
+
+                // Crescimento
+                document.getElementById('growth-profissionais').innerHTML = 
+                    `<i class="fas fa-arrow-up"></i> +${data.gerais.crescimento_profissionais_30d.toFixed(1)}%`;
+                document.getElementById('growth-vagas').innerHTML = 
+                    `<i class="fas fa-arrow-up"></i> +${data.gerais.crescimento_vagas_30d.toFixed(1)}%`;
+                document.getElementById('taxa-match').innerHTML = 
+                    `<i class="fas fa-check"></i> Match: ${data.gerais.taxa_match.toFixed(1)}%`;
+
+                // Gráfico de Tendências
+                criarGraficoTendencias(data.tendencias);
+
+                // Gráfico de ODS
+                criarGraficoODS(data.ods_mais_buscados);
+
+                // Rankings
+                preencherRanking('top-profissionais', data.top_profissionais);
+                preencherRanking('top-empresas', data.top_empresas);
+                preencherRanking('top-vagas', data.top_vagas);
+
+                // Áreas Mais Demandadas
+                preencherAreasDemandadas(data.areas_mais_demandadas);
+
+            } catch (error) {
+                console.error('Erro ao carregar KPIs:', error);
+                document.getElementById('loading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                    <p class="mt-3">Erro ao carregar KPIs</p>
+                `;
+            }
+        }
+
+        function criarGraficoTendencias(tendencias) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            const labels = tendencias.map(t => t.periodo);
+            
+            if (trendChart) trendChart.destroy();
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Profissionais',
+                            data: tendencias.map(t => t.novos_profissionais),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Vagas',
+                            data: tendencias.map(t => t.novas_vagas),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Candidaturas',
+                            data: tendencias.map(t => t.novas_candidaturas),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoODS(ods) {
+            const ctx = document.getElementById('odsChart').getContext('2d');
+            
+            if (odsChart) odsChart.destroy();
+            
+            odsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ods.map(o => `ODS ${o.ods}`),
+                    datasets: [{
+                        data: ods.map(o => o.count),
+                        backgroundColor: [
+                            '#667eea',
+                            '#10b981',
+                            '#f59e0b',
+                            '#3b82f6',
+                            '#8b5cf6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function preencherRanking(elementId, items) {
+            const container = document.getElementById(elementId);
+            const html = items.map((item, index) => {
+                const positionClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : 'other';
+                return `
+                    <li class="ranking-item">
+                        <div class="ranking-position ${positionClass}">${index + 1}</div>
+                        <div class="ranking-name">${item.nome}</div>
+                        <div class="ranking-value">${Math.round(item.valor)}</div>
+                    </li>
+                `;
+            }).join('');
+            container.innerHTML = html || '<li class="ranking-item">Nenhum dado disponível</li>';
+        }
+
+        function preencherAreasDemandadas(areas) {
+            const container = document.getElementById('areas-demandadas');
+            const colors = ['#667eea', '#10b981', '#f59e0b', '#3b82f6', '#ef4444'];
+            
+            const html = areas.map((area, index) => {
+                const color = colors[index % colors.length];
+                const percentage = areas.length > 0 ? (area.count / areas[0].count * 100) : 0;
+                
+                return `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong style="color: ${color};">${area.area}</strong>
+                                <span class="badge" style="background-color: ${color};">${area.count}</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: ${percentage}%; background-color: ${color};"
+                                     aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html || '<div class="col-12"><p class="text-muted">Nenhum dado disponível</p></div>';
+        }
+
+        // Carregar ao iniciar
+        carregarKPIs();
+
+        // Atualizar a cada 5 minutos
+        setInterval(carregarKPIs, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

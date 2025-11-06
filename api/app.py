@@ -9,7 +9,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from api.db import get_db, test_connection
-from api.routers import companies, cnaes, stats, empresas
+from api.routers import companies, cnaes, stats, empresas, profissionais, vagas
 from api.schemas import HealthResponse
 
 # Create FastAPI application
@@ -35,6 +35,8 @@ app.include_router(companies.router)
 app.include_router(cnaes.router)
 app.include_router(stats.router)
 app.include_router(empresas.router)
+app.include_router(profissionais.router)
+app.include_router(vagas.router)
 
 @app.get("/", tags=["root"])
 async def root():

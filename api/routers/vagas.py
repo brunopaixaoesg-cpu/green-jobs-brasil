@@ -1,11 +1,9 @@
 """
 Router de Vagas ESG - Green Jobs Brasil
-"""
-Router de Vagas ESG - Green Jobs Brasil
 Endpoints para gerenciamento de vagas verdes
-Arquivo limpo: normaliza nomes de tabelas/colunas e corrige indentação/erros.
 """
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import JSONResponse
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -83,69 +81,253 @@ class VagaResponse(BaseModel):
 # ============= ENDPOINTS =============
 
 
-@router.get("/", response_model=List[VagaResponse])
+@router.get("/")
 async def listar_vagas(
-    status: Optional[str] = Query('ativa', description="Filtrar por status"),
-    uf: Optional[str] = Query(None, description="Filtrar por UF"),
+    # Paginação
+    page: int = Query(1, ge=1, description="Número da página (começa em 1)"),
+    limit: int = Query(20, ge=1, le=100, description="Items por página (máx 100)"),
+    
+    # Filtros compostos
+    status: Optional[str] = Query(None, description="Status da vaga (aberta, fechada, pausada)"),
+    ods: Optional[str] = Query(None, description="ODS (ex: 7,13,15)"),
+    uf: Optional[str] = Query(None, description="Estados (ex: SP,RJ,MG)"),
+    area: Optional[str] = Query(None, description="Área/competências"),
     remoto: Optional[bool] = Query(None, description="Apenas remotas"),
-    nivel: Optional[str] = Query(None, description="Nível de experiência"),
-    limit: int = Query(50, le=100),
-    offset: int = Query(0, ge=0),
+    hibrido: Optional[bool] = Query(None, description="Aceita híbrido"),
+    nivel: Optional[str] = Query(None, description="Nível experiência (junior,pleno,senior)"),
+    salario_min: Optional[float] = Query(None, ge=0, description="Salário mínimo"),
+    tipo_contratacao: Optional[str] = Query(None, description="Tipo contratação (CLT,PJ,etc)"),
+    
+    # Sorting
+    sort: Optional[str] = Query(None, description="Campo ordenação (titulo,salario_min,created_at)"),
+    order: str = Query("desc", regex="^(asc|desc)$", description="Direção ordenação")
 ):
-    """Listar vagas com filtros opcionais"""
-    conn = None
+    """
+    Lista vagas com filtros compostos, paginação e ordenação
+    
+    **Filtros Compostos:**
+    - `status`: Status da vaga (ativa, fechada, pausada)
+    - `ods`: ODS relacionados (valores separados por vírgula: 7,13,15)
+    - `uf`: Estados (SP,RJ,MG)
+    - `area`: Área ou competências necessárias
+    - `remoto`: Apenas vagas remotas (true/false)
+    - `hibrido`: Aceita trabalho híbrido (true/false)
+    - `nivel`: Nível de experiência (junior, pleno, senior)
+    - `salario_min`: Salário mínimo desejado
+    - `tipo_contratacao`: Tipo de contratação
+    
+    **Paginação:**
+    - `page`: Número da página (default: 1)
+    - `limit`: Items por página (default: 20, máx: 100)
+    
+    **Ordenação:**
+    - `sort`: Campo para ordenar (titulo, salario_min, salario_max, created_at)
+    - `order`: Direção (asc ou desc)
+    
+    **Exemplo:**
+    ```
+    /api/vagas?ods=7,13&uf=SP,RJ&remoto=true&salario_min=5000&sort=salario_max&order=desc&page=1&limit=20
+    ```
+    """
     try:
+        from api.utils.pagination import parse_comma_separated, create_pagination_headers
+        
         conn = get_db()
         cursor = conn.cursor()
-
-        query = "SELECT * FROM vagas WHERE 1=1"
+        
+        # Query base
+        base_query = "SELECT * FROM vagas WHERE 1=1"
+        count_query = "SELECT COUNT(*) as total FROM vagas WHERE 1=1"
         params = []
-
+        
+        # === APLICAR FILTROS ===
+        
+        # Filtro: Status
         if status:
-            query += " AND status = ?"
+            base_query += " AND status = ?"
+            count_query += " AND status = ?"
             params.append(status)
-
+        
+        # Filtro: UF (múltiplos valores)
         if uf:
-            query += " AND localizacao_uf = ?"
-            params.append(uf)
-
+            ufs = parse_comma_separated(uf)
+            if ufs:
+                placeholders = ','.join('?' * len(ufs))
+                base_query += f" AND localizacao_uf IN ({placeholders})"
+                count_query += f" AND localizacao_uf IN ({placeholders})"
+                params.extend(ufs)
+        
+        # Filtro: Remoto
         if remoto is not None:
-            query += " AND remoto = ?"
+            base_query += " AND remoto = ?"
+            count_query += " AND remoto = ?"
             params.append(1 if remoto else 0)
-
+        
+        # Filtro: Híbrido
+        if hibrido is not None:
+            base_query += " AND hibrido = ?"
+            count_query += " AND hibrido = ?"
+            params.append(1 if hibrido else 0)
+        
+        # Filtro: Nível experiência
         if nivel:
-            query += " AND nivel_experiencia = ?"
-            params.append(nivel)
-
-        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-        params.extend([limit, offset])
-
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-
+            base_query += " AND nivel_experiencia = ?"
+            count_query += " AND nivel_experiencia = ?"
+            params.append(nivel.lower())
+        
+        # Filtro: Salário mínimo
+        if salario_min is not None:
+            base_query += " AND (salario_max IS NULL OR salario_max >= ?)"
+            count_query += " AND (salario_max IS NULL OR salario_max >= ?)"
+            params.append(salario_min)
+        
+        # Filtro: Tipo contratação
+        if tipo_contratacao:
+            base_query += " AND tipo_contratacao = ?"
+            count_query += " AND tipo_contratacao = ?"
+            params.append(tipo_contratacao)
+        
+        # Filtro: ODS (busca em campo JSON/texto)
+        ods_filters = []
+        if ods:
+            ods_list = parse_comma_separated(ods)
+            for ods_num in ods_list:
+                ods_filters.append(f"ods_tags LIKE '%{ods_num}%'")
+        
+        if ods_filters:
+            ods_condition = " OR ".join(ods_filters)
+            base_query += f" AND ({ods_condition})"
+            count_query += f" AND ({ods_condition})"
+        
+        # Filtro: Área/competências
+        if area:
+            areas = parse_comma_separated(area)
+            area_filters = []
+            for a in areas:
+                area_filters.append(f"habilidades_requeridas LIKE '%{a}%'")
+            
+            if area_filters:
+                area_condition = " OR ".join(area_filters)
+                base_query += f" AND ({area_condition})"
+                count_query += f" AND ({area_condition})"
+        
+        # === CONTAR TOTAL (antes de paginação) ===
+        cursor.execute(count_query, params)
+        total = cursor.fetchone()['total']
+        
+        # === APLICAR ORDENAÇÃO ===
+        campos_permitidos = ['titulo', 'salario_min', 'salario_max', 'created_at', 'nivel_experiencia']
+        sort_field = sort if sort in campos_permitidos else 'created_at'
+        order_direction = order.upper()
+        
+        base_query += f" ORDER BY {sort_field} {order_direction}"
+        
+        # === APLICAR PAGINAÇÃO ===
+        offset = (page - 1) * limit
+        base_query += f" LIMIT {limit} OFFSET {offset}"
+        
+        # Executar query
+        cursor.execute(base_query, params)
+        vagas = cursor.fetchall()
+        
+        # Processar resultados
         result = []
-        for row in rows:
-            vaga = dict(row)
-            # parse JSON fields if present
+        for vaga in vagas:
+            vaga_dict = dict(vaga)
+            
+            # Parse JSON fields
             try:
-                vaga['ods_tags'] = json.loads(vaga.get('ods_tags') or '[]')
-            except Exception:
-                vaga['ods_tags'] = []
+                vaga_dict['ods_tags'] = json.loads(vaga_dict.get('ods_tags') or '[]')
+            except:
+                vaga_dict['ods_tags'] = []
+            
             try:
-                vaga['habilidades_requeridas'] = json.loads(vaga.get('habilidades_requeridas') or '[]')
-            except Exception:
-                vaga['habilidades_requeridas'] = []
-
-            result.append(vaga)
-
-        return result
-    except HTTPException:
-        raise
+                vaga_dict['habilidades_requeridas'] = json.loads(vaga_dict.get('habilidades_requeridas') or '[]')
+            except:
+                vaga_dict['habilidades_requeridas'] = []
+            
+            # Buscar dados da empresa
+            try:
+                cursor.execute("""
+                    SELECT razao_social, nome_fantasia, score_verde
+                    FROM empresas_esg
+                    WHERE cnpj = ?
+                """, (vaga_dict['cnpj'],))
+                empresa = cursor.fetchone()
+                
+                if empresa:
+                    vaga_dict['empresa_nome'] = empresa['nome_fantasia'] or empresa['razao_social']
+                    vaga_dict['empresa_score'] = empresa.get('score_verde', 0)
+            except Exception as e:
+                print(f"⚠️ Erro ao buscar empresa {vaga_dict['cnpj']}: {e}")
+                # Continuar sem dados da empresa
+                pass
+            
+            # Contar candidaturas
+            try:
+                cursor.execute("""
+                    SELECT COUNT(*) as total_candidaturas
+                    FROM candidaturas
+                    WHERE vaga_id = ?
+                """, (vaga_dict['id'],))
+                cand_stats = cursor.fetchone()
+                vaga_dict['total_candidaturas'] = cand_stats['total_candidaturas'] or 0
+            except Exception as e:
+                print(f"⚠️ Erro ao contar candidaturas da vaga {vaga_dict['id']}: {e}")
+                vaga_dict['total_candidaturas'] = 0
+            
+            result.append(vaga_dict)
+        
+        conn.close()
+        
+        # Calcular páginas
+        pages = (total + limit - 1) // limit
+        
+        # Metadados de paginação
+        meta = {
+            "total": total,
+            "page": page,
+            "pages": pages,
+            "limit": limit,
+            "has_next": page < pages,
+            "has_prev": page > 1
+        }
+        
+        # Headers de paginação
+        headers = create_pagination_headers(meta)
+        
+        return JSONResponse(
+            content={
+                "data": result,
+                "pagination": meta,
+                "filtros_aplicados": {
+                    "status": status,
+                    "ods": parse_comma_separated(ods) if ods else None,
+                    "uf": parse_comma_separated(uf) if uf else None,
+                    "area": parse_comma_separated(area) if area else None,
+                    "remoto": remoto,
+                    "hibrido": hibrido,
+                    "nivel": nivel,
+                    "salario_min": salario_min,
+                    "tipo_contratacao": tipo_contratacao
+                },
+                "ordenacao": {
+                    "campo": sort_field,
+                    "direcao": order
+                }
+            },
+            headers=headers
+        )
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao listar vagas: {str(e)}")
-    finally:
-        if conn:
-            conn.close()
+        import traceback
+        error_detail = {
+            "error": str(e),
+            "type": type(e).__name__,
+            "traceback": traceback.format_exc()
+        }
+        print(f"❌ Erro em listar_vagas: {error_detail}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
 
 @router.get("/{vaga_id}", response_model=VagaResponse)

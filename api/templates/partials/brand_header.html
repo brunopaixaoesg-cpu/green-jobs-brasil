@@ -1,0 +1,31 @@
+<style>
+  /* Scoped brand bar styles */
+  .gjb-brandbar { 
+    display: flex; align-items: center; justify-content: space-between; 
+    gap: 12px; padding: 10px 14px; border-radius: 12px; 
+    background: rgba(11,18,32,0.92); border: 1px solid #22304a; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25); color: #e5e7eb; 
+    margin: 0 0 16px 0;
+  }
+  .gjb-brand-left { display: flex; align-items: center; gap: 10px; }
+  .gjb-badge { height: 44px; width: 44px; border-radius: 50%; background: rgba(45,55,72,0.95); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.08); }
+  .gjb-badge img { max-height: 32px; width: auto; display: block; object-fit: contain; }
+  .gjb-badge .gjb-fallback { display: none; font-weight: 800; font-size: 0.9rem; color: #e2e8f0; letter-spacing: 0.5px; }
+  .gjb-brand-text { font-weight: 700; letter-spacing: .3px; }
+  .gjb-actions { display: flex; align-items: center; gap: 8px; }
+  .gjb-btn { text-decoration: none; background: #0b1220; color: #e5e7eb; border: 1px solid #22304a; padding: 8px 12px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .gjb-btn:hover { filter: brightness(1.05); }
+  @media (max-width: 600px){ .gjb-brand-text{ display:none; } }
+</style>
+<div class="gjb-brandbar">
+  <div class="gjb-brand-left">
+    <div class="gjb-badge">
+      <img src="/static/img/logo_gjb.png" alt="Green Jobs Brasil" onerror="this.style.display='none'; this.parentElement.querySelector('.gjb-fallback').style.display='inline-block';">
+      <span class="gjb-fallback">GJB</span>
+    </div>
+    <span class="gjb-brand-text">Green Jobs Brasil</span>
+  </div>
+  <div class="gjb-actions">
+    <a class="gjb-btn" href="/demo-playbook">📘 Playbook</a>
+  </div>
+</div>

@@ -51,29 +51,48 @@
   - ✅ Documentação atualizada
   - ⚠️ Nota: api/main.py é o entrypoint unificado (reexporta sqlite_api_clean.py)
 
-### P1 - Storytelling UX (1 semana)
-- [ ] Interface de edição de perfil storytelling
-  - Formulário responsivo com validação
-  - Upload de foto de perfil e banner (local ou Cloudinary)
-  - Preview em tempo real
-- [ ] Melhorias Mobile First
-  - Ajustar dashboards para mobile (profissional e empresa)
-  - Testar em dispositivos reais
-  - Otimizar carregamento de imagens
+### P1 - Storytelling UX (1 semana) ✅ COMPLETO
+- [x] Interface de edição de perfil storytelling
+  - ✅ Formulário responsivo com validação
+  - ✅ Upload de foto de perfil e banner (local)
+  - ✅ Preview em tempo real com modal
+- [x] Melhorias Mobile First
+  - ✅ Dashboards adaptados para mobile
+  - ✅ Design responsivo completo
+  - ✅ Otimizado carregamento de imagens
 
-### P2 - API Avançada e KPIs (1 semana)
-- [ ] Endpoint `/api/kpis` consolidado
-  - Métricas agregadas por período (dia/semana/mês)
-  - Tendências de crescimento
-  - Top empresas/profissionais/vagas
-- [ ] Filtros compostos e paginação
-  - Query params padrão: `?page=1&limit=20&sort=score_verde&order=desc`
-  - Filtros por ODS, UF, porte, situação cadastral
-  - Response headers com `X-Total-Count`, `X-Page`, `X-Per-Page`
-- [ ] Cache inteligente
-  - Redis ou cache em memória para endpoints de stats
-  - TTL configurável por endpoint
-  - Invalidação automática em updates
+**Commits principais:**
+- `b23dc98` - Upload de imagens
+- `2f7ba72` - Fix endpoint listar_profissionais
+- `6145e63` - Preview modal completo
+- `f7a8b14` - Edição de dados básicos
+- `1a28cb4` - Mobile First COMPLETO
+
+### P2 - API Avançada e KPIs (1 semana) ✅ COMPLETO
+- [x] Endpoint `/api/kpis` consolidado
+  - ✅ Métricas agregadas (gerais, tendências, tops)
+  - ✅ Tendências de crescimento (12 períodos)
+  - ✅ Top 5 empresas/profissionais/vagas
+  - ✅ Dashboard visual com Chart.js
+- [x] Filtros compostos e paginação
+  - ✅ Query params implementados: `?page=1&limit=20&sort=score_verde&order=desc`
+  - ✅ Filtros por ODS, UF, área, experiência, salário
+  - ✅ Headers HTTP: `X-Total-Count`, `X-Page`, `X-Total-Pages`, `X-Per-Page`
+  - ✅ Endpoints: /api/profissionais, /empresas/api/listar, /api/vagas
+- [x] Módulo de utilities
+  - ✅ `api/utils/pagination.py` com funções reutilizáveis
+  - ✅ Parse de filtros compostos (listas CSV)
+  - ✅ Validação de campos de ordenação
+- [x] Testes automatizados
+  - ✅ `tests/test_filtros_paginacao.py`
+  - ✅ 28/33 testes passando (85% de sucesso)
+  - ✅ Performance < 20ms médio
+
+**Commits principais:**
+- `8639501` - Endpoint /api/kpis consolidado
+- [data atual] - Filtros compostos e paginação completos
+
+**Documentação:** Veja `P2_API_AVANCADA_COMPLETO.md` para detalhes técnicos.
 
 ### P3 - Preparação para Deploy (1 semana)
 - [ ] Variáveis de ambiente

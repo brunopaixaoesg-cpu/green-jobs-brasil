@@ -226,46 +226,202 @@ async def criar_profissional(profissional: ProfissionalCreate):
 
 @router.get("/")
 async def listar_profissionais(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    nivel_desejado: Optional[str] = Query(None),
-    localizacao_uf: Optional[str] = Query(None),
-    areas_interesse: Optional[str] = Query(None)
+    # Paginação
+    page: int = Query(1, ge=1, description="Número da página (começa em 1)"),
+    limit: int = Query(20, ge=1, le=100, description="Items por página (máx 100)"),
+    
+    # Filtros compostos
+    ods: Optional[str] = Query(None, description="ODS interesse (ex: 7,13,15)"),
+    uf: Optional[str] = Query(None, description="Estados (ex: SP,RJ,MG)"),
+    area: Optional[str] = Query(None, description="Áreas interesse (ex: ESG,Sustentabilidade)"),
+    anos_exp_min: Optional[int] = Query(None, ge=0, description="Anos mínimos experiência ESG"),
+    competencia: Optional[str] = Query(None, description="Competências/habilidades (ex: GEE,LCA)"),
+    remoto: Optional[bool] = Query(None, description="Aceita trabalho remoto"),
+    nivel: Optional[str] = Query(None, description="Nível experiência (junior,pleno,senior)"),
+    
+    # Sorting
+    sort: Optional[str] = Query(None, description="Campo ordenação (nome_completo,anos_experiencia_esg,created_at)"),
+    order: str = Query("desc", regex="^(asc|desc)$", description="Direção ordenação")
 ):
-    """Lista profissionais com filtros opcionais"""
+    """
+    Lista profissionais com filtros compostos, paginação e ordenação
+    
+    **Filtros Compostos:**
+    - `ods`: ODS de interesse (valores separados por vírgula: 7,13,15)
+    - `uf`: Estados (SP,RJ,MG)
+    - `area`: Áreas de interesse (ESG,Sustentabilidade,Energia)
+    - `anos_exp_min`: Anos mínimos de experiência em ESG
+    - `competencia`: Competências/habilidades específicas
+    - `remoto`: Aceita trabalho remoto (true/false)
+    - `nivel`: Nível de experiência
+    
+    **Paginação:**
+    - `page`: Número da página (default: 1)
+    - `limit`: Items por página (default: 20, máx: 100)
+    
+    **Ordenação:**
+    - `sort`: Campo para ordenar (nome_completo, anos_experiencia_esg, created_at)
+    - `order`: Direção (asc ou desc)
+    
+    **Exemplo:**
+    ```
+    /api/profissionais?ods=7,13&uf=SP,RJ&anos_exp_min=3&sort=anos_experiencia_esg&order=desc&page=1&limit=20
+    ```
+    """
     try:
+        from api.utils.pagination import parse_comma_separated, paginate_query, create_pagination_headers
+        
         conn = get_db()
         cursor = conn.cursor()
         
-        query = "SELECT * FROM profissionais_esg WHERE status = 'ativo'"
+        # Query base
+        base_query = "SELECT * FROM profissionais_esg WHERE status = 'ativo'"
+        count_query = "SELECT COUNT(*) as total FROM profissionais_esg WHERE status = 'ativo'"
         params = []
         
-        if nivel_desejado:
-            query += " AND nivel_desejado = ?"
-            params.append(nivel_desejado)
+        # === APLICAR FILTROS ===
         
-        if localizacao_uf:
-            query += " AND localizacao_uf LIKE ?"
-            params.append(f"%{localizacao_uf}%")
+        # Filtro: UF (múltiplos valores)
+        if uf:
+            ufs = parse_comma_separated(uf)
+            if ufs:
+                placeholders = ','.join('?' * len(ufs))
+                base_query += f" AND localizacao_uf IN ({placeholders})"
+                count_query += f" AND localizacao_uf IN ({placeholders})"
+                params.extend(ufs)
         
-        if areas_interesse:
-            query += " AND areas_interesse LIKE ?"
-            params.append(f"%{areas_interesse}%")
+        # Filtro: Anos experiência mínima
+        if anos_exp_min is not None:
+            base_query += " AND anos_experiencia_esg >= ?"
+            count_query += " AND anos_experiencia_esg >= ?"
+            params.append(anos_exp_min)
         
-        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-        params.extend([limit, skip])
+        # Filtro: Aceita remoto
+        if remoto is not None:
+            base_query += " AND aceita_remoto = ?"
+            count_query += " AND aceita_remoto = ?"
+            params.append(1 if remoto else 0)
         
-        cursor.execute(query, params)
+        # Filtro: Nível experiência
+        if nivel:
+            base_query += " AND nivel_desejado = ?"
+            count_query += " AND nivel_desejado = ?"
+            params.append(nivel.lower())
+        
+        # Filtro: ODS (necessita buscar em campo JSON/texto)
+        ods_filters = []
+        if ods:
+            ods_list = parse_comma_separated(ods)
+            for ods_num in ods_list:
+                ods_filters.append(f"(ods_interesse LIKE '%{ods_num}%' OR ods_experiencia LIKE '%{ods_num}%')")
+        
+        if ods_filters:
+            ods_condition = " OR ".join(ods_filters)
+            base_query += f" AND ({ods_condition})"
+            count_query += f" AND ({ods_condition})"
+        
+        # Filtro: Áreas de interesse (busca parcial)
+        if area:
+            areas = parse_comma_separated(area)
+            area_filters = []
+            for a in areas:
+                area_filters.append(f"areas_interesse LIKE '%{a}%'")
+            
+            if area_filters:
+                area_condition = " OR ".join(area_filters)
+                base_query += f" AND ({area_condition})"
+                count_query += f" AND ({area_condition})"
+        
+        # Filtro: Competências/habilidades
+        if competencia:
+            competencias = parse_comma_separated(competencia)
+            comp_filters = []
+            for c in competencias:
+                comp_filters.append(f"habilidades_esg LIKE '%{c}%'")
+            
+            if comp_filters:
+                comp_condition = " OR ".join(comp_filters)
+                base_query += f" AND ({comp_condition})"
+                count_query += f" AND ({comp_condition})"
+        
+        # === CONTAR TOTAL (antes de paginação) ===
+        cursor.execute(count_query, params)
+        total = cursor.fetchone()['total']
+        
+        # === APLICAR ORDENAÇÃO ===
+        campos_permitidos = ['nome_completo', 'anos_experiencia_esg', 'created_at', 'anos_experiencia_total']
+        sort_field = sort if sort in campos_permitidos else 'created_at'
+        order_direction = order.upper()
+        
+        base_query += f" ORDER BY {sort_field} {order_direction}"
+        
+        # === APLICAR PAGINAÇÃO ===
+        offset = (page - 1) * limit
+        base_query += f" LIMIT {limit} OFFSET {offset}"
+        
+        # Executar query
+        cursor.execute(base_query, params)
         profissionais = cursor.fetchall()
         conn.close()
         
-        # Converter para formato de response
+        # Converter para dicionários
         result = []
         for prof in profissionais:
             prof_dict = dict(prof)
+            
+            # Parse JSON fields se existirem
+            if prof_dict.get('habilidades_esg'):
+                try:
+                    if isinstance(prof_dict['habilidades_esg'], str):
+                        prof_dict['habilidades_esg'] = json.loads(prof_dict['habilidades_esg'])
+                except:
+                    pass
+            
+            if prof_dict.get('ods_interesse'):
+                try:
+                    if isinstance(prof_dict['ods_interesse'], str):
+                        prof_dict['ods_interesse'] = json.loads(prof_dict['ods_interesse'])
+                except:
+                    pass
+            
             result.append(prof_dict)
         
-        return result
+        # Calcular páginas
+        pages = (total + limit - 1) // limit
+        
+        # Metadados de paginação
+        meta = {
+            "total": total,
+            "page": page,
+            "pages": pages,
+            "limit": limit,
+            "has_next": page < pages,
+            "has_prev": page > 1
+        }
+        
+        # Headers de paginação
+        headers = create_pagination_headers(meta)
+        
+        return JSONResponse(
+            content={
+                "data": result,
+                "pagination": meta,
+                "filtros_aplicados": {
+                    "ods": parse_comma_separated(ods) if ods else None,
+                    "uf": parse_comma_separated(uf) if uf else None,
+                    "area": parse_comma_separated(area) if area else None,
+                    "anos_exp_min": anos_exp_min,
+                    "competencia": parse_comma_separated(competencia) if competencia else None,
+                    "remoto": remoto,
+                    "nivel": nivel
+                },
+                "ordenacao": {
+                    "campo": sort_field,
+                    "direcao": order
+                }
+            },
+            headers=headers
+        )
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")

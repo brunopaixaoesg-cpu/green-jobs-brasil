@@ -1,14 +1,26 @@
 """
 Router para endpoints de KPIs e métricas consolidadas
 Fornece estatísticas agregadas, tendências e rankings
+Versão atualizada com suporte a empresas_esg
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from typing import Optional, Literal
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 import sqlite3
-from ..db import get_db
+import sys
+import os
+
+# Adicionar path para importar db
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db import get_db
+
+# Configurar templates
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 router = APIRouter(prefix="/api/kpis", tags=["KPIs"])
 
@@ -85,9 +97,22 @@ async def obter_kpis_consolidados(
         cursor.execute("SELECT COUNT(*) FROM profissionais_esg")
         total_profissionais = cursor.fetchone()[0]
         
-        # Total de empresas
-        cursor.execute("SELECT COUNT(*) FROM empresas_verdes")
-        total_empresas = cursor.fetchone()[0]
+        # Total de empresas (tentar diferentes nomes de tabela)
+        total_empresas = 0
+        empresa_table_found = None
+        for table_name in ['empresas_esg', 'empresas', 'empresas_verdes', 'empresa']:
+            try:
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                total_empresas = cursor.fetchone()[0]
+                empresa_table_found = table_name
+                print(f"✅ Tabela encontrada: {table_name} com {total_empresas} registros")
+                break
+            except Exception as e:
+                print(f"❌ Tentou {table_name}: {e}")
+                continue
+        
+        if not empresa_table_found:
+            print("⚠️ Nenhuma tabela de empresas encontrada!")
         
         # Total de vagas
         cursor.execute("SELECT COUNT(*) FROM vagas")
@@ -185,15 +210,15 @@ async def obter_kpis_consolidados(
             # Novas candidaturas
             cursor.execute(f"""
                 SELECT COUNT(*) FROM candidaturas 
-                WHERE created_at >= {data_inicio} AND created_at < {data_fim}
+                WHERE data_candidatura >= {data_inicio} AND data_candidatura < {data_fim}
             """)
             novas_candidaturas = cursor.fetchone()[0]
             
             # Matches (candidaturas aceitas ou em entrevista)
             cursor.execute(f"""
                 SELECT COUNT(*) FROM candidaturas 
-                WHERE (status = 'aceita' OR status = 'em_entrevista')
-                AND created_at >= {data_inicio} AND created_at < {data_fim}
+                WHERE (status = 'aceita' OR status = 'em analise')
+                AND data_candidatura >= {data_inicio} AND data_candidatura < {data_fim}
             """)
             matches = cursor.fetchone()[0]
             
@@ -210,11 +235,11 @@ async def obter_kpis_consolidados(
         cursor.execute(f"""
             SELECT 
                 p.id,
-                p.nome_completo,
+                COALESCE(p.nome_completo, p.nome) as nome,
                 COUNT(c.id) as num_candidaturas
             FROM profissionais_esg p
-            LEFT JOIN candidaturas c ON p.id = c.profissional_id
-            GROUP BY p.id, p.nome_completo
+            LEFT JOIN candidaturas c ON p.email = c.email
+            GROUP BY p.id, COALESCE(p.nome_completo, p.nome)
             ORDER BY num_candidaturas DESC
             LIMIT {limit_top}
         """)
@@ -222,7 +247,7 @@ async def obter_kpis_consolidados(
         top_profissionais = [
             TopItem(
                 id=row[0],
-                nome=row[1],
+                nome=row[1] or "Profissional",
                 valor=float(row[2]),
                 metrica="candidaturas"
             )
@@ -231,27 +256,53 @@ async def obter_kpis_consolidados(
         
         # ========== TOP EMPRESAS ==========
         
-        cursor.execute(f"""
-            SELECT 
-                e.id,
-                e.nome_empresa,
-                COUNT(v.id) as num_vagas
-            FROM empresas_verdes e
-            LEFT JOIN vagas v ON e.id = v.empresa_id
-            GROUP BY e.id, e.nome_empresa
-            ORDER BY num_vagas DESC
-            LIMIT {limit_top}
-        """)
+        # Detectar nome da tabela de empresas
+        empresa_table = None
+        for table_name in ['empresas_esg', 'empresas', 'empresas_verdes', 'empresa']:
+            try:
+                cursor.execute(f"SELECT 1 FROM {table_name} LIMIT 1")
+                empresa_table = table_name
+                break
+            except:
+                continue
         
-        top_empresas = [
-            TopItem(
-                id=row[0],
-                nome=row[1],
-                valor=float(row[2]),
-                metrica="vagas_publicadas"
-            )
-            for row in cursor.fetchall()
-        ]
+        top_empresas = []
+        if empresa_table:
+            # Detectar campos disponíveis na tabela
+            cursor.execute(f"PRAGMA table_info({empresa_table})")
+            columns = [col[1] for col in cursor.fetchall()]
+            
+            # Escolher campo de nome baseado no que existe
+            if 'nome_fantasia' in columns:
+                nome_field = "e.nome_fantasia"
+            elif 'razao_social' in columns:
+                nome_field = "e.razao_social"
+            elif 'nome' in columns:
+                nome_field = "e.nome"
+            else:
+                nome_field = "'Empresa'"
+            
+            cursor.execute(f"""
+                SELECT 
+                    e.id,
+                    {nome_field} as nome,
+                    COUNT(v.id) as num_vagas
+                FROM {empresa_table} e
+                LEFT JOIN vagas v ON e.cnpj = v.cnpj
+                GROUP BY e.id
+                ORDER BY num_vagas DESC
+                LIMIT {limit_top}
+            """)
+            
+            top_empresas = [
+                TopItem(
+                    id=row[0],
+                    nome=row[1] or "Empresa sem nome",
+                    valor=float(row[2]),
+                    metrica="vagas_publicadas"
+                )
+                for row in cursor.fetchall()
+            ]
         
         # ========== TOP VAGAS ==========
         
@@ -279,7 +330,7 @@ async def obter_kpis_consolidados(
         
         # ========== ODS MAIS BUSCADOS ==========
         
-        # Agregar ODS de profissionais e vagas
+        # Agregar ODS de profissionais e empresas
         ods_count = {}
         
         # ODS de interesse dos profissionais
@@ -290,13 +341,20 @@ async def obter_kpis_consolidados(
                     ods = ods.strip()
                     ods_count[ods] = ods_count.get(ods, 0) + 1
         
-        # ODS das vagas
-        cursor.execute("SELECT ods_alinhados FROM vagas WHERE ods_alinhados IS NOT NULL")
-        for row in cursor.fetchall():
-            if row[0]:
-                for ods in row[0].split(','):
-                    ods = ods.strip()
-                    ods_count[ods] = ods_count.get(ods, 0) + 1
+        # ODS das empresas (se tabela existir)
+        if empresa_table:
+            try:
+                cursor.execute(f"PRAGMA table_info({empresa_table})")
+                emp_columns = [col[1] for col in cursor.fetchall()]
+                if 'ods_tags' in emp_columns:
+                    cursor.execute(f"SELECT ods_tags FROM {empresa_table} WHERE ods_tags IS NOT NULL")
+                    for row in cursor.fetchall():
+                        if row[0]:
+                            for ods in row[0].split(','):
+                                ods = ods.strip()
+                                ods_count[ods] = ods_count.get(ods, 0) + 1
+            except:
+                pass
         
         ods_mais_buscados = [
             {"ods": ods, "count": count}
@@ -304,22 +362,26 @@ async def obter_kpis_consolidados(
         ]
         
         # ========== ÁREAS MAIS DEMANDADAS ==========
-        
-        cursor.execute(f"""
-            SELECT 
-                area_atuacao,
-                COUNT(*) as count
-            FROM vagas
-            WHERE area_atuacao IS NOT NULL
-            GROUP BY area_atuacao
-            ORDER BY count DESC
-            LIMIT {limit_top}
-        """)
-        
-        areas_mais_demandadas = [
-            {"area": row[0], "count": row[1]}
-            for row in cursor.fetchall()
-        ]
+        # Usar area_atuacao de profissionais como proxy
+        areas_mais_demandadas = []
+        try:
+            cursor.execute(f"""
+                SELECT 
+                    area_atuacao,
+                    COUNT(*) as count
+                FROM profissionais_esg
+                WHERE area_atuacao IS NOT NULL
+                GROUP BY area_atuacao
+                ORDER BY count DESC
+                LIMIT {limit_top}
+            """)
+            
+            areas_mais_demandadas = [
+                {"area": row[0], "count": row[1]}
+                for row in cursor.fetchall()
+            ]
+        except:
+            pass
         
         conn.close()
         
@@ -347,8 +409,15 @@ async def obter_kpis_gerais():
         cursor.execute("SELECT COUNT(*) FROM profissionais_esg")
         total_profissionais = cursor.fetchone()[0]
         
-        cursor.execute("SELECT COUNT(*) FROM empresas_verdes")
-        total_empresas = cursor.fetchone()[0]
+        # Detectar tabela de empresas
+        total_empresas = 0
+        for table_name in ['empresas_esg', 'empresas', 'empresas_verdes', 'empresa']:
+            try:
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                total_empresas = cursor.fetchone()[0]
+                break
+            except:
+                continue
         
         cursor.execute("SELECT COUNT(*) FROM vagas")
         total_vagas = cursor.fetchone()[0]
@@ -371,3 +440,12 @@ async def obter_kpis_gerais():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao obter KPIs gerais: {str(e)}")
+
+
+@router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_kpis(request: Request):
+    """
+    Dashboard visual de KPIs
+    Renderiza página HTML com gráficos interativos
+    """
+    return templates.TemplateResponse("kpis_dashboard.html", {"request": request})

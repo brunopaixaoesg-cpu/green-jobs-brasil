@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌱 Green Jobs Brasil - IA para Talentos Ambientais</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="/static/img/logo_gjb.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -47,6 +48,34 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        /* Logo badge: circular dark background for contrast */
+        .brand-badge {
+            height: 120px;
+            width: 120px;
+            border-radius: 50%;
+            background: rgba(45, 55, 72, 0.92); /* slate-700 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 0 0 2px rgba(255,255,255,0.15);
+        }
+
+        /* Logo image styling (uses image if available, falls back to icon) */
+        .brand-logo {
+            max-height: 88px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* Fallback icon styling inside badge */
+        .brand-badge .logo-fallback {
+            display: none;
+            color: #e2e8f0; /* gray-200 */
+            font-size: 2.2rem;
         }
 
         .hero-title {
@@ -456,7 +485,10 @@
 
         <div class="hero-content">
             <div class="logo">
-                <i class="fas fa-leaf"></i>
+                <div class="brand-badge">
+                    <img src="/static/img/logo_gjb.png" alt="Green Jobs Brasil" class="brand-logo" onerror="this.style.display='none'; const f=this.parentElement.querySelector('.logo-fallback'); if(f){f.style.display='inline-block';}">
+                    <i class="fas fa-leaf logo-fallback"></i>
+                </div>
             </div>
             
             <h1 class="hero-title">Green Jobs Brasil</h1>

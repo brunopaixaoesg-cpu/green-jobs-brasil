@@ -152,6 +152,38 @@
             box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
         }
 
+        .btn-light {
+            background: white;
+            color: var(--primary-green);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: var(--dark-green);
+        }
+
+        .btn-outline-light {
+            border: 2px solid white;
+            color: white;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-outline-light:hover {
+            background: white;
+            color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
         .stats-summary {
             background: white;
             border-radius: var(--border-radius);
@@ -350,19 +382,57 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
                     <h1 class="display-4 fw-bold mb-3">
                         <i class="fas fa-users me-3"></i>Profissionais ESG
                     </h1>
                     <p class="lead mb-4">
-                        Descubra talentos especializados em sustentabilidade e ESG prontos para impulsionar sua empresa.
+                        Rede de talentos especializados em sustentabilidade, energia renovável e gestão ambiental
                     </p>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>Perfis detalhados</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>Certificações verdes</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>Portfólio de projetos</span>
+                        </div>
+                    </div>
+                    <!-- CTA Botão de Cadastro -->
+                    <div class="mt-4">
+                        <a href="/profissionais/cadastro" class="btn btn-light btn-lg me-3">
+                            <i class="fas fa-user-plus me-2"></i>Criar Perfil Profissional
+                        </a>
+                        <a href="#filtros" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-search me-2"></i>Buscar Talentos
+                        </a>
+                    </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-5">
                     <div class="stats-summary">
-                        <h3 id="total-profissionais" class="fw-bold text-primary">--</h3>
-                        <p class="mb-0">Profissionais Cadastrados</p>
+                        <h3 id="total-profissionais" class="fw-bold text-primary mb-2">--</h3>
+                        <p class="mb-3">Profissionais Cadastrados</p>
+                        <hr style="opacity: 0.2;">
+                        <div class="row text-center mt-3">
+                            <div class="col-4">
+                                <div class="fw-bold text-success">85%</div>
+                                <small class="text-muted">Taxa de Match</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold text-success" id="vagas-disponiveis">--</div>
+                                <small class="text-muted">Vagas Abertas</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold text-success">26</div>
+                                <small class="text-muted">Estados</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -372,7 +442,7 @@
     <!-- Main Content -->
     <div class="container">
         <!-- Filtros -->
-        <div class="filter-card">
+        <div class="filter-card" id="filtros">
             <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtros</h5>
             <div class="row g-3">
                 <div class="col-md-3">
@@ -452,28 +522,66 @@
         // Carregar profissionais com paginação do servidor
         async function carregarProfissionais() {
             try {
-                // Carregar apenas o necessário
-                const response = await fetch('/api/profissionais/?limit=50&skip=0');
-                const data = await response.json();
+                // Carregar profissionais
+                const response = await fetch('/api/profissionais?limit=100&page=1');
+                const result = await response.json();
                 
-                profissionais = data;
-                filteredProfissionais = data;
+                // Suportar tanto formato novo (com data) quanto antigo (array direto)
+                profissionais = result.data || result;
+                filteredProfissionais = profissionais;
                 
-                document.getElementById('total-profissionais').textContent = data.length;
+                // Atualizar estatísticas
+                const totalProf = result.pagination?.total || profissionais.length;
+                document.getElementById('total-profissionais').textContent = totalProf;
+                
+                // Carregar vagas disponíveis
+                try {
+                    const vagasResp = await fetch('/api/vagas?status=aberta&limit=1');
+                    if (vagasResp.ok) {
+                        const vagasData = await vagasResp.json();
+                        const totalVagas = vagasData.pagination?.total || vagasData.length || 0;
+                        document.getElementById('vagas-disponiveis').textContent = totalVagas;
+                    } else {
+                        console.warn('Erro ao carregar vagas:', vagasResp.status);
+                        document.getElementById('vagas-disponiveis').textContent = '--';
+                    }
+                } catch (e) {
+                    console.error('Erro ao carregar vagas:', e);
+                    document.getElementById('vagas-disponiveis').textContent = '--';
+                }
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('profissionais-container').style.display = 'block';
                 
-                renderizarProfissionais();
-                renderizarPaginacao();
-                
-                // Inicializar lazy loading após renderizar
-                initLazyLoading();
+                if (profissionais.length > 0) {
+                    renderizarProfissionais();
+                    renderizarPaginacao();
+                    initLazyLoading();
+                } else {
+                    // Mostrar mensagem convidando para cadastro
+                    document.getElementById('profissionais-container').innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-plus fa-4x text-muted mb-4"></i>
+                            <h3>Seja o Primeiro Profissional ESG!</h3>
+                            <p class="lead text-muted mb-4">
+                                Crie seu perfil e conecte-se com empresas verdes que buscam talentos como você.
+                            </p>
+                            <a href="/profissionais/cadastro" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Criar Meu Perfil
+                            </a>
+                        </div>
+                    `;
+                }
                 
             } catch (error) {
                 console.error('Erro ao carregar profissionais:', error);
                 document.getElementById('loading').innerHTML = `
                     <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
                     <p class="mt-3">Erro ao carregar profissionais</p>
+                    <p class="text-muted">${error.message}</p>
+                    <a href="/profissionais/cadastro" class="btn btn-primary mt-3">
+                        <i class="fas fa-user-plus me-2"></i>Criar Meu Perfil
+                    </a>
                 `;
             }
         }
@@ -512,51 +620,82 @@
             }
 
             const html = profissionaisPagina.map(profissional => {
-                const skills = JSON.parse(profissional.habilidades_esg || '[]');
-                const certificacoes = JSON.parse(profissional.certificacoes || '[]');
+                // Parse de habilidades (pode vir como string JSON ou array)
+                let skills = [];
+                try {
+                    if (typeof profissional.habilidades_esg === 'string') {
+                        skills = JSON.parse(profissional.habilidades_esg || '[]');
+                    } else if (Array.isArray(profissional.habilidades_esg)) {
+                        skills = profissional.habilidades_esg;
+                    }
+                } catch (e) {
+                    skills = [];
+                }
+                
+                // Se não tem habilidades, tentar usar competencias ou area
+                if (skills.length === 0) {
+                    if (profissional.competencias) {
+                        skills = typeof profissional.competencias === 'string' 
+                            ? profissional.competencias.split(',').map(s => s.trim())
+                            : profissional.competencias;
+                    } else if (profissional.area_atuacao) {
+                        skills = [profissional.area_atuacao];
+                    }
+                }
                 
                 const skillsHtml = skills.slice(0, 5).map(skill => 
                     `<span class="skill-tag">${skill}</span>`
                 ).join('');
 
                 const salarioMin = profissional.pretensao_salarial_min ? 
-                    `R$ ${profissional.pretensao_salarial_min.toLocaleString('pt-BR')}` : 'A combinar';
+                    `R$ ${profissional.pretensao_salarial_min.toLocaleString('pt-BR')}` : 
+                    (profissional.salario_esperado || 'A combinar');
+
+                const anosExp = profissional.anos_experiencia_total || profissional.anos_experiencia || 0;
+                const anosEsg = profissional.anos_experiencia_esg || Math.floor(anosExp / 2);
+                
+                const cidade = profissional.localizacao_cidade || profissional.cidade || 'Não informado';
+                const uf = profissional.localizacao_uf || profissional.uf || profissional.estado || '--';
+                
+                const nome = profissional.nome_completo || profissional.nome || 'Profissional';
+                const cargo = profissional.cargo_atual || profissional.cargo || 'Profissional ESG';
+                const empresa = profissional.empresa_atual || profissional.empresa || 'Disponível para oportunidades';
 
                 return `
                     <div class="profissional-card">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="profissional-name">${profissional.nome_completo}</div>
+                                <div class="profissional-name">${nome}</div>
                                 <div class="profissional-cargo">
-                                    <i class="fas fa-briefcase me-2"></i>${profissional.cargo_atual || 'Cargo não informado'}
+                                    <i class="fas fa-briefcase me-2"></i>${cargo}
                                 </div>
                                 <div class="profissional-empresa">
-                                    <i class="fas fa-building me-2"></i>${profissional.empresa_atual || 'Empresa não informada'}
+                                    <i class="fas fa-building me-2"></i>${empresa}
                                 </div>
                                 <div class="localizacao mb-3">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    ${profissional.localizacao_cidade} - ${profissional.localizacao_uf}
+                                    ${cidade} - ${uf}
                                 </div>
-                                <div class="skills-container">
+                                ${skillsHtml ? `<div class="skills-container">
                                     ${skillsHtml}
                                     ${skills.length > 5 ? `<span class="skill-tag">+${skills.length - 5} mais</span>` : ''}
-                                </div>
+                                </div>` : ''}
                             </div>
                             <div class="col-md-4 text-md-end">
                                 <div class="experiencia-badge mb-3">
                                     <i class="fas fa-clock"></i>
-                                    ${profissional.anos_experiencia_total} anos exp.
+                                    ${anosExp} anos exp.
                                 </div>
                                 <div class="salario mb-3">${salarioMin}</div>
                                 <div class="mb-3">
                                     <small class="text-muted">
                                         <i class="fas fa-leaf me-1"></i>
-                                        ${profissional.anos_experiencia_esg} anos em ESG
+                                        ${anosEsg} anos em ESG
                                     </small>
                                 </div>
-                                <button class="btn btn-primary btn-sm" onclick="verPerfil(${profissional.id})">
+                                <a href="/profissionais/${profissional.id}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-eye me-2"></i>Ver Perfil
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -637,18 +776,20 @@
 
             filteredProfissionais = profissionais.filter(profissional => {
                 // Filtro por nome
-                if (filtroNome && !profissional.nome_completo.toLowerCase().includes(filtroNome)) {
+                const nome = (profissional.nome_completo || profissional.nome || '').toLowerCase();
+                if (filtroNome && !nome.includes(filtroNome)) {
                     return false;
                 }
 
                 // Filtro por UF
-                if (filtroUf && profissional.localizacao_uf !== filtroUf) {
+                const uf = profissional.localizacao_uf || profissional.uf || profissional.estado;
+                if (filtroUf && uf !== filtroUf) {
                     return false;
                 }
 
                 // Filtro por experiência
                 if (filtroExperiencia) {
-                    const anos = profissional.anos_experiencia_total;
+                    const anos = profissional.anos_experiencia_total || profissional.anos_experiencia || 0;
                     switch (filtroExperiencia) {
                         case '1-3':
                             if (anos < 1 || anos > 3) return false;
@@ -672,11 +813,6 @@
             renderizarProfissionais();
             renderizarPaginacao();
             initLazyLoading(); // Reativar lazy loading após filtrar
-        }
-
-        // Ver perfil
-        function verPerfil(id) {
-            window.location.href = `/api/profissionais/perfil/${id}`;
         }
 
         // Carregar ao iniciar

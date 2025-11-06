@@ -84,6 +84,26 @@ async def dashboard_profissionais_mapa(request: Request):
     return templates.TemplateResponse("dashboard_profissionais_mapa.html", {"request": request})
 
 
+@app.get("/test-api", response_class=HTMLResponse)
+async def test_api_avancada(request: Request):
+    """Página de teste interativa da API Avançada com filtros e paginação"""
+    return templates.TemplateResponse("test_api_avancada.html", {"request": request})
+
+
+# Página Playbook visual da demo
+@app.get("/demo-playbook", response_class=HTMLResponse)
+async def demo_playbook(request: Request):
+    """Playbook visual da demonstração (HTML)."""
+    return templates.TemplateResponse("demo_playbook.html", {"request": request})
+
+
+# Página Roadmap Visual
+@app.get("/roadmap", response_class=HTMLResponse)
+async def roadmap_visual(request: Request):
+    """Roadmap visual com timeline, otimizado para PDF."""
+    return templates.TemplateResponse("roadmap_visual.html", {"request": request})
+
+
 # Endpoint: profissionais por cidade/UF, incluindo nomes e áreas
 @app.get("/api/profissionais/mapa")
 async def profissionais_mapa():
@@ -131,14 +151,16 @@ sys.path.insert(0, os.path.dirname(__file__))
 try:
     original_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    from routers import profissionais, empresas, kpis
+    from routers import profissionais, empresas, kpis, vagas
     os.chdir(original_dir)
     app.include_router(profissionais.router)
     app.include_router(empresas.router)
     app.include_router(kpis.router)
+    app.include_router(vagas.router)
     logger.info("✅ Profissionais router carregado com sucesso!")
     logger.info("✅ Empresas router carregado com sucesso!")
     logger.info("✅ KPIs router carregado com sucesso!")
+    logger.info("✅ Vagas router carregado com sucesso!")
 except Exception as e:
     logger.error(f"❌ Não foi possível carregar routers: {e}")
     import traceback
@@ -166,45 +188,48 @@ async def status():
 
 # ============= ENDPOINTS SIMPLES PARA MVP =============
 
-@app.get("/api/vagas/")
-async def listar_vagas():
-    """Lista todas as vagas"""
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM vagas ORDER BY created_at DESC LIMIT 100")
-        vagas = cursor.fetchall()
-        conn.close()
-        return [dict(vaga) for vaga in vagas]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# DEPRECATED: Endpoint movido para api/routers/vagas.py (com filtros e paginação)
+# @app.get("/api/vagas/")
+# async def listar_vagas():
+#     """Lista todas as vagas"""
+#     try:
+#         conn = get_db()
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT * FROM vagas ORDER BY created_at DESC LIMIT 100")
+#         vagas = cursor.fetchall()
+#         conn.close()
+#         return [dict(vaga) for vaga in vagas]
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/profissionais/")
-async def listar_profissionais():
-    """Lista todos os profissionais, adaptando campos para o frontend"""
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM profissionais_esg ORDER BY created_at DESC LIMIT 100")
-        profissionais = cursor.fetchall()
-        conn.close()
-        resultado = []
-        for prof in profissionais:
-            p = dict(prof)
-            resultado.append({
-                "id": p.get("id"),
-                "nome_completo": p.get("nome_completo", "Nome não informado"),
-                "email": p.get("email", "Email não informado"),
-                "area_atuacao": p.get("area_atuacao", "Área não informada"),
-                "anos_experiencia_esg": p.get("anos_experiencia_esg", 0),
-                "localizacao_cidade": p.get("localizacao_cidade", "Cidade não informada"),
-                "localizacao_uf": p.get("localizacao_uf", "UF não informada"),
-                "created_at": p.get("created_at")
-            })
-        return resultado
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# DEPRECATED: Endpoint movido para api/routers/profissionais.py (com filtros e paginação)
+# @app.get("/api/profissionais/")
+# async def listar_profissionais():
+#     """Lista todos os profissionais, adaptando campos para o frontend"""
+#     try:
+#         conn = get_db()
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT * FROM profissionais_esg ORDER BY created_at DESC LIMIT 100")
+#         profissionais = cursor.fetchall()
+#         conn.close()
+#         resultado = []
+#         for prof in profissionais:
+#             p = dict(prof)
+#             resultado.append({
+#                 "id": p.get("id"),
+#                 "nome_completo": p.get("nome_completo", "Nome não informado"),
+#                 "email": p.get("email", "Email não informado"),
+#                 "area_atuacao": p.get("area_atuacao", "Área não informada"),
+#                 "anos_experiencia_esg": p.get("anos_experiencia_esg", 0),
+#                 "localizacao_cidade": p.get("localizacao_cidade", "Cidade não informada"),
+#                 "localizacao_uf": p.get("localizacao_uf", "UF não informada"),
+#                 "created_at": p.get("created_at")
+#             })
+#         return resultado
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 # Adicionando endpoint /api/candidaturas após definição do app
 @app.get("/api/candidaturas")
 async def listar_candidaturas():
@@ -391,6 +416,12 @@ async def landing_page(request: Request):
 async def dashboard_page(request: Request):
     """Dashboard principal do sistema com autenticação"""
     return templates.TemplateResponse("dashboard_auth.html", {"request": request})
+
+# Dashboard KPIs
+@app.get("/kpis", response_class=HTMLResponse)
+async def kpis_dashboard_page(request: Request):
+    """Dashboard de KPIs e métricas"""
+    return templates.TemplateResponse("kpis_dashboard.html", {"request": request})
 
 # Dashboard ML
 @app.get("/ml-avancado", response_class=HTMLResponse)
@@ -584,49 +615,51 @@ async def teste_sistema_page(request: Request):
     """Página de teste do sistema completo"""
     return templates.TemplateResponse("teste_sistema.html", {"request": request})
 
-@app.get("/api/vagas")
-async def listar_vagas():
-    """API para listar todas as vagas ativas"""
-    try:
-        conn = get_db()
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        # Buscar vagas ativas com dados da empresa
-        cursor.execute("""
-            SELECT 
-                v.*,
-                e.razao_social as empresa_nome,
-                (SELECT COUNT(*) FROM candidaturas_esg WHERE vaga_id = v.id) as total_candidaturas
-            FROM vagas v 
-            LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
-            WHERE v.status = 'ativa'
-            ORDER BY v.created_at DESC
-        """)
-        
-        vagas = []
-        for row in cursor.fetchall():
-            vaga = dict(row)
-            # Calcular dias desde publicação
-            if vaga['created_at']:
-                from datetime import datetime
-                created = datetime.fromisoformat(vaga['created_at'].replace('Z', '+00:00'))
-                dias = (datetime.now() - created).days
-                vaga['dias_publicada'] = dias
-            vagas.append(vaga)
-        
-        conn.close()
-        
-        return {
-            "vagas": vagas,
-            "total": len(vagas)
-        }
-        
-    except Exception as e:
-        logger.error("Erro ao listar vagas: %s", str(e))
-        if 'conn' in locals():
-            conn.close()
-        raise HTTPException(status_code=500, detail=f"Erro ao listar vagas: {str(e)}")
+# DEPRECATED: Endpoint movido para api/routers/vagas.py (com filtros e paginação)
+# @app.get("/api/vagas")
+# async def listar_vagas():
+#     """API para listar todas as vagas ativas"""
+#     try:
+#         conn = get_db()
+#         conn.row_factory = sqlite3.Row
+#         cursor = conn.cursor()
+#         
+#         # Buscar vagas ativas com dados da empresa
+#         cursor.execute("""
+#             SELECT 
+#                 v.*,
+#                 e.razao_social as empresa_nome,
+#                 (SELECT COUNT(*) FROM candidaturas_esg WHERE vaga_id = v.id) as total_candidaturas
+#             FROM vagas v 
+#             LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
+#             WHERE v.status = 'ativa'
+#             ORDER BY v.created_at DESC
+#         """)
+#         
+#         vagas = []
+#         for row in cursor.fetchall():
+#             vaga = dict(row)
+#             # Calcular dias desde publicação
+#             if vaga['created_at']:
+#                 from datetime import datetime
+#                 created = datetime.fromisoformat(vaga['created_at'].replace('Z', '+00:00'))
+#                 dias = (datetime.now() - created).days
+#                 vaga['dias_publicada'] = dias
+#             vagas.append(vaga)
+#         
+#         conn.close()
+#         
+#         return {
+#             "vagas": vagas,
+#             "total": len(vagas)
+#         }
+#         
+#     except Exception as e:
+#         logger.error("Erro ao listar vagas: %s", str(e))
+#         if 'conn' in locals():
+#             conn.close()
+#         raise HTTPException(status_code=500, detail=f"Erro ao listar vagas: {str(e)}")
+
 
 @app.post("/api/candidaturas/criar")
 async def criar_candidatura(request: Request):
@@ -1572,41 +1605,43 @@ async def get_matching_dashboard():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/vagas")
-async def get_vagas(limit: int = 10):
-    """Lista vagas ESG"""
-    try:
-        conn = get_db()
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT v.*, e.nome_fantasia 
-            FROM vagas v
-            LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
-            WHERE v.status = 'ativa'
-            ORDER BY v.created_at DESC
-            LIMIT ?
-        """, (limit,))
-        
-        vagas = []
-        for row in cursor.fetchall():
-            vaga = dict(row)
-            # Parse JSON fields
-            try:
-                if vaga['ods_tags']:
-                    vaga['ods_tags'] = json.loads(vaga['ods_tags'])
-                if vaga['habilidades_requeridas']:
-                    vaga['habilidades_requeridas'] = json.loads(vaga['habilidades_requeridas'])
-            except:
-                pass
-            vagas.append(vaga)
-        
-        conn.close()
-        return vagas
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# DEPRECATED: Endpoint movido para api/routers/vagas.py (com filtros e paginação)
+# @app.get("/api/vagas")
+# async def get_vagas(limit: int = 10):
+#     """Lista vagas ESG"""
+#     try:
+#         conn = get_db()
+#         conn.row_factory = sqlite3.Row
+#         cursor = conn.cursor()
+#         
+#         cursor.execute("""
+#             SELECT v.*, e.nome_fantasia 
+#             FROM vagas v
+#             LEFT JOIN empresas_esg e ON v.cnpj = e.cnpj
+#             WHERE v.status = 'ativa'
+#             ORDER BY v.created_at DESC
+#             LIMIT ?
+#         """, (limit,))
+#         
+#         vagas = []
+#         for row in cursor.fetchall():
+#             vaga = dict(row)
+#             # Parse JSON fields
+#             try:
+#                 if vaga['ods_tags']:
+#                     vaga['ods_tags'] = json.loads(vaga['ods_tags'])
+#                 if vaga['habilidades_requeridas']:
+#                     vaga['habilidades_requeridas'] = json.loads(vaga['habilidades_requeridas'])
+#             except:
+#                 pass
+#             vagas.append(vaga)
+#         
+#         conn.close()
+#         return vagas
+#         
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 def _is_admin_request(request: Request) -> bool:
@@ -1767,39 +1802,40 @@ async def admin_list_import_audit(request: Request, limit: int = 100):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/profissionais")
-async def get_profissionais(limit: int = 10):
-    """Lista profissionais ESG"""
-    try:
-        conn = get_db()
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT
-                id,
-                nome as nome_profissional,
-                area_atuacao,
-                experiencia_anos as anos_experiencia_esg,
-                localizacao_cidade,
-                localizacao_uf,
-                status
-            FROM profissionais_esg
-            WHERE status = 'ativo'
-            ORDER BY experiencia_anos DESC
-            LIMIT ?
-        """, (limit,))
-        
-        profissionais = []
-        for row in cursor.fetchall():
-            profissional = dict(row)
-            profissionais.append(profissional)
-        
-        conn.close()
-        return profissionais
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# DEPRECATED: Endpoint movido para api/routers/profissionais.py
+# @app.get("/api/profissionais")
+# async def get_profissionais(limit: int = 10):
+#     """Lista profissionais ESG"""
+#     try:
+#         conn = get_db()
+#         conn.row_factory = sqlite3.Row
+#         cursor = conn.cursor()
+#         
+#         cursor.execute("""
+#             SELECT
+#                 id,
+#                 nome as nome_profissional,
+#                 area_atuacao,
+#                 experiencia_anos as anos_experiencia_esg,
+#                 localizacao_cidade,
+#                 localizacao_uf,
+#                 status
+#             FROM profissionais_esg
+#             WHERE status = 'ativo'
+#             ORDER BY experiencia_anos DESC
+#             LIMIT ?
+#         """, (limit,))
+#         
+#         profissionais = []
+#         for row in cursor.fetchall():
+#             profissional = dict(row)
+#             profissionais.append(profissional)
+#         
+#         conn.close()
+#         return profissionais
+#         
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/cnaes")
 async def get_cnaes():
