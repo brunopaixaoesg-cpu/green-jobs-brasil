@@ -14,8 +14,9 @@ from typing import Optional, List, Dict, Any
 import json
 import os
 import sqlite3
+import time
 
-from api.logger import logger
+from api.logging_config import logger, log_request, log_db_query, log_error
 
 app = FastAPI(
     title="Green Jobs Brasil API",
@@ -43,6 +44,24 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Use centralized DB helper from api.db
 from api.db import get_db
+
+# ===== Middleware para Logging Estruturado =====
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Loga automaticamente todas as requisições HTTP"""
+    start_time = time.time()
+    
+    response = await call_next(request)
+    
+    duration_ms = (time.time() - start_time) * 1000
+    log_request(
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        duration_ms=duration_ms
+    )
+    
+    return response
 
 # Endpoint para validação instantânea de CNPJ
 @app.get("/api/empresas/validar-cnpj/{cnpj}")
