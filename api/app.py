@@ -3,31 +3,92 @@ Green Jobs Brasil - FastAPI Application
 Main application file for the Green Jobs Brasil API.
 """
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from datetime import datetime
 from sqlalchemy.orm import Session
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
+from typing import Dict, Any
+from pydantic import BaseModel
 
 from api.db import get_db, test_connection
 from api.routers import companies, cnaes, stats, empresas, profissionais, vagas
-from api.schemas import HealthResponse
+from api.config import Config
+
+# Health Response Schema
+class HealthResponse(BaseModel):
+    status: str
+    timestamp: datetime
+    version: str
+    database_connected: bool
+
+# Configure rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 # Create FastAPI application
 app = FastAPI(
     title="Green Jobs Brasil API",
     description="API para consulta de empresas verdes no Brasil baseada em classificação CNAE e ODS",
-    version="1.0.0",
+    version="1.6.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# Configure CORS
+# Add rate limiter to app state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # HSTS - Force HTTPS in production
+        if not Config.DEBUG:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        
+        # CSP - Content Security Policy
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "connect-src 'self' https://api.greenjobsbrasil.com.br;"
+        )
+        
+        # Prevent MIME type sniffing
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        
+        # Prevent clickjacking
+        response.headers["X-Frame-Options"] = "DENY"
+        
+        # XSS Protection (legacy but still useful)
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        
+        # Referrer Policy
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
+        # Permissions Policy (formerly Feature Policy)
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        
+        return response
+
+# Add security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Configure CORS with environment variables
+cors_origins = Config.get_cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
+    allow_origins=cors_origins,
+    allow_credentials=Config.CORS_ALLOW_CREDENTIALS,
+    allow_methods=Config.CORS_ALLOW_METHODS.split(","),
+    allow_headers=[Config.CORS_ALLOW_HEADERS] if Config.CORS_ALLOW_HEADERS != "*" else ["*"],
 )
 
 # Include routers
@@ -39,20 +100,27 @@ app.include_router(profissionais.router)
 app.include_router(vagas.router)
 
 @app.get("/", tags=["root"])
-async def root():
+@limiter.limit(f"{Config.RATE_LIMIT_PER_SECOND}/second")
+async def root(request: Request):
     """
     Root endpoint with API information.
     """
     return {
         "message": "Green Jobs Brasil API",
-        "version": "1.0.0",
+        "version": "1.6.0",
         "description": "API para consulta de empresas verdes no Brasil",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "security": {
+            "rate_limit": f"{Config.RATE_LIMIT_PER_SECOND} req/s per IP",
+            "cors_enabled": True,
+            "https_required": not Config.DEBUG
+        }
     }
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])
-async def health_check():
+@limiter.limit(f"{Config.RATE_LIMIT_PER_SECOND * 2}/second")  # Double limit for health checks
+async def health_check(request: Request):
     """
     Health check endpoint.
     
@@ -63,18 +131,19 @@ async def health_check():
     return HealthResponse(
         status="ok" if database_connected else "error",
         timestamp=datetime.now(),
-        version="1.0.0",
+        version="1.6.0",
         database_connected=database_connected
     )
 
 @app.get("/info", tags=["info"])
-async def api_info():
+@limiter.limit(f"{Config.RATE_LIMIT_PER_SECOND}/second")
+async def api_info(request: Request):
     """
     Get detailed API information and available endpoints.
     """
     return {
         "api_name": "Green Jobs Brasil",
-        "version": "1.0.0",
+        "version": "1.6.0",
         "description": "Sistema para identificação e classificação de empresas verdes no Brasil",
         "endpoints": {
             "empresas": {
@@ -103,7 +172,14 @@ async def api_info():
             "Receita Federal do Brasil (RFB) - Dados Públicos CNPJ",
             "Classificação CNAE Verde customizada",
             "Mapeamento para Objetivos de Desenvolvimento Sustentável (ODS)"
-        ]
+        ],
+        "security": {
+            "rate_limit_per_second": Config.RATE_LIMIT_PER_SECOND,
+            "rate_limit_per_minute": Config.RATE_LIMIT_PER_MINUTE,
+            "rate_limit_per_hour": Config.RATE_LIMIT_PER_HOUR,
+            "cors_origins": Config.get_cors_origins(),
+            "https_only": not Config.DEBUG
+        }
     }
 
 # Error handlers
