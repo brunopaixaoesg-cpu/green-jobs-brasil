@@ -16,15 +16,8 @@ from typing import Dict, Any
 from pydantic import BaseModel
 
 from api.db import get_db, test_connection
-from api.routers import companies, cnaes, stats, empresas, profissionais, vagas
+from api.routers import companies, cnaes, stats, empresas, profissionais, vagas, health
 from api.config import Config
-
-# Health Response Schema
-class HealthResponse(BaseModel):
-    status: str
-    timestamp: datetime
-    version: str
-    database_connected: bool
 
 # Configure rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -92,6 +85,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(health.router)  # Health checks first
 app.include_router(companies.router)
 app.include_router(cnaes.router)
 app.include_router(stats.router)
@@ -117,23 +111,6 @@ async def root(request: Request):
             "https_required": not Config.DEBUG
         }
     }
-
-@app.get("/health", response_model=HealthResponse, tags=["health"])
-@limiter.limit(f"{Config.RATE_LIMIT_PER_SECOND * 2}/second")  # Double limit for health checks
-async def health_check(request: Request):
-    """
-    Health check endpoint.
-    
-    Returns API status and database connectivity.
-    """
-    database_connected = test_connection()
-    
-    return HealthResponse(
-        status="ok" if database_connected else "error",
-        timestamp=datetime.now(),
-        version="1.6.0",
-        database_connected=database_connected
-    )
 
 @app.get("/info", tags=["info"])
 @limiter.limit(f"{Config.RATE_LIMIT_PER_SECOND}/second")

@@ -170,12 +170,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 try:
     original_dir = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    from routers import profissionais, empresas, kpis, vagas
+    from routers import profissionais, empresas, kpis, vagas, health
     os.chdir(original_dir)
+    app.include_router(health.router)  # Health checks first
     app.include_router(profissionais.router)
     app.include_router(empresas.router)
     app.include_router(kpis.router)
     app.include_router(vagas.router)
+    logger.info("✅ Health router carregado com sucesso!")
     logger.info("✅ Profissionais router carregado com sucesso!")
     logger.info("✅ Empresas router carregado com sucesso!")
     logger.info("✅ KPIs router carregado com sucesso!")
