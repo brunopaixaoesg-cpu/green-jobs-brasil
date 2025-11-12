@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#059669">
+    <title>Green Jobs Brasil - COP30 Pitch</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .slides-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: pan-y;
+        }
+
+        .slide {
+            min-width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .slide-content {
+            max-width: 800px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #10b981;
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #34d399;
+        }
+
+        p {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.95);
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .stat-number {
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 800;
+            color: #10b981;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            font-weight: 600;
+            margin: 0.5rem 0.25rem;
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            color: #e2e8f0;
+        }
+
+        .list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(148, 163, 184, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: #10b981;
+            width: 32px;
+            border-radius: 6px;
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.9rem;
+            color: #64748b;
+            z-index: 1000;
+        }
+
+        .logo {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #10b981;
+            z-index: 1000;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            text-decoration: none;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .cta-button:active {
+            transform: scale(0.95);
+        }
+
+        .swipe-hint {
+            position: fixed;
+            bottom: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #64748b;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Dark mode adjustments for readability */
+        @media (prefers-color-scheme: dark) {
+            .stat-card {
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        /* Landscape orientation optimization */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .slide {
+                padding: 1rem;
+                justify-content: flex-start;
+                padding-top: 4rem;
+            }
+            h1 {
+                font-size: clamp(1.5rem, 6vw, 2.5rem);
+            }
+            h2 {
+                font-size: clamp(1.2rem, 4vw, 1.8rem);
+            }
+            .stats-grid {
+                gap: 1rem;
+            }
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+
+        /* Tablet optimization */
+        @media (min-width: 768px) {
+            .slide {
+                padding: 3rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">GJB</div>
+    <div class="slide-number"><span id="current-slide">1</span> / <span id="total-slides">12</span></div>
+    
+    <div class="slides-container" id="slides">
+        <!-- Slide 1: Capa -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>Green Jobs Brasil</h1>
+                <p style="font-size: clamp(1.2rem, 4vw, 1.8rem); color: #10b981; margin-top: 1rem;">
+                    A Inteligência de Dados que Acelera a Transição Verde do Brasil
+                </p>
+                <div style="margin-top: 2rem;">
+                    <span class="badge">🇧🇷 Taxonomia Sustentável Brasileira</span>
+                    <span class="badge">🌍 COP30 Belém 2025</span>
+                    <span class="badge">📊 7 Milhões de Empregos</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: O Problema -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🚨 O Problema</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">7M</span>
+                        <span class="stat-label">Empregos verdes no Brasil</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">0%</span>
+                        <span class="stat-label">Visibilidade desses dados</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">93k</span>
+                        <span class="stat-label">Empresas ESG invisíveis</span>
+                    </div>
+                </div>
+                <p style="margin-top: 2rem; font-size: clamp(1.1rem, 3.5vw, 1.4rem);">
+                    Empresas verdes não conseguem contratar. Profissionais ESG não encontram vagas. 
+                    Investidores não sabem onde alocar capital verde.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 3: A Solução -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>✨ Nossa Solução</h2>
+                <ul class="list">
+                    <li><strong>Identificação Automática</strong><br>
+                        Mapeamos 93.000 empresas verdes por CNAE + TSB</li>
+                    <li><strong>Pontuação ESG</strong><br>
+                        Score 0-100 baseado em dados objetivos</li>
+                    <li><strong>Matching Inteligente</strong><br>
+                        Conectamos talentos verdes com empresas sustentáveis</li>
+                    <li><strong>Dados Abertos</strong><br>
+                        API pública para acesso transparente</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: Taxonomia Brasileira -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🇧🇷 Integração TSB Oficial</h2>
+                <div class="highlight">
+                    <p style="font-size: clamp(1.1rem, 3.5vw, 1.3rem); color: #e2e8f0;">
+                        <strong>Somos a primeira plataforma a integrar a Taxonomia Sustentável Brasileira</strong>
+                    </p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">11</span>
+                        <span class="stat-label">Objetivos Ambientais + Sociais</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">8</span>
+                        <span class="stat-label">Setores Prioritários</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">160+</span>
+                        <span class="stat-label">CNAEs Mapeados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Biodiversidade -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🌳 Foco em Biodiversidade</h2>
+                <p style="font-size: clamp(1.1rem, 3.5vw, 1.3rem); margin-bottom: 2rem;">
+                    Brasil tem o maior ativo de biodiversidade do planeta. 
+                    Mapeamos empregos que <strong>protegem e restauram nossos biomas</strong>.
+                </p>
+                <ul class="list">
+                    <li>Restauração Ecológica (560k empregos)</li>
+                    <li>Energias Renováveis (1.2M empregos)</li>
+                    <li>Agricultura Sustentável (2.1M empregos)</li>
+                    <li>Gestão de Água e Resíduos (890k empregos)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Impacto ODS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🎯 Alinhamento com ODS</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">7</span>
+                        <span class="stat-label">ODS Ambientais</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">6</span>
+                        <span class="stat-label">ODS Sociais</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">NDC Brasil Coberta</span>
+                    </div>
+                </div>
+                <div class="highlight" style="margin-top: 2rem;">
+                    <p>
+                        Cada empresa e vaga é classificada por impacto em 
+                        <strong>Energia Limpa</strong>, <strong>Água</strong>, <strong>Clima</strong>, 
+                        <strong>Biodiversidade</strong>, <strong>Economia Circular</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Tecnologia -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>⚙️ Tecnologia</h2>
+                <ul class="list">
+                    <li><strong>ETL Automatizado</strong><br>
+                        Processamento de milhões de CNPJs</li>
+                    <li><strong>API RESTful</strong><br>
+                        Dados abertos para integração</li>
+                    <li><strong>Machine Learning</strong><br>
+                        Matching inteligente de talentos</li>
+                    <li><strong>Dashboard Interativo</strong><br>
+                        Visualização de impacto ESG</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Tração -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>📈 Tração Atual</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">93k</span>
+                        <span class="stat-label">Empresas Mapeadas</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">160+</span>
+                        <span class="stat-label">CNAEs Verdes</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">7M</span>
+                        <span class="stat-label">Empregos Potenciais</span>
+                    </div>
+                </div>
+                <div class="highlight" style="margin-top: 2rem;">
+                    <p>
+                        <strong>Pronto para COP30 Belém 2025</strong><br>
+                        Plataforma operacional para demonstração ao governo e investidores
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Modelo de Negócio -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>💰 Modelo de Negócio</h2>
+                <ul class="list">
+                    <li><strong>Freemium</strong><br>
+                        Empresas: cadastro grátis, premium R$ 299/mês</li>
+                    <li><strong>API Enterprise</strong><br>
+                        Acesso completo aos dados: R$ 2k-10k/mês</li>
+                    <li><strong>Consultoria ESG</strong><br>
+                        Análise personalizada: R$ 15k-50k</li>
+                    <li><strong>Dados como Serviço</strong><br>
+                        Relatórios setoriais: R$ 5k-20k</li>
+                </ul>
+                <div class="highlight" style="margin-top: 2rem;">
+                    <p><strong>ARR Projetado 2027:</strong> R$ 7M - R$ 12M</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Roadmap 2025-2027 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🗺️ Roadmap</h2>
+                <div class="highlight">
+                    <h3 style="color: #10b981; margin-bottom: 0.5rem;">2025 - Fundação</h3>
+                    <p>✓ Lançamento plataforma<br>✓ Integração TSB<br>✓ COP30 Belém</p>
+                </div>
+                <div class="highlight">
+                    <h3 style="color: #10b981; margin-bottom: 0.5rem;">2026 - Escala</h3>
+                    <p>• 200k empresas ativas<br>• Parcerias gov + universidades<br>• Expansão América Latina</p>
+                </div>
+                <div class="highlight">
+                    <h3 style="color: #10b981; margin-bottom: 0.5rem;">2027 - Bioeconomia</h3>
+                    <p>• Territorialização por bioma<br>• Comunidades tradicionais<br>• Ecoturismo + Restauração</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Diferencial Competitivo -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🏆 Por Que Somos Únicos?</h2>
+                <ul class="list">
+                    <li><strong>Primeira TSB Tech</strong><br>
+                        Única plataforma integrada com taxonomia oficial</li>
+                    <li><strong>Dados Brasileiros</strong><br>
+                        Foco em biodiversidade e biomas nacionais</li>
+                    <li><strong>Open Data</strong><br>
+                        Transparência total via API pública</li>
+                    <li><strong>Impacto Mensurável</strong><br>
+                        Score ESG baseado em dados objetivos</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 12: Call to Action -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>🚀 Vamos Acelerar Juntos?</h2>
+                <p style="font-size: clamp(1.2rem, 4vw, 1.6rem); margin: 2rem 0;">
+                    Junte-se a nós na construção da maior plataforma de empregos verdes 
+                    da América Latina.
+                </p>
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <span class="stat-number">93x</span>
+                        <span class="stat-label">Potencial de Expansão</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">R$12M</span>
+                        <span class="stat-label">ARR Projetado 2027</span>
+                    </div>
+                </div>
+                <a href="mailto:bruno@greenjobsbrasil.com" class="cta-button">
+                    📧 Agendar Reunião
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="swipe-hint">← Deslize para navegar →</div>
+    
+    <div class="navigation" id="navigation"></div>
+
+    <script>
+        // Configuração
+        const slidesContainer = document.getElementById('slides');
+        const slides = document.querySelectorAll('.slide');
+        const navigation = document.getElementById('navigation');
+        const currentSlideEl = document.getElementById('current-slide');
+        const totalSlidesEl = document.getElementById('total-slides');
+        
+        let currentSlide = 0;
+        let startX = 0;
+        let isDragging = false;
+
+        totalSlidesEl.textContent = slides.length;
+
+        // Criar navegação
+        slides.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot';
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(index));
+            navigation.appendChild(dot);
+        });
+
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        // Funções de navegação
+        function goToSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+            
+            currentSlide = index;
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            currentSlideEl.textContent = currentSlide + 1;
+            
+            navDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                goToSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                goToSlide(currentSlide - 1);
+            }
+        }
+
+        // Touch events
+        slidesContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        slidesContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        }, { passive: false });
+
+        slidesContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isDragging = false;
+        });
+
+        // Mouse events (desktop)
+        slidesContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+
+        slidesContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        slidesContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            
+            const endX = e.clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isDragging = false;
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Hide swipe hint after first interaction
+        let interacted = false;
+        function hideHint() {
+            if (!interacted) {
+                document.querySelector('.swipe-hint').style.display = 'none';
+                interacted = true;
+            }
+        }
+        slidesContainer.addEventListener('touchstart', hideHint);
+        slidesContainer.addEventListener('mousedown', hideHint);
+        document.addEventListener('keydown', hideHint);
+
+        // PWA: Service Worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                // Silent fail if sw.js not available
+            });
+        }
+    </script>
+</body>
+</html>

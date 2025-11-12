@@ -112,6 +112,29 @@
   - `/ready` para readiness probe (K8s-ready)
   - Métricas Prometheus em `/metrics` (opcional)
 
+## 🌳 Visão de Longo Prazo: Bioeconomia & Comunidades Tradicionais
+
+**Timeline:** 2026-2027  
+**Documento completo:** [`docs/ROADMAP_BIOECONOMIA_COMUNIDADES.md`](docs/ROADMAP_BIOECONOMIA_COMUNIDADES.md)
+
+**Por quê?** O Brasil tem o maior ativo de biodiversidade do planeta. Queremos conectar este diferencial único com tecnologia de dados moderna, valorizando conhecimento tradicional e criando empregos verdes territorializados.
+
+**Principais objetivos:**
+- 🌲 Mapear empregos em bioeconomia (ecoturismo, restauração, extrativismo sustentável)
+- 👥 Valorizar povos e comunidades tradicionais como guardiões da biodiversidade
+- 📍 Territorializar dados por bioma (Amazônia, Cerrado, Mata Atlântica, Caatinga, Pampa, Pantanal)
+- 🎓 Criar trilhas de capacitação específicas (Guia Amazônico, Auxiliar de Restauração, Produtor de Sociobiodiversidade)
+
+**Funcionalidades planejadas:**
+- Categoria "Bioeconomia & Sociobiodiversidade" na plataforma
+- Mapa interativo por bioma com heatmap de oportunidades
+- Trilhas de capacitação regionalizadas
+- Parcerias com Embrapa, Inpa, ISA, ICMBio, Ministério dos Povos Indígenas
+
+**Status:** Planejamento - Pesquisa e escuta de comunidades prevista para 2026
+
+---
+
 ## Próximos marcos (Q4/2025 – Q1/2026)
 
 ### 1. DATA-01 — Expansão de dados RFB (2 semanas, Dez/2025)
@@ -307,6 +330,12 @@
 - Notificações por email; chat empresa–candidato
 - Mobile First amplo; acessibilidade WCAG AA
 - Analytics/admin; dados reais (scraping/validação de mercado)
+- **BIO-01 — Bioeconomia & Comunidades Tradicionais** (2026-2027)
+  - Pesquisa e co-criação com comunidades
+  - Mapeamento de empregos por bioma
+  - Trilhas de capacitação regionalizadas
+  - Parcerias institucionais (Embrapa, Inpa, ISA, Funai)
+  - Ver [`docs/ROADMAP_BIOECONOMIA_COMUNIDADES.md`](docs/ROADMAP_BIOECONOMIA_COMUNIDADES.md) para detalhes
 
 ## Métricas de sucesso (indicativas)
 

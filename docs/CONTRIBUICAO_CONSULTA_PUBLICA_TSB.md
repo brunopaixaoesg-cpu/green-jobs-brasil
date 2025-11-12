@@ -24,7 +24,7 @@
 
 ## 2. Contexto da Contribuição
 
-A Green Jobs Brasil atua desde [ano] na identificação e classificação de atividades econômicas verdes no Brasil, tendo desenvolvido um sistema proprietário de mapeamento CNAE → ODS com base em pesquisa científica e alinhamento com taxonomias internacionais (EU Taxonomy, ASEAN Taxonomy).
+A Green Jobs Brasil atua desde [2024] na identificação e classificação de atividades econômicas verdes no Brasil, tendo desenvolvido um sistema proprietário de mapeamento CNAE → ODS com base em pesquisa científica e alinhamento com taxonomias internacionais (EU Taxonomy, ASEAN Taxonomy).
 
 Com o lançamento do Plano de Ação da Taxonomia Sustentável Brasileira (TSB), identificamos **total alinhamento estratégico** entre nossa missão e os objetivos da taxonomia oficial. Esta contribuição visa:
 
