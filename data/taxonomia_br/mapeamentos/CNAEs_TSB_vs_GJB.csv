@@ -1,0 +1,11 @@
+setor_tsb,cnae,descricao,status_gjb,categoria_gjb,prioridade,observacoes
+A - Agropecuária,01.15-6/00,Cultivo de soja,Não mapeado,-,Alta,Critérios complexos (desmatamento)
+A - Agropecuária,01.11-3/02,Cultivo de milho,Não mapeado,-,Alta,Agricultura regenerativa
+A - Agropecuária,01.35-1/00,Cultivo de café e cacau,Não mapeado,-,Média,Culturas perenes sustentáveis
+A - Agropecuária,01.51-2/01,Pecuária bovina - corte,Não mapeado,-,Média,Sistemas a pasto sustentável
+A - Agropecuária,01.51-2/02,Pecuária bovina - leite,Não mapeado,-,Média,Baixa emissão de metano
+A - Agropecuária,02.10-1/01,Cultivo de eucalipto,Não mapeado,-,Alta,Florestas plantadas
+B - Extrativas,08.99-1/01,Extração de grafita,Não mapeado,-,Média,Minerais para baterias
+D - Energia,35.11-5/01,Geração de energia elétrica,Mapeado,Core,Alta,JÁ TEMOS - renovável
+D - Energia,35.12-3/00,Transmissão de energia elétrica,Não mapeado,-,Alta,Infraestrutura energética
+F - Construção,42.9,Construção de estradas,Não mapeado,-,Média,Infraestrutura sustentável
