@@ -12,7 +12,7 @@ import psutil
 
 from api.db import get_db, test_connection
 from api.logging_config import logger
-from api.config import Config
+from api.settings import settings
 
 router = APIRouter(tags=["health"])
 
@@ -87,7 +87,7 @@ async def health_check(request: Request):
     return HealthResponse(
         status=overall_status,
         timestamp=datetime.now(),
-        version=Config.APP_VERSION,
+        version=settings.app_version,
         database=db_status,
         uptime_seconds=round(time.time() - _start_time, 2)
     )
@@ -124,14 +124,14 @@ async def readiness_check(request: Request):
     
     # Check 2: Logs writable
     try:
-        log_dir = os.path.dirname(Config.get_log_path())
-        checks["logs_writable"] = os.path.exists(log_dir) and os.access(log_dir, os.W_OK)
+        log_dir = settings.log_dir
+        checks["logs_writable"] = os.path.exists(log_dir) or os.makedirs(log_dir, exist_ok=True) is None
     except Exception as e:
         logger.error(f"Readiness check logs error: {e}")
     
     # Check 3: Config loaded
     try:
-        checks["config_loaded"] = Config.APP_VERSION is not None
+        checks["config_loaded"] = settings.app_version is not None
     except Exception as e:
         logger.error(f"Readiness check config error: {e}")
     
@@ -324,10 +324,10 @@ async def metrics_json(request: Request):
     
     # API metrics
     api = {
-        "version": Config.APP_VERSION,
+        "version": settings.app_version,
         "uptime_seconds": round(time.time() - _start_time, 2),
-        "debug_mode": Config.DEBUG,
-        "environment": Config.ENVIRONMENT
+        "debug_mode": settings.debug,
+        "environment": settings.environment
     }
     
     return MetricsResponse(

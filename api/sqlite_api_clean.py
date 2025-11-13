@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 import uvicorn
 from datetime import datetime
@@ -16,13 +17,42 @@ import os
 import sqlite3
 import time
 
+# Importar configurações e logging
+from api.settings import settings
+from api.logger_setup import get_logger
 from api.logging_config import logger, log_request, log_db_query, log_error
 
+# Logger específico deste módulo
+module_logger = get_logger(__name__)
+
 app = FastAPI(
-    title="Green Jobs Brasil API",
-    description="API para matching de empregos verdes no Brasil - SQLite Local",
-    version="2.3.0"
+    title=settings.app_name,
+    description=f"""
+    API para mapeamento de empresas verdes no Brasil com integração 
+    à Taxonomia Sustentável Brasileira (TSB).
+    
+    **Principais recursos:**
+    - 📊 93.000+ empresas verdes mapeadas
+    - 🇧🇷 Classificação TSB (11 objetivos + 8 setores)
+    - 🎯 160+ CNAEs verdes
+    - 💼 Sistema de matching profissionais-vagas
+    
+    **Documentação completa:** https://github.com/brunopaixaoesg-cpu/green-jobs-brasil
+    """,
+    version=settings.app_version,
+    debug=settings.debug
 )
+
+# Configurar CORS com origins do .env
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=settings.cors_allow_methods,
+    allow_headers=[settings.cors_allow_headers] if settings.cors_allow_headers == "*" else settings.cors_allow_headers,
+)
+
+module_logger.info(f"API iniciando - Environment: {settings.environment}, TSB: {settings.enable_tsb}")
 
 # Configurar caminhos absolutos para templates e arquivos estáticos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
