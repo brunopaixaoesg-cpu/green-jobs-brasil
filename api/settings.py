@@ -3,9 +3,9 @@ Configuração centralizada da aplicação usando Pydantic Settings.
 Carrega variáveis de ambiente do arquivo .env
 """
 import os
-from typing import List
-from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from typing import List, Union
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -28,12 +28,15 @@ class Settings(BaseSettings):
     bcrypt_rounds: int = Field(default=12, env="BCRYPT_ROUNDS")
     
     # CORS
-    cors_origins: str = Field(
+    cors_origins: Union[str, List[str]] = Field(
         default="http://localhost:3000,http://localhost:8002,http://127.0.0.1:8002",
         env="CORS_ORIGINS"
     )
     cors_allow_credentials: bool = Field(default=True, env="CORS_ALLOW_CREDENTIALS")
-    cors_allow_methods: str = Field(default="GET,POST,PUT,DELETE,PATCH,OPTIONS", env="CORS_ALLOW_METHODS")
+    cors_allow_methods: Union[str, List[str]] = Field(
+        default="GET,POST,PUT,DELETE,PATCH,OPTIONS",
+        env="CORS_ALLOW_METHODS"
+    )
     cors_allow_headers: str = Field(default="*", env="CORS_ALLOW_HEADERS")
     
     # Rate Limiting
@@ -52,7 +55,10 @@ class Settings(BaseSettings):
     # Storage
     upload_dir: str = Field(default="api/static/uploads", env="UPLOAD_DIR")
     max_upload_size_mb: int = Field(default=5, env="MAX_UPLOAD_SIZE_MB")
-    allowed_extensions: str = Field(default="jpg,jpeg,png,pdf,doc,docx", env="ALLOWED_EXTENSIONS")
+    allowed_extensions: Union[str, List[str]] = Field(
+        default="jpg,jpeg,png,pdf,doc,docx",
+        env="ALLOWED_EXTENSIONS"
+    )
     
     # APIs Externas
     receita_api_url: str = Field(default="https://www.receitaws.com.br/v1", env="RECEITA_API_URL")
@@ -73,26 +79,50 @@ class Settings(BaseSettings):
     app_version: str = Field(default="2.0.0", env="APP_VERSION")
     base_url: str = Field(default="http://127.0.0.1:8002", env="BASE_URL")
     
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def parse_cors_origins(cls, v):
-        """Converte string CSV em lista"""
+        """Converte string CSV ou lista em lista"""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v
     
-    @validator("allowed_extensions", pre=True)
+    @field_validator("allowed_extensions", mode="before")
+    @classmethod
     def parse_allowed_extensions(cls, v):
-        """Converte string CSV em lista"""
+        """Converte string CSV ou lista em lista"""
         if isinstance(v, str):
             return [ext.strip() for ext in v.split(",")]
         return v
     
-    @validator("cors_allow_methods", pre=True)
+    @field_validator("cors_allow_methods", mode="before")
+    @classmethod
     def parse_cors_methods(cls, v):
-        """Converte string CSV em lista"""
+        """Converte string CSV ou lista em lista"""
         if isinstance(v, str):
             return [method.strip() for method in v.split(",")]
         return v
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Garante que cors_origins sempre retorna lista"""
+        if isinstance(self.cors_origins, str):
+            return [origin.strip() for origin in self.cors_origins.split(",")]
+        return self.cors_origins
+    
+    @property
+    def cors_methods_list(self) -> List[str]:
+        """Garante que cors_allow_methods sempre retorna lista"""
+        if isinstance(self.cors_allow_methods, str):
+            return [method.strip() for method in self.cors_allow_methods.split(",")]
+        return self.cors_allow_methods
+    
+    @property
+    def allowed_extensions_list(self) -> List[str]:
+        """Garante que allowed_extensions sempre retorna lista"""
+        if isinstance(self.allowed_extensions, str):
+            return [ext.strip() for ext in self.allowed_extensions.split(",")]
+        return self.allowed_extensions
     
     @property
     def is_production(self) -> bool:
@@ -111,10 +141,11 @@ class Settings(BaseSettings):
             return self.database_url
         return f"sqlite:///{self.db_path}"
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False
+    )
 
 
 # Instância global de configurações

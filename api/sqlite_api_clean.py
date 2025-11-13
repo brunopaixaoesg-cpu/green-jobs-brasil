@@ -302,18 +302,36 @@ async def listar_candidaturas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/empresas")
-async def listar_empresas():
-    """Lista todas as empresas"""
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM empresas_esg ORDER BY score_verde DESC LIMIT 100")
-        empresas = cursor.fetchall()
-        conn.close()
-        return [dict(emp) for emp in empresas]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# ENDPOINT REMOVIDO - Duplicado com linha 926
+# Mantido apenas o endpoint mais completo com suporte a TSB
+# @app.get("/api/empresas")
+# async def listar_empresas(tsb: bool = False):
+#     """
+#     Lista todas as empresas.
+#     
+#     Args:
+#         tsb: Se True, enriquece resposta com dados TSB
+#     """
+#     try:
+#         conn = get_db()
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT * FROM empresas_esg ORDER BY score_verde DESC LIMIT 100")
+#         empresas = cursor.fetchall()
+#         conn.close()
+#         
+#         empresas_list = [dict(emp) for emp in empresas]
+#         
+#         # Enriquecer com TSB se solicitado e feature habilitada
+#         if tsb and settings.enable_tsb:
+#             from api.utils.tsb_helpers import enriquecer_empresa_com_tsb
+#             empresas_list = [
+#                 enriquecer_empresa_com_tsb(emp, emp.get("cnae_principal", "").split(","))
+#                 for emp in empresas_list
+#             ]
+#         
+#         return empresas_list
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/seed")
 async def seed_database_endpoint():
@@ -908,14 +926,20 @@ async def profissional_perfil_page(request: Request, profissional_id: int):
 
 # API endpoints
 @app.get("/api/empresas")
-async def get_empresas():
-    """Listar empresas verdes"""
+async def get_empresas(tsb: bool = False):
+    """
+    Lista empresas verdes.
+    
+    Args:
+        tsb: Se True, enriquece resposta com dados da Taxonomia Sustentável Brasileira
+    """
     try:
         conn = get_db()
         cursor = conn.cursor()
         
         cursor.execute("""
             SELECT cnpj, razao_social, nome_fantasia, score_verde,
+                   cnae_principal, cnaes_secundarias, ods_tags,
                    created_at
             FROM empresas_esg 
             ORDER BY score_verde DESC 
@@ -928,7 +952,7 @@ async def get_empresas():
             
             # Parse JSON fields safely
             try:
-                if empresa['ods_tags']:
+                if empresa.get('ods_tags'):
                     empresa['ods_tags'] = json.loads(empresa['ods_tags'])
                 else:
                     empresa['ods_tags'] = []
@@ -936,12 +960,18 @@ async def get_empresas():
                 empresa['ods_tags'] = []
                 
             try:
-                if empresa['cnaes_secundarias']:
+                if empresa.get('cnaes_secundarias'):
                     empresa['cnaes_secundarias'] = json.loads(empresa['cnaes_secundarias'])
                 else:
                     empresa['cnaes_secundarias'] = []
             except:
                 empresa['cnaes_secundarias'] = []
+            
+            # Enriquecer com TSB se solicitado
+            if tsb and settings.enable_tsb:
+                from api.utils.tsb_helpers import enriquecer_empresa_com_tsb
+                cnaes = [empresa.get('cnae_principal', '')] + empresa.get('cnaes_secundarias', [])
+                empresa = enriquecer_empresa_com_tsb(empresa, cnaes)
             
             empresas.append(empresa)
         
