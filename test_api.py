@@ -79,7 +79,7 @@ def main():
         tests_passed += 1
     
     tests_total += 1
-    if test_endpoint("TSB Info", f"{BASE_URL}/api/taxonomia/info"):
+    if test_endpoint("TSB Info", f"{BASE_URL}/api/taxonomia/"):
         tests_passed += 1
     
     print()
@@ -89,17 +89,17 @@ def main():
     print("-" * 60)
     
     tests_total += 1
-    if test_endpoint("Listar Empresas", f"{BASE_URL}/api/empresas"):
+    if test_endpoint("Listar Empresas", f"{BASE_URL}/empresas/api/listar"):
         tests_passed += 1
     
     tests_total += 1
-    if test_endpoint("Empresas com TSB", f"{BASE_URL}/api/empresas?tsb=true"):
+    if test_endpoint("Empresas com TSB", f"{BASE_URL}/empresas/api/listar?tsb=true"):
         tests_passed += 1
         try:
-            r = requests.get(f"{BASE_URL}/api/empresas?tsb=true", timeout=5)
+            r = requests.get(f"{BASE_URL}/empresas/api/listar?tsb=true", timeout=5)
             data = r.json()
-            if len(data) > 0:
-                empresa = data[0]
+            if 'items' in data and len(data['items']) > 0:
+                empresa = data['items'][0]
                 if 'tsb_elegivel' in empresa:
                     print(f"   → Enriquecimento TSB: ✅")
                     print(f"   → TSB Elegível: {empresa.get('tsb_elegivel')}")
@@ -134,4 +134,9 @@ def main():
         return 1
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit_code = main()
+    
+    # Pausa para ver os resultados
+    print()
+    input("Pressione ENTER para fechar...")
+    sys.exit(exit_code)

@@ -37,7 +37,7 @@ echo.
 
 echo 📊 TESTANDO EMPRESAS COM TSB
 echo ------------------------------------------------------------
-curl -s "http://127.0.0.1:8002/api/empresas?tsb=true" > temp_empresas.json
+curl -s "http://127.0.0.1:8002/empresas/api/listar?tsb=true&limit=5" > temp_empresas.json
 type temp_empresas.json | python -m json.tool
 del temp_empresas.json
 echo.
@@ -50,6 +50,6 @@ echo ============================================================
 echo.
 echo 🎯 Acesse para explorar:
 echo    📚 Documentação: http://127.0.0.1:8002/docs
-echo    🌱 TSB Info:     http://127.0.0.1:8002/api/taxonomia/info
+echo    🌱 TSB Info:     http://127.0.0.1:8002/api/taxonomia/
 echo.
 pause

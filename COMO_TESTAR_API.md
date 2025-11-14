@@ -94,17 +94,17 @@ curl http://127.0.0.1:8002/api/taxonomia/setores
 
 ### TSB - Info
 ```bash
-curl http://127.0.0.1:8002/api/taxonomia/info
+curl http://127.0.0.1:8002/api/taxonomia/
 ```
 
-### Empresas SEM TSB
+### Empresas (Paginado)
 ```bash
-curl http://127.0.0.1:8002/api/empresas
+curl http://127.0.0.1:8002/empresas/api/listar
 ```
 
 ### Empresas COM TSB (enriquecidas)
 ```bash
-curl "http://127.0.0.1:8002/api/empresas?tsb=true"
+curl "http://127.0.0.1:8002/empresas/api/listar?tsb=true&limit=5"
 ```
 
 ---
