@@ -138,8 +138,27 @@ class Settings(BaseSettings):
     def database_connection_string(self) -> str:
         """Retorna string de conexão do banco"""
         if self.database_url:
-            return self.database_url
+            # Render usa postgres://, mas SQLAlchemy 1.4+ requer postgresql://
+            url = self.database_url
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+            return url
         return f"sqlite:///{self.db_path}"
+    
+    @property
+    def is_render(self) -> bool:
+        """Detecta se está rodando no Render.com"""
+        return os.getenv("RENDER") == "true"
+    
+    @property
+    def is_sqlite(self) -> bool:
+        """Verifica se está usando SQLite"""
+        return "sqlite" in self.database_connection_string.lower()
+    
+    @property
+    def is_postgresql(self) -> bool:
+        """Verifica se está usando PostgreSQL"""
+        return "postgresql" in self.database_connection_string.lower()
     
     model_config = SettingsConfigDict(
         env_file=".env",

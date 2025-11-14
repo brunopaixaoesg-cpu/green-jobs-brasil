@@ -1,11 +1,40 @@
-fastapi
-uvicorn
-jinja2
-python-multipart
-psycopg2-binary
-requests
-python-dotenv
-pydantic-settings
-slowapi
-python-json-logger
-psutil
+# ============================================
+# GREEN JOBS BRASIL - Production Dependencies
+# ============================================
+
+# Core Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Database
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.23
+
+# Authentication & Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# HTTP & APIs
+requests>=2.31.0
+httpx>=0.25.0
+
+# Templates & Static
+jinja2>=3.1.2
+
+# Environment & Config
+python-dotenv>=1.0.0
+
+# Logging
+python-json-logger>=2.0.7
+
+# Rate Limiting
+slowapi>=0.1.9
+
+# Monitoring
+psutil>=5.9.6
+
+# Utils
+python-dateutil>=2.8.2

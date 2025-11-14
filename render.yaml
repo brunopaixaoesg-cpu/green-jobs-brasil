@@ -1,0 +1,217 @@
+# ============================================
+# RENDER.COM - Configuração de Deploy
+# Green Jobs Brasil API
+# ============================================
+
+services:
+  # ============================================
+  # WEB SERVICE - API FastAPI
+  # ============================================
+  - type: web
+    name: greenjobs-api
+    runtime: python
+    plan: free  # Alterar para 'starter' em produção
+    region: oregon  # Ou 'ohio' para menor latência BR
+    branch: main  # Branch principal para deploy
+    buildCommand: bash build.sh
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    
+    # Health Check (obrigatório para Render)
+    healthCheckPath: /health
+    
+    # Auto-deploy no push para main
+    autoDeploy: true
+    
+    # Variáveis de Ambiente
+    envVars:
+      # ============================================
+      # AMBIENTE
+      # ============================================
+      - key: ENVIRONMENT
+        value: production
+      
+      - key: APP_NAME
+        value: Green Jobs Brasil
+      
+      - key: APP_VERSION
+        value: 1.6.0
+      
+      - key: PORT
+        value: 8002
+      
+      - key: HOST
+        value: 0.0.0.0
+      
+      - key: DEBUG
+        value: false
+      
+      - key: RELOAD
+        value: false
+      
+      # ============================================
+      # BANCO DE DADOS
+      # ============================================
+      # DATABASE_URL será injetado automaticamente pelo Render
+      # quando vincular o PostgreSQL database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: greenjobs-db
+          property: connectionString
+      
+      # ============================================
+      # SEGURANÇA
+      # ============================================
+      # IMPORTANTE: Gerar em produção com:
+      # python -c "import secrets; print(secrets.token_urlsafe(32))"
+      - key: SECRET_KEY
+        generateValue: true  # Render gera automaticamente
+      
+      - key: JWT_ALGORITHM
+        value: HS256
+      
+      - key: JWT_EXPIRATION_MINUTES
+        value: 1440
+      
+      - key: BCRYPT_ROUNDS
+        value: 12
+      
+      # ============================================
+      # CORS
+      # ============================================
+      - key: CORS_ORIGINS
+        value: https://greenjobs-web.onrender.com,https://greenjobs.com.br,https://www.greenjobs.com.br
+      
+      - key: CORS_ALLOW_CREDENTIALS
+        value: true
+      
+      - key: CORS_ALLOW_METHODS
+        value: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      
+      - key: CORS_ALLOW_HEADERS
+        value: "*"
+      
+      # ============================================
+      # RATE LIMITING
+      # ============================================
+      - key: RATE_LIMIT_PER_SECOND
+        value: 10
+      
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 100
+      
+      - key: RATE_LIMIT_PER_HOUR
+        value: 1000
+      
+      # ============================================
+      # LOGGING
+      # ============================================
+      - key: LOG_LEVEL
+        value: INFO
+      
+      - key: LOG_FORMAT
+        value: json  # JSON para produção (melhor para análise)
+      
+      - key: LOG_DIR
+        value: /var/log
+      
+      - key: LOG_FILE
+        value: greenjobs.log
+      
+      - key: LOG_MAX_SIZE_MB
+        value: 10
+      
+      - key: LOG_BACKUP_COUNT
+        value: 5
+      
+      # ============================================
+      # STORAGE
+      # ============================================
+      - key: UPLOAD_DIR
+        value: /opt/render/project/src/uploads
+      
+      - key: MAX_UPLOAD_SIZE_MB
+        value: 5
+      
+      - key: ALLOWED_EXTENSIONS
+        value: jpg,jpeg,png,pdf,doc,docx
+      
+      # ============================================
+      # APIs EXTERNAS
+      # ============================================
+      - key: RECEITA_API_URL
+        value: https://www.receitaws.com.br/v1
+      
+      - key: EXTERNAL_API_TIMEOUT
+        value: 30
+      
+      - key: EXTERNAL_API_MAX_RETRIES
+        value: 3
+      
+      # ============================================
+      # FEATURES FLAGS
+      # ============================================
+      - key: ENABLE_REGISTRATION
+        value: true
+      
+      - key: ENABLE_ML_MATCHING
+        value: true
+      
+      - key: ENABLE_AUTO_IMPORT
+        value: false
+      
+      - key: ENABLE_TSB
+        value: true
+      
+      - key: ENABLE_STORYTELLING
+        value: true
+      
+      - key: MAINTENANCE_MODE
+        value: false
+      
+      # ============================================
+      # BASE URL
+      # ============================================
+      - key: BASE_URL
+        value: https://greenjobs-api.onrender.com
+
+# ============================================
+# DATABASE - PostgreSQL
+# ============================================
+databases:
+  - name: greenjobs-db
+    plan: free  # Alterar para 'starter' em produção
+    databaseName: greenjobs
+    user: greenjobs_user
+    region: oregon  # Mesma região do web service
+    
+    # PostgreSQL version
+    ipAllowList: []  # Vazio = aceita de qualquer IP (ok para free tier)
+
+# ============================================
+# NOTAS IMPORTANTES
+# ============================================
+# 1. Free tier tem limitações:
+#    - Web service hiberna após 15min inatividade
+#    - Database limitado a 256MB
+#    - Builds limitados
+#
+# 2. Para produção real:
+#    - Alterar plans para 'starter' ($7/mês web + $7/mês db)
+#    - Adicionar domínio customizado
+#    - Configurar SSL (automático no Render)
+#    - Habilitar auto-scaling se necessário
+#
+# 3. Primeiro deploy:
+#    - Conectar repositório GitHub
+#    - Render lerá este arquivo automaticamente
+#    - Database será criado primeiro
+#    - Web service será deployado em seguida
+#
+# 4. Migrations:
+#    - Rodar migrations no build.sh
+#    - Ou usar Render Background Workers
+#
+# 5. Logs:
+#    - Acessíveis via dashboard Render
+#    - Formato JSON facilita parsing
+#    - Integração com Datadog/Sentry possível
