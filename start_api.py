@@ -4,7 +4,6 @@ Script para iniciar a API do Green Jobs Brasil
 import subprocess
 import sys
 import os
-from api.logger import logger
 
 def start_api():
     # Mudar para o diretório do projeto
@@ -20,17 +19,19 @@ def start_api():
         "--port", "8002"
     ]
     
-    logger.info("Iniciando Green Jobs Brasil API...")
-    logger.info("API: http://127.0.0.1:8002")
-    logger.info("Docs: http://127.0.0.1:8002/docs")
-    logger.info("%s", "=" * 50)
+    print("🚀 Iniciando Green Jobs Brasil API...")
+    print("📍 API: http://127.0.0.1:8002")
+    print("📚 Docs: http://127.0.0.1:8002/docs")
+    print("🔍 TSB: http://127.0.0.1:8002/api/taxonomia/objetivos")
+    print("=" * 60)
     
     try:
         subprocess.run(cmd)
     except KeyboardInterrupt:
-        logger.info("API interrompida pelo usuario")
+        print("\n⚠️  API interrompida pelo usuário")
     except Exception as e:
-        logger.exception("Erro ao iniciar API: %s", e)
+        print(f"❌ Erro ao iniciar API: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     start_api()
